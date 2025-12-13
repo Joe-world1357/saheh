@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
 import 'widgets/common_widgets.dart';
 import 'widgets/form_widgets.dart';
+import 'edit_personal_info_screen.dart';
+import 'change_password_screen.dart';
+import 'login_methods_screen.dart';
+import 'language_selection_screen.dart';
+import 'privacy_controls_screen.dart';
+import 'connect_devices_screen.dart';
+import 'privacy_policy_screen.dart';
+import 'terms_of_service_screen.dart';
+import 'help_center_screen.dart';
+import 'contact_support_screen.dart';
+import 'send_feedback_screen.dart';
+import 'about_screen.dart';
 
 class SettingsScreen
     extends
@@ -114,7 +126,14 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.edit_outlined,
                         title: "Edit Personal Info",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const EditPersonalInfoScreen(),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(
                         height: 8,
@@ -122,7 +141,14 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.lock_outline,
                         title: "Change Password",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ChangePasswordScreen(),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(
                         height: 8,
@@ -130,7 +156,14 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.login_outlined,
                         title: "Login Methods",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginMethodsScreen(),
+                            ),
+                          );
+                        },
                       ),
 
                       const SizedBox(
@@ -149,7 +182,14 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.language,
                         title: "Language",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LanguageSelectionScreen(),
+                            ),
+                          );
+                        },
                         trailing: "English",
                       ),
                       const SizedBox(
@@ -186,7 +226,14 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.privacy_tip_outlined,
                         title: "Privacy Controls",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PrivacyControlsScreen(),
+                            ),
+                          );
+                        },
                       ),
 
                       const SizedBox(
@@ -210,7 +257,14 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.devices_outlined,
                         title: "Connect Devices",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ConnectDevicesScreen(),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(
                         height: 8,
@@ -280,7 +334,29 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.policy_outlined,
                         title: "Privacy Policy",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PrivacyPolicyScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      SettingItem(
+                        icon: Icons.description_outlined,
+                        title: "Terms of Service",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TermsOfServiceScreen(),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(
                         height: 8,
@@ -310,7 +386,14 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.help_outline,
                         title: "Help Center",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HelpCenterScreen(),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(
                         height: 8,
@@ -318,7 +401,14 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.contact_support_outlined,
                         title: "Contact Support",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ContactSupportScreen(),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(
                         height: 8,
@@ -326,7 +416,29 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.feedback_outlined,
                         title: "Send Feedback",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SendFeedbackScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      SettingItem(
+                        icon: Icons.info_outline,
+                        title: "About",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AboutScreen(),
+                            ),
+                          );
+                        },
                       ),
 
                       const SizedBox(

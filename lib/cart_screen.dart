@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'checkout_screen.dart';
 
 class CartScreen
     extends
@@ -347,7 +348,24 @@ class _CartScreenState
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Checkout action
+                        if (cartItems.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Your cart is empty'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CheckoutScreen(
+                              totalAmount: total,
+                              cartItems: cartItems,
+                            ),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primary,

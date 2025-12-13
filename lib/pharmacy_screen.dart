@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'drug_details.dart';
 import 'cart_screen.dart';
 import 'widgets/card_widgets.dart';
+import 'search_results_screen.dart';
+import 'barcode_scanner_screen.dart';
+import 'prescription_upload_screen.dart';
 
 class PharmacyScreen
     extends
@@ -105,27 +108,37 @@ class PharmacyScreen
                     ),
                   ),
                   child: Row(
-                    children: const [
-                      Icon(
+                    children: [
+                      const Icon(
                         Icons.search,
                         color: Color(
                           0xFF9E9E9E,
                         ),
                         size: 22,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 12,
                       ),
                       Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: "Search drugs, category...",
-                            hintStyle: TextStyle(
-                              color: Color(
-                                0xFFBDBDBD,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SearchResultsScreen(
+                                  searchQuery: '',
+                                ),
                               ),
-                              fontSize: 14,
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Text(
+                              "Search drugs, category...",
+                              style: TextStyle(
+                                color: Colors.grey.shade400,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ),
@@ -190,7 +203,14 @@ class PharmacyScreen
                               height: 16,
                             ),
                             ElevatedButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const BarcodeScannerScreen(),
+                                  ),
+                                );
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: primary,
                                 shape: RoundedRectangleBorder(
@@ -296,7 +316,14 @@ class PharmacyScreen
                               height: 16,
                             ),
                             ElevatedButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const PrescriptionUploadScreen(),
+                                  ),
+                                );
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: primary,
                                 shape: RoundedRectangleBorder(

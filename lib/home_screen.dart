@@ -5,6 +5,8 @@ import 'nutrition_screen.dart';
 import 'xp_system.dart';
 import 'widgets/common_widgets.dart';
 import 'clinic/clinic_dashboard.dart';
+import 'notifications_screen.dart';
+import 'view_suggestions_screen.dart';
 
 class HomeScreen
     extends
@@ -75,7 +77,14 @@ class HomeScreen
                           0xFF1A2A2C,
                         ),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const NotificationsScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -832,7 +841,14 @@ class HomeScreen
                         height: 12,
                       ),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ViewSuggestionsScreen(),
+                            ),
+                          );
+                        },
                         child: const Text(
                           "View Suggestions",
                           style: TextStyle(
