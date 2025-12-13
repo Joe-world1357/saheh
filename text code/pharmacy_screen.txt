@@ -1,0 +1,321 @@
+import 'package:flutter/material.dart';
+import 'drug_details.dart';
+import 'cart_screen.dart';
+
+class PharmacyScreen extends StatelessWidget {
+  const PharmacyScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    const primary = Color(0xFF20C6B7);
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5FAFA),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+
+              // TOP BAR --------------------------------------------------------
+              Row(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: primary, width: 2),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF20C6B7)),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ),
+                  const Spacer(),
+                  const Text(
+                    "Pharmacy",
+                    style: TextStyle(
+                      color: Color(0xFF1A2A2C),
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.shopping_cart_outlined, color: Color(0xFF1A2A2C)),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const CartScreen()),
+                      );
+                    },
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // SEARCH BAR --------------------------------------------------------
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: primary.withOpacity(0.4)),
+                ),
+                child: const TextField(
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    icon: Icon(Icons.search, color: Color(0xFF687779)),
+                    hintText: "Search drugs, category...",
+                    hintStyle: TextStyle(color: Color(0xFF687779)),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // SCAN CARD --------------------------------------------------------
+              _topActionCard(
+                primary: primary,
+                title: "Scan the Barcode\nfor faster search",
+                buttonText: "Scan Barcode",
+                icon: Icons.qr_code_scanner,
+              ),
+
+              const SizedBox(height: 20),
+
+              // PRESCRIPTION CARD ------------------------------------------------
+              _topActionCard(
+                primary: primary,
+                title: "Order quickly with\nPrescription",
+                buttonText: "Upload Prescription",
+                icon: Icons.upload_file,
+              ),
+
+              const SizedBox(height: 30),
+
+              // --------------------------- CATEGORIES ---------------------------
+
+              _section("Popular Product"),
+              const SizedBox(height: 10),
+              _simpleRow(context, primary),
+
+              const SizedBox(height: 30),
+
+              _section("Product on Sale"),
+              const SizedBox(height: 10),
+              _simpleRow(context, primary),
+
+              const SizedBox(height: 30),
+
+              _section("Pain Relief"),
+              const SizedBox(height: 10),
+              _simpleRow(context, primary),
+
+              const SizedBox(height: 30),
+
+              _section("Vitamins"),
+              const SizedBox(height: 10),
+              _simpleRow(context, primary),
+
+              const SizedBox(height: 30),
+
+              _section("Cold & Flu"),
+              const SizedBox(height: 10),
+              _simpleRow(context, primary),
+
+              const SizedBox(height: 30),
+
+              _section("Antiseptics"),
+              const SizedBox(height: 10),
+              _simpleRow(context, primary),
+
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ACTION CARD ---------------------------------------------------------------
+  Widget _topActionCard({
+    required Color primary,
+    required String title,
+    required String buttonText,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: primary.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: primary.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Icon(icon, color: primary, size: 45),
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFF1A2A2C),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      side: const BorderSide(color: Colors.black),
+                    ),
+                  ),
+                  onPressed: () {},
+                  child: Text(
+                    buttonText,
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // SECTION TITLE --------------------------------------------------------------
+  Widget _section(String title) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            color: Color(0xFF1A2A2C),
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const Text(
+          "See all",
+          style: TextStyle(
+            color: Color(0xFF20C6B7),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // SIMPLE ROW OF 3 CARDS -----------------------------------------------------
+  Widget _simpleRow(BuildContext context, Color primary) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _card(context, primary),
+          const SizedBox(width: 12),
+          _card(context, primary),
+          const SizedBox(width: 12),
+          _card(context, primary),
+        ],
+      ),
+    );
+  }
+
+  // CARD WITH NO IMAGE (PLACEHOLDER ICON ONLY) --------------------------------
+  Widget _card(BuildContext context, Color primary) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const DrugDetails(
+              img: "", // no assets
+              name: "OBH Combi",
+              size: "75ml",
+              price: 9.99,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        width: 160,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: primary.withOpacity(0.3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // NO IMAGE — ONLY PLACEHOLDER BOX
+            Container(
+              height: 90,
+              decoration: BoxDecoration(
+                color: primary.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Center(
+                child: Icon(Icons.medical_services, size: 40, color: Color(0xFF20C6B7)),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+            const Text(
+              "OBH Combi",
+              style: TextStyle(
+                color: Color(0xFF1A2A2C),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const Text(
+              "75ml",
+              style: TextStyle(color: Color(0xFF687779), fontSize: 13),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              "\$9.99",
+              style: TextStyle(
+                color: Color(0xFF1A2A2C),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: primary,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.black),
+                ),
+                child: const Icon(Icons.add, size: 20, color: Colors.black),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
