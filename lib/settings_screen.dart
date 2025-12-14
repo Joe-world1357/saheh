@@ -13,6 +13,10 @@ import 'help_center_screen.dart';
 import 'contact_support_screen.dart';
 import 'send_feedback_screen.dart';
 import 'about_screen.dart';
+import 'sync_activity_data_screen.dart';
+import 'workout_preferences_screen.dart';
+import 'nutrition_settings_screen.dart';
+import 'connected_devices_security_screen.dart';
 
 class SettingsScreen
     extends
@@ -272,7 +276,14 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.sync,
                         title: "Sync Activity Data",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SyncActivityDataScreen(),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(
                         height: 8,
@@ -280,7 +291,14 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.fitness_center,
                         title: "Workout Preferences",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const WorkoutPreferencesScreen(),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(
                         height: 8,
@@ -288,7 +306,14 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.restaurant,
                         title: "Nutrition Settings",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NutritionSettingsScreen(),
+                            ),
+                          );
+                        },
                       ),
 
                       const SizedBox(
@@ -326,7 +351,14 @@ class _SettingsScreenState
                       SettingItem(
                         icon: Icons.phonelink_lock,
                         title: "Connected Devices",
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ConnectedDevicesSecurityScreen(),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(
                         height: 8,
