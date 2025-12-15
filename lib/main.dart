@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
-import 'register_screen.dart';
-import 'splash_screen.dart';
-import 'guest_navbar.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/theme/app_colors.dart';
+import 'features/auth/view/login_screen.dart';
+import 'features/auth/view/register_screen.dart';
+import 'features/auth/view/splash_screen.dart';
+import 'features/home/view/guest_navbar.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -18,9 +24,9 @@ class MyApp extends StatelessWidget {
       title: 'Health App',
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF5FAFA),
+        scaffoldBackgroundColor: AppColors.background,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF20C6B7),
+          seedColor: AppColors.primary,
           brightness: Brightness.light,
         ),
       ),
@@ -40,7 +46,6 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primary = Color(0xFF20C6B7);
 
     return Scaffold(
       body: SafeArea(
@@ -68,7 +73,7 @@ class WelcomeScreen extends StatelessWidget {
                     Text(
                       'Your health',
                       style: TextStyle(
-                        color: Color(0xFF1A2A2C),
+                        color: AppColors.textPrimary,
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                       ),
@@ -77,7 +82,7 @@ class WelcomeScreen extends StatelessWidget {
                     Text(
                       'journey starts here',
                       style: TextStyle(
-                        color: Color(0xFF1A2A2C),
+                        color: AppColors.textPrimary,
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                       ),
@@ -97,7 +102,7 @@ class WelcomeScreen extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: primary,
+                  backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(32),
                     side: const BorderSide(color: Colors.black, width: 1),
@@ -186,7 +191,7 @@ class WelcomeScreen extends StatelessWidget {
                     'Continue as a guest',
                     style: TextStyle(
                       decoration: TextDecoration.underline,
-                      color: Color(0xFF20C6B7),
+                      color: AppColors.primary,
                     ),
                   ),
                 ),

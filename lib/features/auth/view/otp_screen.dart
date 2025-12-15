@@ -1,0 +1,208 @@
+import 'package:flutter/material.dart';
+import 'create_new_password_screen.dart';
+import '../../../shared/widgets/form_widgets.dart';
+
+class OtpScreen
+    extends
+        StatefulWidget {
+  const OtpScreen({
+    super.key,
+  });
+
+  @override
+  State<
+    OtpScreen
+  >
+  createState() => _OtpScreenState();
+}
+
+class _OtpScreenState
+    extends
+        State<
+          OtpScreen
+        > {
+  final List<
+    TextEditingController
+  >
+  _controllers = List.generate(
+    4,
+    (
+      index,
+    ) => TextEditingController(),
+  );
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) {
+    const primary = Color(
+      0xFF20C6B7,
+    );
+
+    return Scaffold(
+      backgroundColor: const Color(
+        0xFFF5FAFA,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 24,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(
+                height: 16,
+              ),
+
+              // BACK BUTTON
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_ios,
+                    color: Color(
+                      0xFF1A2A2C,
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(
+                    context,
+                  ),
+                ),
+              ),
+
+              const SizedBox(
+                height: 30,
+              ),
+
+              // TITLE
+              const Center(
+                child: Text(
+                  "OTP Verification",
+                  style: TextStyle(
+                    color: Color(
+                      0xFF1A2A2C,
+                    ),
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+
+              const SizedBox(
+                height: 10,
+              ),
+
+              // SUBTITLE
+              const Center(
+                child: Text(
+                  "Enter the verification code we sent\nto your email address.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(
+                      0xFF687779,
+                    ),
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+
+              const SizedBox(
+                height: 40,
+              ),
+
+              // OTP BOXES
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(
+                  4,
+                  (
+                    index,
+                  ) {
+                    return OtpBox(
+                      controller: _controllers[index],
+                    );
+                  },
+                ),
+              ),
+
+              const SizedBox(
+                height: 40,
+              ),
+
+              // VERIFY BUTTON
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (
+                            _,
+                          ) => const CreateNewPasswordScreen(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      32,
+                    ),
+                    side: const BorderSide(
+                      color: Colors.black,
+                      width: 1,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                  ),
+                ),
+                child: const Text(
+                  "Verify",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+
+              const SizedBox(
+                height: 20,
+              ),
+
+              // RESEND CODE
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Didn't receive code? ",
+                    style: TextStyle(
+                      color: Color(
+                        0xFF687779,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      "Resend",
+                      style: TextStyle(
+                        color: primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(
+                height: 30,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
