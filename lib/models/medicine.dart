@@ -13,16 +13,29 @@ class Medicine {
     this.instructions,
   });
 
-  factory Medicine.fromMap(Map<String, dynamic> data, String id) {
+  // 🔒 SAFE fromMap
+  factory Medicine.fromMap(
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return Medicine(
       id: id,
-      userId: data['user_id'],
-      name: data['name'],
-      dosage: data['dosage'],
-      instructions: data['instructions'],
+
+      // required FK
+      userId: map['user_id'] as String? ?? '',
+
+      // required text
+      name: map['name'] as String? ?? '',
+      dosage: map['dosage'] as String? ?? '',
+
+      // optional text
+      instructions: map['instructions'] as String?,
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'user_id': userId,
