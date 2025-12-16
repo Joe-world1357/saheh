@@ -15,18 +15,33 @@ class WorkoutExercise {
     this.description,
   });
 
+  // 🔒 SAFE fromMap
   factory WorkoutExercise.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return WorkoutExercise(
       id: id,
-      planId: data['plan_id'],
-      exerciseName: data['exercise_name'],
-      repetitions: data['repetitions'],
-      sets: data['sets'],
-      description: data['description'],
+
+      // required FK
+      planId: map['plan_id'] as String? ?? '',
+
+      // required text
+      exerciseName: map['exercise_name'] as String? ?? '',
+
+      // reps & sets safe parsing
+      repetitions:
+          (map['repetitions'] as num?)?.toInt() ?? 0,
+      sets: (map['sets'] as num?)?.toInt() ?? 0,
+
+      // optional text
+      description: map['description'] as String?,
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'plan_id': planId,
