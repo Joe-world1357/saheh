@@ -13,18 +13,34 @@ class Appointment {
     required this.status,
   });
 
+  // 🔒 SAFE fromMap
   factory Appointment.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return Appointment(
       id: id,
-      userId: data['user_id'],
-      doctorId: data['doctor_id'],
-      appointmentDate:
-          DateTime.parse(data['appointment_date']),
-      status: data['status'],
+
+      // required refs (safe fallback)
+      userId: map['user_id'] as String? ?? '',
+      doctorId: map['doctor_id'] as String? ?? '',
+
+      // Firestore / cache safe date handling
+      appointmentDate: map['appointment_date'] != null
+          ? DateTime.tryParse(
+                map['appointment_date'].toString(),
+              ) ??
+              DateTime.now()
+          : DateTime.now(),
+
+      // safe status
+      status: map['status'] as String? ?? 'pending',
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'user_id': userId,
