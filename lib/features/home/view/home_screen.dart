@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../health/view/reminder_screen.dart';
-<<<<<<< HEAD
-=======
 import '../../health/view/sleep_tracker_screen.dart';
 import '../../health/view/water_intake_screen.dart';
 import '../../health/view/health_goals_screen.dart';
 import '../../health/view/health_reports_screen.dart';
->>>>>>> 11527b2 (Initial commit)
 import '../../fitness/view/workout_library.dart';
 import '../../nutrition/view/nutrition_screen.dart';
 import '../../fitness/view/xp_system.dart';
@@ -629,50 +626,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     style: theme.textTheme.titleLarge,
                   ),
                 ),
-<<<<<<< HEAD
-                child: Container(
-                  padding: const EdgeInsets.all(
-                    16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(
-                      0xFFE3F2FD,
-                    ),
-                    borderRadius: BorderRadius.circular(
-                      16,
-                    ),
-                    border: Border.all(
-                      color:
-                          const Color(
-                            0xFF2196F3,
-<<<<<<< HEAD
-                          ).withOpacity(
-                            0.3,
-=======
-                          ).withValues(
-                            alpha: 0.3,
->>>>>>> 11527b2 (Initial commit)
-                          ),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(
-                              8,
-                            ),
-<<<<<<< HEAD
-                            decoration: BoxDecoration(
-                              color: const Color(
-=======
-                            decoration: const BoxDecoration(
-                              color: Color(
->>>>>>> 11527b2 (Initial commit)
-                                0xFF2196F3,
-=======
 
                 const SizedBox(height: 16),
 
@@ -695,7 +648,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (_) => const SleepTrackerScreen(),
->>>>>>> ae69bd0 (Initial commit)
                               ),
                             );
                           },
@@ -723,13 +675,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-              const SizedBox(height: 24),
-=======
                 const SizedBox(height: 12),
->>>>>>> ae69bd0 (Initial commit)
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -774,115 +720,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
 
-<<<<<<< HEAD
-              const SizedBox(height: 16),
-
-              // HEALTH TRACKING CARDS
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _buildHealthTrackingCard(
-                        context,
-                        icon: Icons.bedtime,
-                        label: "Sleep",
-                        value: "7h 30m",
-                        color: const Color(0xFF6C5CE7),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SleepTrackerScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildHealthTrackingCard(
-                        context,
-                        icon: Icons.water_drop,
-                        label: "Water",
-                        value: "1.2L / 2L",
-                        color: const Color(0xFF2196F3),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const WaterIntakeScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _buildHealthTrackingCard(
-                        context,
-                        icon: Icons.flag,
-                        label: "Goals",
-                        value: "3 active",
-                        color: const Color(0xFF4CAF50),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const HealthGoalsScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildHealthTrackingCard(
-                        context,
-                        icon: Icons.analytics,
-                        label: "Reports",
-                        value: "View all",
-                        color: const Color(0xFFFF9800),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const HealthReportsScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
->>>>>>> 11527b2 (Initial commit)
-              const SizedBox(
-                height: 30,
-              ),
-            ],
-=======
                 const SizedBox(height: 30),
               ],
             ),
->>>>>>> ae69bd0 (Initial commit)
           ),
         ),
       ),
     );
   }
-<<<<<<< HEAD
-=======
 
   Widget _buildHealthTrackingCard(
     BuildContext context, {
@@ -928,5 +773,4 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
->>>>>>> 11527b2 (Initial commit)
 }

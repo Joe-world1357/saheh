@@ -1,5 +1,6 @@
 class AppointmentModel {
   final int? id;
+  final String userEmail; // User isolation
   final String type; // clinic, lab_test, home_health
   final String providerName;
   final String specialty;
@@ -12,6 +13,7 @@ class AppointmentModel {
 
   AppointmentModel({
     this.id,
+    required this.userEmail,
     required this.type,
     required this.providerName,
     required this.specialty,
@@ -26,6 +28,7 @@ class AppointmentModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'user_email': userEmail,
       'type': type,
       'provider_name': providerName,
       'specialty': specialty,
@@ -41,6 +44,7 @@ class AppointmentModel {
   factory AppointmentModel.fromMap(Map<String, dynamic> map) {
     return AppointmentModel(
       id: map['id'] as int?,
+      userEmail: map['user_email'] as String? ?? '',
       type: map['type'] as String,
       providerName: map['provider_name'] as String,
       specialty: map['specialty'] as String,

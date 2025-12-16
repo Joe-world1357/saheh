@@ -3,21 +3,24 @@ import '../../models/user_model.dart';
 
 /// Local storage service for authentication using Hive
 /// Stores user credentials and session data
+/// Supports multiple users with isolated credentials
 class AuthStorage {
   static const String _authBoxName = 'auth';
   static const String _userBoxName = 'users';
+  static const String _credentialsBoxName = 'credentials'; // Separate box for credentials
   static const String _sessionKey = 'isLoggedIn';
   static const String _currentUserKey = 'currentUserId';
-  static const String _credentialsKey = 'credentials';
 
   static Box? _authBox;
   static Box? _userBox;
+  static Box? _credentialsBox;
 
   /// Initialize Hive boxes
   static Future<void> init() async {
     await Hive.initFlutter();
     _authBox = await Hive.openBox(_authBoxName);
     _userBox = await Hive.openBox(_userBoxName);
+    _credentialsBox = await Hive.openBox(_credentialsBoxName);
   }
 
   /// Check if user is logged in
@@ -25,7 +28,7 @@ class AuthStorage {
     return _authBox?.get(_sessionKey, defaultValue: false) ?? false;
   }
 
-  /// Get current user ID
+  /// Get current user ID (email)
   static String? getCurrentUserId() {
     return _authBox?.get(_currentUserKey);
   }
@@ -41,30 +44,29 @@ class AuthStorage {
     return UserModel.fromMap(Map<String, dynamic>.from(userData));
   }
 
-  /// Save user credentials (email and hashed password)
+  /// Save user credentials (per user - keyed by email)
   static Future<void> saveCredentials(String email, String hashedPassword) async {
-    await _authBox?.put(_credentialsKey, {
+    // Store credentials keyed by email for multi-user support
+    await _credentialsBox?.put(email, {
       'email': email,
       'password': hashedPassword,
     });
   }
 
-  /// Get stored credentials
-  static Map<String, String>? getCredentials() {
-    final creds = _authBox?.get(_credentialsKey);
+  /// Get stored credentials for a specific user
+  static Map<String, String>? getCredentialsForUser(String email) {
+    final creds = _credentialsBox?.get(email);
     if (creds == null) return null;
     return Map<String, String>.from(creds);
   }
 
-  /// Verify password
+  /// Verify password for a specific user
   static bool verifyPassword(String email, String password) {
-    final creds = getCredentials();
+    // Get credentials for this specific user
+    final creds = getCredentialsForUser(email);
     if (creds == null) return false;
     
-    if (creds['email'] != email) return false;
-    
-    // In a real app, you'd hash the password and compare
-    // For now, we'll store a simple hash
+    // Verify the password hash matches
     return creds['password'] == _hashPassword(password);
   }
 
@@ -87,6 +89,11 @@ class AuthStorage {
     return UserModel.fromMap(Map<String, dynamic>.from(userData));
   }
 
+  /// Check if user exists
+  static bool userExists(String email) {
+    return _credentialsBox?.containsKey(email) ?? false;
+  }
+
   /// Login user
   static Future<void> login(UserModel user) async {
     await _authBox?.put(_sessionKey, true);
@@ -98,7 +105,7 @@ class AuthStorage {
   static Future<void> logout() async {
     await _authBox?.put(_sessionKey, false);
     await _authBox?.delete(_currentUserKey);
-    // Don't delete credentials - allow "remember me" functionality
+    // Don't delete credentials - allow re-login
   }
 
   /// Register new user
@@ -121,6 +128,17 @@ class AuthStorage {
   static Future<void> clearAll() async {
     await _authBox?.clear();
     await _userBox?.clear();
+    await _credentialsBox?.clear();
+  }
+
+  /// Delete a specific user's data
+  static Future<void> deleteUser(String email) async {
+    await _userBox?.delete(email);
+    await _credentialsBox?.delete(email);
+    // If this was the current user, log out
+    if (getCurrentUserId() == email) {
+      await logout();
+    }
   }
 }
 

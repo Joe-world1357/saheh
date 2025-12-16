@@ -1,5 +1,6 @@
 class WorkoutModel {
   final int? id;
+  final String userEmail; // User isolation
   final String name;
   final String type; // cardio, strength, yoga, etc.
   final int duration; // in minutes
@@ -9,6 +10,7 @@ class WorkoutModel {
 
   WorkoutModel({
     this.id,
+    required this.userEmail,
     required this.name,
     required this.type,
     required this.duration,
@@ -20,6 +22,7 @@ class WorkoutModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'user_email': userEmail,
       'name': name,
       'type': type,
       'duration': duration,
@@ -32,6 +35,7 @@ class WorkoutModel {
   factory WorkoutModel.fromMap(Map<String, dynamic> map) {
     return WorkoutModel(
       id: map['id'] as int?,
+      userEmail: map['user_email'] as String? ?? '',
       name: map['name'] as String,
       type: map['type'] as String,
       duration: map['duration'] as int,

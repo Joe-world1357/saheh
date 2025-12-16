@@ -431,6 +431,7 @@ class PharmacyScreen
                       size: "20pcs",
                       price: 15.99,
                       primary: primary,
+                      imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400",
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -438,7 +439,7 @@ class PharmacyScreen
                               (
                                 _,
                               ) => const DrugDetails(
-                                img: "",
+                                imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400",
                                 name: "Panadol",
                                 size: "20pcs",
                                 price: 15.99,
@@ -454,6 +455,7 @@ class PharmacyScreen
                       size: "100ml",
                       price: 7.99,
                       primary: primary,
+                      imageUrl: "https://images.unsplash.com/photo-1559757148-5c3507e8e6d4?w=400",
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -461,7 +463,7 @@ class PharmacyScreen
                               (
                                 _,
                               ) => const DrugDetails(
-                                img: "",
+                                imageUrl: "https://images.unsplash.com/photo-1559757148-5c3507e8e6d4?w=400",
                                 name: "Bodrex Herbal",
                                 size: "100ml",
                                 price: 7.99,
@@ -477,6 +479,7 @@ class PharmacyScreen
                       size: "3pcs",
                       price: 5.99,
                       primary: primary,
+                      imageUrl: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400",
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -484,7 +487,7 @@ class PharmacyScreen
                               (
                                 _,
                               ) => const DrugDetails(
-                                img: "",
+                                imageUrl: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400",
                                 name: "Konidin",
                                 size: "3pcs",
                                 price: 5.99,
@@ -550,6 +553,7 @@ class PharmacyScreen
                       price: 9.99,
                       originalPrice: 10.99,
                       primary: primary,
+                      imageUrl: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400",
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -557,7 +561,7 @@ class PharmacyScreen
                               (
                                 _,
                               ) => const DrugDetails(
-                                img: "",
+                                imageUrl: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400",
                                 name: "OBH Combi",
                                 size: "75ml",
                                 price: 9.99,
@@ -574,6 +578,7 @@ class PharmacyScreen
                       price: 6.99,
                       originalPrice: 8.99,
                       primary: primary,
+                      imageUrl: "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400",
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -581,7 +586,7 @@ class PharmacyScreen
                               (
                                 _,
                               ) => const DrugDetails(
-                                img: "",
+                                imageUrl: "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400",
                                 name: "Betadine",
                                 size: "50ml",
                                 price: 6.99,
@@ -598,6 +603,7 @@ class PharmacyScreen
                       price: 7.99,
                       originalPrice: 9.99,
                       primary: primary,
+                      imageUrl: "https://images.unsplash.com/photo-1559757148-5c3507e8e6d4?w=400",
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -605,7 +611,7 @@ class PharmacyScreen
                               (
                                 _,
                               ) => const DrugDetails(
-                                img: "",
+                                imageUrl: "https://images.unsplash.com/photo-1559757148-5c3507e8e6d4?w=400",
                                 name: "Bodrexin",
                                 size: "75ml",
                                 price: 7.99,

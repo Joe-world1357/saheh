@@ -1,5 +1,6 @@
 class MealModel {
   final int? id;
+  final String userEmail; // User isolation
   final String name;
   final String mealType; // breakfast, lunch, dinner, snack
   final double calories;
@@ -11,6 +12,7 @@ class MealModel {
 
   MealModel({
     this.id,
+    required this.userEmail,
     required this.name,
     required this.mealType,
     required this.calories,
@@ -24,6 +26,7 @@ class MealModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'user_email': userEmail,
       'name': name,
       'meal_type': mealType,
       'calories': calories,
@@ -38,6 +41,7 @@ class MealModel {
   factory MealModel.fromMap(Map<String, dynamic> map) {
     return MealModel(
       id: map['id'] as int?,
+      userEmail: map['user_email'] as String? ?? '',
       name: map['name'] as String,
       mealType: map['meal_type'] as String,
       calories: (map['calories'] as num).toDouble(),

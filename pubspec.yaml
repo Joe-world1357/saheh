@@ -41,16 +41,14 @@ dependencies:
   intl: ^0.20.2
   shared_preferences: ^2.2.2
   flutter_local_notifications: ^17.0.0
-<<<<<<< HEAD
-=======
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   crypto: ^3.0.5
+  cached_network_image: ^3.3.1
   # Firebase (optional - uncomment if you want to use Firebase)
   # firebase_core: ^3.6.0
   # firebase_auth: ^5.3.1
   # cloud_firestore: ^5.4.4
->>>>>>> 11527b2 (Initial commit)
 
 dev_dependencies:
   flutter_native_splash: ^2.4.0
@@ -63,11 +61,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
-<<<<<<< HEAD
-=======
   hive_generator: ^2.0.1
   build_runner: ^2.4.13
->>>>>>> 11527b2 (Initial commit)
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

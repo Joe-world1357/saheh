@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'cart_screen.dart';
 import '../../../providers/cart_provider.dart';
+import '../../../shared/widgets/network_image_widget.dart';
 
 class DrugDetails extends ConsumerStatefulWidget {
-  final String img;
+  final String? imageUrl; // Changed from img to imageUrl
   final String name;
   final String size;
   final double price;
 
   const DrugDetails({
     super.key,
-    required this.img,
+    this.imageUrl, // Optional image URL
     required this.name,
     required this.size,
     required this.price,
@@ -128,12 +129,11 @@ class _DrugDetailsState extends ConsumerState<DrugDetails> {
                             20,
                           ),
                         ),
-                        child: Center(
-                          child: Icon(
-                            Icons.medication,
-                            size: 100,
-                            color: Colors.grey.shade300,
-                          ),
+                        child: PharmacyProductImage(
+                          imageUrl: widget.imageUrl,
+                          width: double.infinity,
+                          height: 200,
+                          borderRadius: BorderRadius.circular(20),
                         ),
                       ),
                     ),

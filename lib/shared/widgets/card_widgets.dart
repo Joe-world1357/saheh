@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'network_image_widget.dart';
 
 // From NutritionScreen
 class MealCard
@@ -157,6 +158,7 @@ class ProductCard
   final double? originalPrice;
   final Color primary;
   final VoidCallback onTap;
+  final String? imageUrl; // Add image URL support
 
   const ProductCard({
     super.key,
@@ -166,6 +168,7 @@ class ProductCard
     this.originalPrice,
     required this.primary,
     required this.onTap,
+    this.imageUrl, // Optional image URL
   });
 
   @override
@@ -194,21 +197,11 @@ class ProductCard
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
+            PharmacyProductImage(
+              imageUrl: imageUrl,
+              width: double.infinity,
               height: 85,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(
-                  12,
-                ),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.medication_outlined,
-                  color: Colors.grey.shade400,
-                  size: 40,
-                ),
-              ),
+              borderRadius: BorderRadius.circular(12),
             ),
             const SizedBox(
               height: 8,

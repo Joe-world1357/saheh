@@ -64,15 +64,16 @@ class _MacroProgressBarState extends State<MacroProgressBar> with SingleTickerPr
   }
 
   Color _getMacroColor(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
     switch (widget.type) {
       case MacroType.protein:
-        return AppTheme.getProteinColor(context);
+        return AppTheme.getProteinColor(brightness);
       case MacroType.carbs:
-        return AppTheme.getCarbsColor(context);
+        return AppTheme.getCarbsColor(brightness);
       case MacroType.fats:
-        return AppTheme.getFatsColor(context);
+        return AppTheme.getFatsColor(brightness);
       case MacroType.calories:
-        return AppTheme.getCaloriesColor(context);
+        return AppTheme.getCaloriesColor(brightness);
     }
   }
 
@@ -169,11 +170,6 @@ class _MacroProgressBarState extends State<MacroProgressBar> with SingleTickerPr
                 Container(
                   height: 10,
                   decoration: BoxDecoration(
-<<<<<<< HEAD
-                    color: AppTheme.getSurface2(context),
-=======
-                    color: Theme.of(context).colorScheme.surfaceVariant ?? Theme.of(context).colorScheme.surface,
->>>>>>> 11527b2 (Initial commit)
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),

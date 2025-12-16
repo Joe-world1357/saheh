@@ -3,17 +3,13 @@ import 'package:flutter/material.dart';
 class ChatWithDoctorScreen extends StatefulWidget {
   final String doctorName;
   final String specialty;
-  final Color color;
+  final Color? color;
 
   const ChatWithDoctorScreen({
     super.key,
     required this.doctorName,
     required this.specialty,
-<<<<<<< HEAD
-    required this.color,
-=======
-    this.color = const Color(0xFF20C6B7),
->>>>>>> 11527b2 (Initial commit)
+    this.color,
   });
 
   @override
@@ -99,7 +95,7 @@ class _ChatWithDoctorScreenState extends State<ChatWithDoctorScreen> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: widget.color,
+                color: widget.color ?? primary,
                 borderRadius: BorderRadius.circular(12),
               ),
             ),

@@ -6,6 +6,7 @@ class CartItem {
   final double price;
   int quantity;
   final String? imageUrl;
+  final String? size;
 
   CartItem({
     required this.productId,
@@ -13,6 +14,7 @@ class CartItem {
     required this.price,
     this.quantity = 1,
     this.imageUrl,
+    this.size,
   });
 
   double get total => price * quantity;
@@ -23,6 +25,7 @@ class CartItem {
     double? price,
     int? quantity,
     String? imageUrl,
+    String? size,
   }) {
     return CartItem(
       productId: productId ?? this.productId,
@@ -30,6 +33,7 @@ class CartItem {
       price: price ?? this.price,
       quantity: quantity ?? this.quantity,
       imageUrl: imageUrl ?? this.imageUrl,
+      size: size ?? this.size,
     );
   }
 }

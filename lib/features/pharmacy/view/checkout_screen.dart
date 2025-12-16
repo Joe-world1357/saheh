@@ -310,7 +310,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                             ),
                                           ),
                                           Text(
-                                            '${item.imageUrl ?? 'N/A'} × ${item.quantity}',
+                                            '${item.size ?? 'N/A'} × ${item.quantity}',
                                             style: TextStyle(
                                               color: Colors.grey.shade600,
                                               fontSize: 12,

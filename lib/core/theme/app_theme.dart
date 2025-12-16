@@ -1,19 +1,5 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
-<<<<<<< HEAD
-
-/// Theme utilities and helpers
-class AppTheme {
-  /// Get blue gradient colors based on context
-  static List<Color> getBlueGradient(BuildContext context) {
-    return [
-      AppColors.primary,
-      AppColors.primaryLight,
-    ];
-  }
-  
-  /// Get primary gradient
-=======
 import 'app_text_styles.dart';
 
 /// Complete theme configuration for Sehati Health App
@@ -504,7 +490,6 @@ class AppTheme {
   // ============================================================================
   
   /// Get primary gradient (Light Mode)
->>>>>>> 11527b2 (Initial commit)
   static List<Color> getPrimaryGradient() {
     return [
       AppColors.primary,
@@ -512,26 +497,6 @@ class AppTheme {
     ];
   }
   
-<<<<<<< HEAD
-  /// Get success gradient
-  static List<Color> getSuccessGradient() {
-    return [
-      AppColors.success,
-      AppColors.success.withOpacity(0.7),
-    ];
-  }
-  
-  /// Get macro colors
-  static Color getProteinColor(BuildContext context) => AppColors.protein;
-  static Color getCarbsColor(BuildContext context) => AppColors.carbs;
-  static Color getFatsColor(BuildContext context) => AppColors.fats;
-  static Color getCaloriesColor(BuildContext context) => AppColors.calories;
-  
-  /// Get surface colors
-  static Color getSurface2(BuildContext context) => AppColors.surfaceElevated;
-}
-
-=======
   /// Get primary gradient (Dark Mode) - Following darkmode.md spec
   static List<Color> getPrimaryGradientDark() {
     return [
@@ -588,4 +553,3 @@ class AppTheme {
     return brightness == Brightness.dark ? AppColors.caloriesDark : AppColors.calories;
   }
 }
->>>>>>> 11527b2 (Initial commit)

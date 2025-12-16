@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
 import '../core/storage/auth_storage.dart';
 import '../database/database_helper.dart';
+import 'home_data_provider.dart';
 
 /// Authentication state
 class AuthState {
@@ -118,6 +119,9 @@ class AuthNotifier extends Notifier<AuthState> {
         user: user,
         isLoading: false,
       );
+
+      // Refresh home data for the newly logged in user
+      ref.invalidate(homeDataProvider);
 
       return true;
     } catch (e) {

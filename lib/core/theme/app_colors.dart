@@ -1,29 +1,13 @@
 import 'package:flutter/material.dart';
 
 /// Centralized color definitions for the Sehati Health App
-<<<<<<< HEAD
-=======
 /// Following darkmode.md specification for dark mode
->>>>>>> 11527b2 (Initial commit)
 /// All colors used throughout the app should reference this file
 class AppColors {
   // ============================================================================
   // PRIMARY COLORS
   // ============================================================================
   
-<<<<<<< HEAD
-  /// Primary brand color - Teal/Cyan
-  static const Color primary = Color(0xFF20C6B7);
-  
-  /// Primary color variant - darker
-  static const Color primaryDark = Color(0xFF17A89A);
-  
-  /// Primary color variant - lighter
-  static const Color primaryLight = Color(0xFF4DD0E1);
-
-  // ============================================================================
-  // BACKGROUND COLORS
-=======
   /// Primary brand color - Teal/Cyan (Light Mode)
   static const Color primary = Color(0xFF20C6B7);
   
@@ -41,7 +25,6 @@ class AppColors {
 
   // ============================================================================
   // BACKGROUND & SURFACE COLORS (Light Mode)
->>>>>>> 11527b2 (Initial commit)
   // ============================================================================
   
   /// Main app background color
@@ -54,9 +37,6 @@ class AppColors {
   static const Color surfaceElevated = Color(0xFFF8F9FA);
 
   // ============================================================================
-<<<<<<< HEAD
-  // TEXT COLORS
-=======
   // BACKGROUND & SURFACE COLORS (Dark Mode)
   // ============================================================================
   
@@ -77,7 +57,6 @@ class AppColors {
 
   // ============================================================================
   // TEXT COLORS (Light Mode)
->>>>>>> 11527b2 (Initial commit)
   // ============================================================================
   
   /// Primary text color
@@ -93,9 +72,6 @@ class AppColors {
   static const Color textWhite = Color(0xFFFFFFFF);
 
   // ============================================================================
-<<<<<<< HEAD
-  // BORDER & DIVIDER COLORS
-=======
   // TEXT COLORS (Dark Mode)
   // ============================================================================
   
@@ -110,7 +86,6 @@ class AppColors {
 
   // ============================================================================
   // BORDER & DIVIDER COLORS (Light Mode)
->>>>>>> 11527b2 (Initial commit)
   // ============================================================================
   
   /// Border color
@@ -118,14 +93,6 @@ class AppColors {
   
   /// Divider color
   static const Color divider = Color(0xFFE8EAED);
-<<<<<<< HEAD
-  
-  /// Border color for primary elements
-  static const Color borderPrimary = Color(0xFF20C6B7);
-
-  // ============================================================================
-  // STATUS COLORS
-=======
 
   // ============================================================================
   // BORDER & DIVIDER COLORS (Dark Mode)
@@ -139,7 +106,6 @@ class AppColors {
 
   // ============================================================================
   // STATUS COLORS (Light Mode)
->>>>>>> 11527b2 (Initial commit)
   // ============================================================================
   
   static const Color success = Color(0xFF4CAF50);
@@ -148,9 +114,6 @@ class AppColors {
   static const Color info = Color(0xFF2196F3);
 
   // ============================================================================
-<<<<<<< HEAD
-  // NUTRITION COLORS
-=======
   // STATUS COLORS (Dark Mode)
   // ============================================================================
   
@@ -168,7 +131,6 @@ class AppColors {
 
   // ============================================================================
   // NUTRITION COLORS (Light Mode)
->>>>>>> 11527b2 (Initial commit)
   // ============================================================================
   
   static const Color protein = Color(0xFF66BB6A);
@@ -177,22 +139,6 @@ class AppColors {
   static const Color calories = Color(0xFFFFA726);
 
   // ============================================================================
-<<<<<<< HEAD
-  // GRAY SCALE
-  // ============================================================================
-  
-  static const Color gray100 = Color(0xFFF5F5F5);
-  static const Color gray200 = Color(0xFFEEEEEE);
-  static const Color gray300 = Color(0xFFE0E0E0);
-  static const Color gray400 = Color(0xFFBDBDBD);
-  static const Color gray500 = Color(0xFF9E9E9E);
-  static const Color gray600 = Color(0xFF757575);
-  static const Color gray700 = Color(0xFF616161);
-  static const Color gray800 = Color(0xFF424242);
-  static const Color gray900 = Color(0xFF212121);
-}
-
-=======
   // NUTRITION COLORS (Dark Mode)
   // ============================================================================
   
@@ -272,4 +218,3 @@ class AppColors {
     return brightness == Brightness.dark ? infoDark : info;
   }
 }
->>>>>>> 11527b2 (Initial commit)

@@ -96,18 +96,22 @@ class HomeDataNotifier extends Notifier<HomeData> {
 
   Future<void> _loadHomeData() async {
     final today = DateTime.now();
-    final startOfDay = DateTime(today.year, today.month, today.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
 
-    // Get user data
+    // Get user data - CRITICAL: Always use current authenticated user
     final authState = ref.read(authProvider);
     final userName = authState.user?.name ?? 'User';
     final userLevel = authState.user?.level ?? 1;
     final userXP = authState.user?.xp ?? 0;
     final xpToNextLevel = (userLevel * 100) - userXP;
-
-    // Load reminders (filtered by user)
     final userEmail = authState.user?.email;
+
+    // If no user is logged in, return default data
+    if (userEmail == null || userEmail.isEmpty) {
+      state = _getDefaultHomeData();
+      return;
+    }
+
+    // Load reminders (filtered by current user)
     final reminders = await _db.getAllMedicineReminders(userEmail: userEmail);
     final activeReminders = reminders.where((r) => r.isActive).toList();
     final todayDayOfWeek = today.weekday % 7; // Convert to 0-6 (Sunday=0)
@@ -127,16 +131,16 @@ class HomeDataNotifier extends Notifier<HomeData> {
       nextReminderTime = next.time;
     }
 
-    // Load nutrition data for today
-    final meals = await _db.getMealsByDate(today);
+    // Load nutrition data for today (filtered by current user)
+    final meals = await _db.getMealsByDate(today, userEmail: userEmail);
     final caloriesConsumed = meals.fold(0.0, (sum, meal) => sum + meal.calories);
     final proteinConsumed = meals.fold(0.0, (sum, meal) => sum + meal.protein);
     final carbsConsumed = meals.fold(0.0, (sum, meal) => sum + meal.carbs);
     final fatConsumed = meals.fold(0.0, (sum, meal) => sum + meal.fat);
     const caloriesGoal = 2000.0;
 
-    // Load workout data for today
-    final workouts = await _db.getWorkoutsByDate(today);
+    // Load workout data for today (filtered by current user)
+    final workouts = await _db.getWorkoutsByDate(today, userEmail: userEmail);
     WorkoutModel? todaysWorkout;
     if (workouts.isNotEmpty) {
       todaysWorkout = workouts.first;
@@ -144,14 +148,14 @@ class HomeDataNotifier extends Notifier<HomeData> {
     final totalSteps = 7234; // TODO: Get from activity tracker
     final caloriesBurned = workouts.fold(0.0, (sum, w) => sum + w.caloriesBurned);
 
-    // Load health tracking
-    final sleep = await _db.getSleepByDate(today);
+    // Load health tracking (filtered by current user)
+    final sleep = await _db.getSleepByDate(today, userEmail: userEmail);
     final sleepHours = sleep?.duration;
-    final waterIntake = await _db.getTotalWaterByDate(today);
+    final waterIntake = await _db.getTotalWaterByDate(today, userEmail: userEmail);
     const waterGoal = 2000;
     
-    // Load health goals
-    final goals = await _db.getAllHealthGoals();
+    // Load health goals (filtered by current user)
+    final goals = await _db.getAllHealthGoals(userEmail: userEmail);
     final activeGoals = goals.length;
 
     state = HomeData(

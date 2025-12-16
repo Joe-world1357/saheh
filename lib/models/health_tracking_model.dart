@@ -1,5 +1,6 @@
 class SleepTrackingModel {
   final int? id;
+  final String userEmail; // User isolation
   final DateTime date;
   final DateTime? bedtime;
   final DateTime? wakeTime;
@@ -9,6 +10,7 @@ class SleepTrackingModel {
 
   SleepTrackingModel({
     this.id,
+    required this.userEmail,
     required this.date,
     this.bedtime,
     this.wakeTime,
@@ -20,6 +22,7 @@ class SleepTrackingModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'user_email': userEmail,
       'date': date.toIso8601String(),
       'bedtime': bedtime?.toIso8601String(),
       'wake_time': wakeTime?.toIso8601String(),
@@ -32,6 +35,7 @@ class SleepTrackingModel {
   factory SleepTrackingModel.fromMap(Map<String, dynamic> map) {
     return SleepTrackingModel(
       id: map['id'] as int?,
+      userEmail: map['user_email'] as String? ?? '',
       date: DateTime.parse(map['date'] as String),
       bedtime: map['bedtime'] != null
           ? DateTime.parse(map['bedtime'] as String)
@@ -52,12 +56,14 @@ class SleepTrackingModel {
 
 class WaterIntakeModel {
   final int? id;
+  final String userEmail; // User isolation
   final DateTime date;
   final int amount; // in ml
   final DateTime createdAt;
 
   WaterIntakeModel({
     this.id,
+    required this.userEmail,
     required this.date,
     required this.amount,
     DateTime? createdAt,
@@ -66,6 +72,7 @@ class WaterIntakeModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'user_email': userEmail,
       'date': date.toIso8601String(),
       'amount': amount,
       'created_at': createdAt.toIso8601String(),
@@ -75,6 +82,7 @@ class WaterIntakeModel {
   factory WaterIntakeModel.fromMap(Map<String, dynamic> map) {
     return WaterIntakeModel(
       id: map['id'] as int?,
+      userEmail: map['user_email'] as String? ?? '',
       date: DateTime.parse(map['date'] as String),
       amount: map['amount'] as int,
       createdAt: map['created_at'] != null
@@ -86,6 +94,7 @@ class WaterIntakeModel {
 
 class HealthGoalModel {
   final int? id;
+  final String userEmail; // User isolation
   final String title;
   final String target;
   final String current;
@@ -96,6 +105,7 @@ class HealthGoalModel {
 
   HealthGoalModel({
     this.id,
+    required this.userEmail,
     required this.title,
     required this.target,
     required this.current,
@@ -108,6 +118,7 @@ class HealthGoalModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'user_email': userEmail,
       'title': title,
       'target': target,
       'current': current,
@@ -121,6 +132,7 @@ class HealthGoalModel {
   factory HealthGoalModel.fromMap(Map<String, dynamic> map) {
     return HealthGoalModel(
       id: map['id'] as int?,
+      userEmail: map['user_email'] as String? ?? '',
       title: map['title'] as String,
       target: map['target'] as String,
       current: map['current'] as String,

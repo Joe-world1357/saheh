@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'drug_details.dart';
 import '../../../shared/widgets/card_widgets.dart';
+import '../../../shared/widgets/network_image_widget.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   final String searchQuery;
@@ -19,13 +20,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   String _currentQuery = '';
   String _selectedFilter = 'All';
 
-  final List<Map<String, dynamic>> _allProducts = [
+    final List<Map<String, dynamic>> _allProducts = [
     {
       'name': 'Panadol',
       'size': '20pcs',
       'price': 15.99,
       'category': 'Pain Relief',
       'inStock': true,
+      'imageUrl': 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400', // Example URL
     },
     {
       'name': 'Bodrex Herbal',
@@ -406,8 +408,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
-                                                  builder: (_) => DrugDetails(
-                                                    img: "",
+                                                  builder: (_) =>                                                   DrugDetails(
+                                                    imageUrl: product['imageUrl'] as String?,
                                                     name: product['name'] as String,
                                                     size: product['size'] as String,
                                                     price: product['price'] as double,

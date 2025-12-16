@@ -28,7 +28,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 3, // Incremented for user isolation
+      version: 4, // Incremented for full user isolation across all tables
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -104,6 +104,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE meals (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
         name TEXT NOT NULL,
         meal_type TEXT NOT NULL,
         calories REAL NOT NULL,
@@ -119,6 +120,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE workouts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
         name TEXT NOT NULL,
         type TEXT NOT NULL,
         duration INTEGER NOT NULL,
@@ -132,6 +134,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE appointments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
         type TEXT NOT NULL,
         provider_name TEXT NOT NULL,
         specialty TEXT NOT NULL,
@@ -148,6 +151,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE sleep_tracking (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
         date TEXT NOT NULL,
         bedtime TEXT,
         wake_time TEXT,
@@ -161,6 +165,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE water_intake (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
         date TEXT NOT NULL,
         amount INTEGER NOT NULL,
         created_at TEXT NOT NULL
@@ -171,6 +176,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE health_goals (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
         title TEXT NOT NULL,
         target TEXT NOT NULL,
         current TEXT NOT NULL,
@@ -195,6 +201,18 @@ class DatabaseHelper {
     return UserModel.fromMap(maps.first);
   }
 
+  Future<UserModel?> getUserByEmail(String email) async {
+    final db = await database;
+    final maps = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email],
+      limit: 1,
+    );
+    if (maps.isEmpty) return null;
+    return UserModel.fromMap(maps.first);
+  }
+
   Future<int> updateUser(UserModel user) async {
     final db = await database;
     return await db.update(
@@ -202,6 +220,16 @@ class DatabaseHelper {
       user.copyWith(updatedAt: DateTime.now()).toMap(),
       where: 'id = ?',
       whereArgs: [user.id],
+    );
+  }
+
+  Future<int> updateUserByEmail(UserModel user) async {
+    final db = await database;
+    return await db.update(
+      'users',
+      user.copyWith(updatedAt: DateTime.now()).toMap(),
+      where: 'email = ?',
+      whereArgs: [user.email],
     );
   }
 
@@ -355,7 +383,12 @@ class DatabaseHelper {
     final db = await database;
     await db.delete('medicine_reminders', where: 'user_email = ?', whereArgs: [userEmail]);
     await db.delete('medicine_intake', where: 'user_email = ?', whereArgs: [userEmail]);
-    // Add other user-specific tables here as needed
+    await db.delete('meals', where: 'user_email = ?', whereArgs: [userEmail]);
+    await db.delete('workouts', where: 'user_email = ?', whereArgs: [userEmail]);
+    await db.delete('appointments', where: 'user_email = ?', whereArgs: [userEmail]);
+    await db.delete('sleep_tracking', where: 'user_email = ?', whereArgs: [userEmail]);
+    await db.delete('water_intake', where: 'user_email = ?', whereArgs: [userEmail]);
+    await db.delete('health_goals', where: 'user_email = ?', whereArgs: [userEmail]);
   }
 
   // Meal operations
@@ -364,14 +397,23 @@ class DatabaseHelper {
     return await db.insert('meals', meal.toMap());
   }
 
-  Future<List<MealModel>> getMealsByDate(DateTime date) async {
+  Future<List<MealModel>> getMealsByDate(DateTime date, {String? userEmail}) async {
     final db = await database;
     final dateStr = date.toIso8601String().split('T')[0];
-    final maps = await db.query(
-      'meals',
-      where: "DATE(meal_date) = ?",
-      whereArgs: [dateStr],
-    );
+    List<Map<String, dynamic>> maps;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      maps = await db.query(
+        'meals',
+        where: "DATE(meal_date) = ? AND user_email = ?",
+        whereArgs: [dateStr, userEmail],
+      );
+    } else {
+      maps = await db.query(
+        'meals',
+        where: "DATE(meal_date) = ?",
+        whereArgs: [dateStr],
+      );
+    }
     return maps.map((map) => MealModel.fromMap(map)).toList();
   }
 
@@ -381,14 +423,23 @@ class DatabaseHelper {
     return await db.insert('workouts', workout.toMap());
   }
 
-  Future<List<WorkoutModel>> getWorkoutsByDate(DateTime date) async {
+  Future<List<WorkoutModel>> getWorkoutsByDate(DateTime date, {String? userEmail}) async {
     final db = await database;
     final dateStr = date.toIso8601String().split('T')[0];
-    final maps = await db.query(
-      'workouts',
-      where: "DATE(workout_date) = ?",
-      whereArgs: [dateStr],
-    );
+    List<Map<String, dynamic>> maps;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      maps = await db.query(
+        'workouts',
+        where: "DATE(workout_date) = ? AND user_email = ?",
+        whereArgs: [dateStr, userEmail],
+      );
+    } else {
+      maps = await db.query(
+        'workouts',
+        where: "DATE(workout_date) = ?",
+        whereArgs: [dateStr],
+      );
+    }
     return maps.map((map) => WorkoutModel.fromMap(map)).toList();
   }
 
@@ -398,9 +449,19 @@ class DatabaseHelper {
     return await db.insert('appointments', appointment.toMap());
   }
 
-  Future<List<AppointmentModel>> getAllAppointments() async {
+  Future<List<AppointmentModel>> getAllAppointments({String? userEmail}) async {
     final db = await database;
-    final maps = await db.query('appointments', orderBy: 'appointment_date DESC');
+    List<Map<String, dynamic>> maps;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      maps = await db.query(
+        'appointments',
+        where: 'user_email = ?',
+        whereArgs: [userEmail],
+        orderBy: 'appointment_date DESC',
+      );
+    } else {
+      maps = await db.query('appointments', orderBy: 'appointment_date DESC');
+    }
     return maps.map((map) => AppointmentModel.fromMap(map)).toList();
   }
 
@@ -410,15 +471,25 @@ class DatabaseHelper {
     return await db.insert('sleep_tracking', sleep.toMap());
   }
 
-  Future<SleepTrackingModel?> getSleepByDate(DateTime date) async {
+  Future<SleepTrackingModel?> getSleepByDate(DateTime date, {String? userEmail}) async {
     final db = await database;
     final dateStr = date.toIso8601String().split('T')[0];
-    final maps = await db.query(
-      'sleep_tracking',
-      where: "DATE(date) = ?",
-      whereArgs: [dateStr],
-      limit: 1,
-    );
+    List<Map<String, dynamic>> maps;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      maps = await db.query(
+        'sleep_tracking',
+        where: "DATE(date) = ? AND user_email = ?",
+        whereArgs: [dateStr, userEmail],
+        limit: 1,
+      );
+    } else {
+      maps = await db.query(
+        'sleep_tracking',
+        where: "DATE(date) = ?",
+        whereArgs: [dateStr],
+        limit: 1,
+      );
+    }
     if (maps.isEmpty) return null;
     return SleepTrackingModel.fromMap(maps.first);
   }
@@ -429,13 +500,19 @@ class DatabaseHelper {
     return await db.insert('water_intake', water.toMap());
   }
 
-  Future<int> getTotalWaterByDate(DateTime date) async {
+  Future<int> getTotalWaterByDate(DateTime date, {String? userEmail}) async {
     final db = await database;
     final dateStr = date.toIso8601String().split('T')[0];
-    final result = await db.rawQuery(
-      'SELECT SUM(amount) as total FROM water_intake WHERE DATE(date) = ?',
-      [dateStr],
-    );
+    String query;
+    List<dynamic> args;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      query = 'SELECT SUM(amount) as total FROM water_intake WHERE DATE(date) = ? AND user_email = ?';
+      args = [dateStr, userEmail];
+    } else {
+      query = 'SELECT SUM(amount) as total FROM water_intake WHERE DATE(date) = ?';
+      args = [dateStr];
+    }
+    final result = await db.rawQuery(query, args);
     return result.first['total'] as int? ?? 0;
   }
 
@@ -445,14 +522,31 @@ class DatabaseHelper {
     return await db.insert('health_goals', goal.toMap());
   }
 
-  Future<List<HealthGoalModel>> getAllHealthGoals() async {
+  Future<List<HealthGoalModel>> getAllHealthGoals({String? userEmail}) async {
     final db = await database;
-    final maps = await db.query('health_goals', orderBy: 'created_at DESC');
+    List<Map<String, dynamic>> maps;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      maps = await db.query(
+        'health_goals',
+        where: 'user_email = ?',
+        whereArgs: [userEmail],
+        orderBy: 'created_at DESC',
+      );
+    } else {
+      maps = await db.query('health_goals', orderBy: 'created_at DESC');
+    }
     return maps.map((map) => HealthGoalModel.fromMap(map)).toList();
   }
 
-  Future<int> deleteHealthGoal(int id) async {
+  Future<int> deleteHealthGoal(int id, {String? userEmail}) async {
     final db = await database;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      return await db.delete(
+        'health_goals',
+        where: 'id = ? AND user_email = ?',
+        whereArgs: [id, userEmail],
+      );
+    }
     return await db.delete('health_goals', where: 'id = ?', whereArgs: [id]);
   }
 
@@ -476,7 +570,6 @@ class DatabaseHelper {
       // Add user_email column to medicine_reminders
       try {
         await db.execute('ALTER TABLE medicine_reminders ADD COLUMN user_email TEXT');
-        // Set default user_email for existing records (will be cleared on logout)
         await db.execute("UPDATE medicine_reminders SET user_email = '' WHERE user_email IS NULL");
       } catch (e) {
         // Column might already exist, ignore
@@ -485,10 +578,22 @@ class DatabaseHelper {
       // Add user_email column to medicine_intake
       try {
         await db.execute('ALTER TABLE medicine_intake ADD COLUMN user_email TEXT');
-        // Set default user_email for existing records (will be cleared on logout)
         await db.execute("UPDATE medicine_intake SET user_email = '' WHERE user_email IS NULL");
       } catch (e) {
         // Column might already exist, ignore
+      }
+    }
+    
+    if (oldVersion < 4) {
+      // Add user_email column to all remaining tables
+      final tables = ['meals', 'workouts', 'appointments', 'sleep_tracking', 'water_intake', 'health_goals'];
+      for (final table in tables) {
+        try {
+          await db.execute('ALTER TABLE $table ADD COLUMN user_email TEXT');
+          await db.execute("UPDATE $table SET user_email = '' WHERE user_email IS NULL");
+        } catch (e) {
+          // Column might already exist, ignore
+        }
       }
     }
   }

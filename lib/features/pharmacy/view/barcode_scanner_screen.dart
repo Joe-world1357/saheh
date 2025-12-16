@@ -57,7 +57,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
         context,
         MaterialPageRoute(
           builder: (_) => DrugDetails(
-            img: "",
+            imageUrl: "",
             name: product['name'] as String,
             size: product['size'] as String,
             price: product['price'] as double,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'checkout_screen.dart';
 import '../../../providers/cart_provider.dart';
+import '../../../shared/widgets/network_image_widget.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
@@ -276,20 +277,11 @@ class CartScreen extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Container(
+          PharmacyProductImage(
+            imageUrl: item.imageUrl,
             width: 60,
             height: 60,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Icon(
-                Icons.medication,
-                size: 30,
-                color: Colors.grey.shade400,
-              ),
-            ),
+            borderRadius: BorderRadius.circular(12),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -320,7 +312,7 @@ class CartScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  item.imageUrl ?? '',
+                  item.size ?? '',
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     fontSize: 13,

@@ -2,32 +2,72 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../../shared/widgets/common_widgets.dart';
-import '../../../providers/user_provider.dart';
-<<<<<<< HEAD
-=======
 import '../../../providers/auth_provider.dart';
-import '../../../core/theme/app_colors.dart';
-import 'achievements_screen.dart';
-import 'favorites_screen.dart';
-import '../../health/view/medical_records_screen.dart';
-import '../../health/view/appointment_history_screen.dart';
-import '../../health/view/progress_reports_screen.dart';
-import '../../auth/view/welcome_screen.dart';
->>>>>>> 11527b2 (Initial commit)
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
+  /// Get initials from user name
+  String _getInitials(String? name) {
+    if (name == null || name.isEmpty) return 'GU';
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
+  }
+
+  /// Get month name from month number
+  String _getMonthName(int month) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[month - 1];
+  }
+
+  /// Get duration text from join date
+  String _getDurationText(DateTime joinDate) {
+    final now = DateTime.now();
+    final difference = now.difference(joinDate);
+    final days = difference.inDays;
+    
+    if (days < 1) return 'Just joined';
+    if (days == 1) return '1 day';
+    if (days < 7) return '$days days';
+    if (days < 30) return '${(days / 7).floor()} weeks';
+    if (days < 365) return '${(days / 30).floor()} months';
+    
+    final years = (days / 365).floor();
+    final months = ((days % 365) / 30).floor();
+    if (months == 0) return '$years ${years == 1 ? 'year' : 'years'}';
+    return '$years ${years == 1 ? 'year' : 'years'}, $months ${months == 1 ? 'month' : 'months'}';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const primary = Color(
-      0xFF20C6B7,
-    );
+    const primary = Color(0xFF20C6B7);
+    
+    // Watch authProvider to get current user data
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
+    
+    // Get user details
+    final userName = user?.name ?? 'Guest User';
+    final userEmail = user?.email ?? 'No email';
+    final userLevel = user?.level ?? 1;
+    final userXP = user?.xp ?? 0;
+    final userAge = user?.age;
+    final userGender = user?.gender;
+    final userHeight = user?.height;
+    final userWeight = user?.weight;
+    final userPhone = user?.phone;
+    final userAddress = user?.address;
+    final userInitials = _getInitials(userName);
+    final memberSince = user?.createdAt;
 
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFF5FAFA,
-      ),
+      backgroundColor: const Color(0xFFF5FAFA),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,12 +78,8 @@ class ProfileScreen extends ConsumerWidget {
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Color(
-                      0xFF20C6B7,
-                    ),
-                    Color(
-                      0xFF17A89A,
-                    ),
+                    Color(0xFF20C6B7),
+                    Color(0xFF17A89A),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -52,9 +88,7 @@ class ProfileScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   SizedBox(
-                    height: MediaQuery.of(
-                      context,
-                    ).padding.top,
+                    height: MediaQuery.of(context).padding.top,
                   ),
                   // TOP BAR
                   Padding(
@@ -75,10 +109,7 @@ class ProfileScreen extends ConsumerWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder:
-                                    (
-                                      _,
-                                    ) => const SettingsScreen(),
+                                builder: (_) => const SettingsScreen(),
                               ),
                             );
                           },
@@ -86,27 +117,23 @@ class ProfileScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
                   // PROFILE PICTURE
                   Container(
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(
-                        0.3,
-                      ),
+                      color: Colors.white.withOpacity(0.3),
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: Colors.white,
                         width: 3,
                       ),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        "JD",
-                        style: TextStyle(
+                        userInitials,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
@@ -114,218 +141,42 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    height: 16,
-                  ),
+                  const SizedBox(height: 16),
                   Text(
-                    ref.watch(userProvider)?.name ?? "Guest User",
+                    userName,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(
-                    height: 8,
-                  ),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Text(
-                        "👑 Level 12",
-                        style: TextStyle(
+                        "👑 Level $userLevel",
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(
-                        width: 16,
-                      ),
+                      const SizedBox(width: 16),
                       Text(
-                        "• 2,450 XP",
-                        style: TextStyle(
+                        "• $userXP XP",
+                        style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 14,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 30,
-                  ),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
 
-<<<<<<< HEAD
-            const SizedBox(
-              height: 20,
-            ),
-
-=======
-            const SizedBox(height: 20),
-
-            // QUICK ACTIONS --------------------------------------------------
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildProfileQuickAction(
-                      context,
-                      icon: Icons.emoji_events,
-                      label: "Achievements",
-                      color: const Color(0xFFFFC107),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AchievementsScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildProfileQuickAction(
-                      context,
-                      icon: Icons.favorite,
-                      label: "Favorites",
-                      color: const Color(0xFFE91E63),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const FavoritesScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildProfileQuickAction(
-                      context,
-                      icon: Icons.folder_shared,
-                      label: "Medical Records",
-                      color: const Color(0xFF2196F3),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const MedicalRecordsScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildProfileQuickAction(
-                      context,
-                      icon: Icons.history,
-                      label: "Appointments",
-                      color: const Color(0xFF4CAF50),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AppointmentHistoryScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ProgressReportsScreen(),
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF20C6B7), Color(0xFF17A89A)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.trending_up,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Progress Reports",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              "View your health progress over time",
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.white70,
-                        size: 16,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
->>>>>>> 11527b2 (Initial commit)
             // PERSONAL INFORMATION -------------------------------------------
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -379,32 +230,30 @@ class ProfileScreen extends ConsumerWidget {
                             Expanded(
                               child: InfoItem(
                                 "Age",
-                                "32 years",
+                                userAge != null ? "$userAge years" : "N/A",
                               ),
                             ),
                             Expanded(
                               child: InfoItem(
                                 "Gender",
-                                "Male",
+                                userGender ?? "N/A",
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(
-                          height: 16,
-                        ),
+                        const SizedBox(height: 16),
                         Row(
                           children: [
                             Expanded(
                               child: InfoItem(
                                 "Height",
-                                "${ref.watch(userProvider)?.height?.toStringAsFixed(0) ?? 'N/A'} cm",
+                                userHeight != null ? "${userHeight.toStringAsFixed(0)} cm" : "N/A",
                               ),
                             ),
                             Expanded(
                               child: InfoItem(
                                 "Weight",
-                                "${ref.watch(userProvider)?.weight?.toStringAsFixed(0) ?? 'N/A'} kg",
+                                userWeight != null ? "${userWeight.toStringAsFixed(0)} kg" : "N/A",
                               ),
                             ),
                           ],
@@ -633,25 +482,21 @@ class ProfileScreen extends ConsumerWidget {
                   ContactItem(
                     Icons.email_outlined,
                     "Email",
-                    ref.watch(userProvider)?.email ?? "No email",
+                    userEmail,
                     primary,
                   ),
-                  const SizedBox(
-                    height: 12,
-                  ),
+                  const SizedBox(height: 12),
                   ContactItem(
                     Icons.phone_outlined,
                     "Phone",
-                    "+1 (555) 123-4567",
+                    userPhone ?? "Not set",
                     primary,
                   ),
-                  const SizedBox(
-                    height: 12,
-                  ),
+                  const SizedBox(height: 12),
                   ContactItem(
                     Icons.location_on_outlined,
                     "Address",
-                    "742 Evergreen Terrace\nSpringfield, ST 12345",
+                    userAddress ?? "Not set",
                     primary,
                   ),
 
@@ -735,21 +580,21 @@ class ProfileScreen extends ConsumerWidget {
                               const SizedBox(
                                 height: 4,
                               ),
-                              const Text(
-                                "January 15, 2023",
-                                style: TextStyle(
-                                  color: Color(
-                                    0xFF1A2A2C,
-                                  ),
+                              Text(
+                                memberSince != null
+                                    ? "${_getMonthName(memberSince.month)} ${memberSince.day}, ${memberSince.year}"
+                                    : "Recently joined",
+                                style: const TextStyle(
+                                  color: Color(0xFF1A2A2C),
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(
-                                height: 2,
-                              ),
+                              const SizedBox(height: 2),
                               Text(
-                                "2 years with Sehati",
+                                memberSince != null
+                                    ? "${_getDurationText(memberSince)} with Sehati"
+                                    : "Welcome to Sehati!",
                                 style: TextStyle(
                                   color: Colors.grey.shade500,
                                   fontSize: 12,
@@ -762,29 +607,6 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
 
-<<<<<<< HEAD
-=======
-                  const SizedBox(height: 24),
-
-                  // LOGOUT BUTTON
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _handleLogout(context, ref),
-                      icon: const Icon(Icons.logout),
-                      label: const Text('Logout'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.error,
-                        side: const BorderSide(color: AppColors.error, width: 2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
-                  ),
-
->>>>>>> 11527b2 (Initial commit)
                   const SizedBox(
                     height: 40,
                   ),
@@ -796,88 +618,4 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
-<<<<<<< HEAD
-=======
-
-  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
-    // Show confirmation dialog
-    final shouldLogout = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldLogout == true && context.mounted) {
-      // Logout user
-      await ref.read(authProvider.notifier).logout();
-
-      // Navigate to welcome screen
-      if (context.mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-          (route) => false,
-        );
-      }
-    }
-  }
-
-  Widget _buildProfileQuickAction(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: theme.dividerColor),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 24),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              label,
-              style: TextStyle(
-                color: theme.colorScheme.onSurface,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
->>>>>>> 11527b2 (Initial commit)
 }

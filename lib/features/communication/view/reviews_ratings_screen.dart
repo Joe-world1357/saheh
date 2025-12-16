@@ -1,23 +1,13 @@
 import 'package:flutter/material.dart';
 
 class ReviewsRatingsScreen extends StatefulWidget {
-<<<<<<< HEAD
   final String? itemName;
-  final String? itemType; // 'product', 'doctor', 'caregiver'
+  final String? itemType;
 
   const ReviewsRatingsScreen({
     super.key,
     this.itemName,
     this.itemType,
-=======
-  final String? providerName;
-  final String? providerType; // 'product', 'doctor', 'caregiver'
-
-  const ReviewsRatingsScreen({
-    super.key,
-    this.providerName,
-    this.providerType,
->>>>>>> 11527b2 (Initial commit)
   });
 
   @override

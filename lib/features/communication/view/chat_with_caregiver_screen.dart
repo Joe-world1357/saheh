@@ -3,17 +3,13 @@ import 'package:flutter/material.dart';
 class ChatWithCaregiverScreen extends StatefulWidget {
   final String caregiverName;
   final String role;
-  final Color color;
+  final Color? color;
 
   const ChatWithCaregiverScreen({
     super.key,
     required this.caregiverName,
     required this.role,
-<<<<<<< HEAD
-    required this.color,
-=======
-    this.color = const Color(0xFFFF9800),
->>>>>>> 11527b2 (Initial commit)
+    this.color,
   });
 
   @override
@@ -99,7 +95,7 @@ class _ChatWithCaregiverScreenState extends State<ChatWithCaregiverScreen> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: widget.color,
+                color: widget.color ?? primary,
                 borderRadius: BorderRadius.circular(12),
               ),
             ),

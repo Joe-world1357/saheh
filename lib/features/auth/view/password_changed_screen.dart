@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'package:idk/main.dart';
-=======
 import 'welcome_screen.dart';
->>>>>>> 11527b2 (Initial commit)
 
 class PasswordChangedScreen extends StatelessWidget {
   const PasswordChangedScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const primary = Color(0xFF20C6B7);
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -30,25 +27,18 @@ class PasswordChangedScreen extends StatelessWidget {
                 const SizedBox(height: 30),
 
                 // TITLE
-                const Text(
+                Text(
                   "Password Changed!",
-                  style: TextStyle(
-                    color: Color(0xFF1A2A2C),
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: theme.textTheme.headlineMedium,
                 ),
 
                 const SizedBox(height: 10),
 
                 // SUBTEXT
-                const Text(
+                Text(
                   "Your password has been\nchanged successfully.",
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0xFF687779),
-                    fontSize: 15,
-                  ),
+                  style: theme.textTheme.bodyMedium,
                 ),
 
                 const SizedBox(height: 40),
@@ -64,16 +54,15 @@ class PasswordChangedScreen extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primary,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(32),
-                      side: const BorderSide(color: Colors.black, width: 1),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 50),
                   ),
                   child: const Text(
                     "Back to Login",
                     style: TextStyle(
-                      color: Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
