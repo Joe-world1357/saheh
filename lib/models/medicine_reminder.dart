@@ -13,17 +13,34 @@ class MedicineReminder {
     required this.repeatDaily,
   });
 
+  // 🔒 SAFE fromMap
   factory MedicineReminder.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return MedicineReminder(
       id: id,
-      userId: data['user_id'],
-      medicineId: data['medicine_id'],
-      reminderTime: DateTime.parse(data['reminder_time']),
-      repeatDaily: data['repeat_daily'],
+
+      // required FKs
+      userId: map['user_id'] as String? ?? '',
+      medicineId: map['medicine_id'] as String? ?? '',
+
+      // Firestore / offline safe date
+      reminderTime: map['reminder_time'] != null
+          ? DateTime.tryParse(
+                map['reminder_time'].toString(),
+              ) ??
+              DateTime.now()
+          : DateTime.now(),
+
+      // safe boolean
+      repeatDaily: map['repeat_daily'] as bool? ?? false,
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'user_id': userId,
