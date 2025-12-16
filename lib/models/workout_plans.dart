@@ -11,16 +11,27 @@ class WorkoutPlan {
     required this.durationWeeks,
   });
 
+  // 🔒 SAFE fromMap
   factory WorkoutPlan.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return WorkoutPlan(
       id: id,
-      goal: data['goal'],
-      difficulty: data['difficulty'],
-      durationWeeks: data['duration_weeks'],
+
+      // required text
+      goal: map['goal'] as String? ?? '',
+      difficulty: map['difficulty'] as String? ?? '',
+
+      // duration-safe
+      durationWeeks:
+          (map['duration_weeks'] as num?)?.toInt() ?? 0,
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'goal': goal,
