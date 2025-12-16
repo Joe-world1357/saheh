@@ -15,18 +15,37 @@ class CaregiverBooking {
     required this.status,
   });
 
+  // 🔒 SAFE fromMap
   factory CaregiverBooking.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return CaregiverBooking(
       id: id,
-      userId: data['user_id'],
-      caregiverId: data['caregiver_id'],
-      bookingDate: DateTime.parse(data['booking_date']),
-      durationHours: data['duration_hours'],
-      status: data['status'],
+
+      // required refs (safe fallback)
+      userId: map['user_id'] as String? ?? '',
+      caregiverId: map['caregiver_id'] as String? ?? '',
+
+      // Firestore / offline safe date
+      bookingDate: map['booking_date'] != null
+          ? DateTime.tryParse(
+                map['booking_date'].toString(),
+              ) ??
+              DateTime.now()
+          : DateTime.now(),
+
+      // duration must NEVER crash
+      durationHours: (map['duration_hours'] as num?)?.toInt() ?? 0,
+
+      // logical default
+      status: map['status'] as String? ?? 'pending',
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'user_id': userId,
