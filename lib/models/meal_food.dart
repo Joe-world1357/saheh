@@ -13,16 +13,28 @@ class MealFood {
     required this.caloriesTotal,
   });
 
-  factory MealFood.fromMap(Map<String, dynamic> data, String id) {
+  // 🔒 SAFE fromMap
+  factory MealFood.fromMap(
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return MealFood(
       id: id,
-      mealId: data['meal_id'],
-      foodId: data['food_id'],
-      quantity: data['quantity']?.toDouble(),
-      caloriesTotal: data['calories_total']?.toDouble(),
+
+      // required FKs
+      mealId: map['meal_id'] as String? ?? '',
+      foodId: map['food_id'] as String? ?? '',
+
+      // math-safe numbers
+      quantity: (map['quantity'] as num?)?.toDouble() ?? 0.0,
+      caloriesTotal:
+          (map['calories_total'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'meal_id': mealId,
