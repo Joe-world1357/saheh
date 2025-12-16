@@ -17,19 +17,37 @@ class Caregiver {
     this.rating,
   });
 
+  // 🔒 SAFE fromMap
   factory Caregiver.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return Caregiver(
       id: id,
-      fullName: data['full_name'],
-      age: data['age'],
-      experience: data['experience'],
-      rating: data['rating']?.toDouble(),
-      serviceDescription: data['service_description'],
-      hourlyRate: data['hourly_rate']?.toDouble(),
+
+      // required text fields
+      fullName: map['full_name'] as String? ?? '',
+
+      // required ints (safe numeric casting)
+      age: (map['age'] as num?)?.toInt() ?? 0,
+      experience: (map['experience'] as num?)?.toInt() ?? 0,
+
+      // optional rating
+      rating: (map['rating'] as num?)?.toDouble(),
+
+      // required description
+      serviceDescription:
+          map['service_description'] as String? ?? '',
+
+      // required money value
+      hourlyRate:
+          (map['hourly_rate'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'full_name': fullName,
