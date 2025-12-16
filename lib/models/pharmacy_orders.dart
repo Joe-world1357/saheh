@@ -13,17 +13,37 @@ class PharmacyOrder {
     required this.totalPrice,
   });
 
+  // 🔒 SAFE fromMap
   factory PharmacyOrder.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return PharmacyOrder(
       id: id,
-      userId: data['user_id'],
-      orderDate: DateTime.parse(data['order_date']),
-      status: data['status'],
-      totalPrice: data['total_price']?.toDouble(),
+
+      // required FK
+      userId: map['user_id'] as String? ?? '',
+
+      // Firestore / offline safe date
+      orderDate: map['order_date'] != null
+          ? DateTime.tryParse(
+                map['order_date'].toString(),
+              ) ??
+              DateTime.now()
+          : DateTime.now(),
+
+      // order lifecycle safety
+      status: map['status'] as String? ?? 'pending',
+
+      // money-safe total
+      totalPrice:
+          (map['total_price'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'user_id': userId,
