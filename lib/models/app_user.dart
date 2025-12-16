@@ -30,23 +30,36 @@ class AppUser {
     this.xpLevel,
   });
 
-  factory AppUser.fromMap(Map<String, dynamic> data, String id) {
+  // 🔒 SAFE fromMap
+  factory AppUser.fromMap(Map<String, dynamic>? data, String id) {
+    final map = data ?? {};
+
     return AppUser(
       id: id,
-      email: data['email'],
-      username: data['username'],
-      accountCreated: DateTime.parse(data['account_created']),
-      age: data['age'],
-      gender: data['gender'],
-      height: data['height']?.toDouble(),
-      weight: data['weight']?.toDouble(),
-      phone: data['phone'],
-      address: data['address'],
-      activityLevel: data['activity_level'],
-      xpLevel: data['xp_level'],
+
+      // required fields with safe fallback
+      email: map['email'] as String? ?? '',
+      username: map['username'] as String? ?? '',
+
+      // Firestore-safe date parsing
+      accountCreated: map['account_created'] != null
+          ? DateTime.tryParse(map['account_created'].toString()) ??
+              DateTime.now()
+          : DateTime.now(),
+
+      // optional fields (safe casting)
+      age: map['age'] as int?,
+      gender: map['gender'] as String?,
+      height: (map['height'] as num?)?.toDouble(),
+      weight: (map['weight'] as num?)?.toDouble(),
+      phone: map['phone'] as String?,
+      address: map['address'] as String?,
+      activityLevel: map['activity_level'] as String?,
+      xpLevel: map['xp_level'] as int?,
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'email': email,
