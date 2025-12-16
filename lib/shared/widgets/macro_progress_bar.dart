@@ -169,7 +169,11 @@ class _MacroProgressBarState extends State<MacroProgressBar> with SingleTickerPr
                 Container(
                   height: 10,
                   decoration: BoxDecoration(
+<<<<<<< HEAD
                     color: AppTheme.getSurface2(context),
+=======
+                    color: Theme.of(context).colorScheme.surfaceVariant ?? Theme.of(context).colorScheme.surface,
+>>>>>>> 11527b2 (Initial commit)
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),

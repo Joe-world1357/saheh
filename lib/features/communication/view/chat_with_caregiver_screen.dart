@@ -9,7 +9,11 @@ class ChatWithCaregiverScreen extends StatefulWidget {
     super.key,
     required this.caregiverName,
     required this.role,
+<<<<<<< HEAD
     required this.color,
+=======
+    this.color = const Color(0xFFFF9800),
+>>>>>>> 11527b2 (Initial commit)
   });
 
   @override

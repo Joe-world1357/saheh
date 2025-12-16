@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 
 class VideoConsultationScreen extends StatefulWidget {
+<<<<<<< HEAD
   final String doctorName;
   final String specialty;
+=======
+  final String providerName;
+  final String providerType;
+>>>>>>> 11527b2 (Initial commit)
   final Color color;
 
   const VideoConsultationScreen({
     super.key,
+<<<<<<< HEAD
     required this.doctorName,
     required this.specialty,
     required this.color,
+=======
+    required this.providerName,
+    required this.providerType,
+    this.color = const Color(0xFF20C6B7),
+>>>>>>> 11527b2 (Initial commit)
   });
 
   @override
@@ -50,7 +61,11 @@ class _VideoConsultationScreenState extends State<VideoConsultationScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
+<<<<<<< HEAD
                     widget.doctorName,
+=======
+                    widget.providerName,
+>>>>>>> 11527b2 (Initial commit)
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -59,9 +74,15 @@ class _VideoConsultationScreenState extends State<VideoConsultationScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
+<<<<<<< HEAD
                     widget.specialty,
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.7),
+=======
+                    widget.providerType,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+>>>>>>> 11527b2 (Initial commit)
                       fontSize: 14,
                     ),
                   ),

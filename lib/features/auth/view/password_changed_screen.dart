@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:idk/main.dart';
+=======
+import 'welcome_screen.dart';
+>>>>>>> 11527b2 (Initial commit)
 
 class PasswordChangedScreen extends StatelessWidget {
   const PasswordChangedScreen({super.key});

@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'caregiver_success_screen.dart';
+<<<<<<< HEAD
+=======
+import '../../../communication/view/chat_with_caregiver_screen.dart';
+import '../../../communication/view/video_consultation_screen.dart';
+import '../../../communication/view/reviews_ratings_screen.dart';
+>>>>>>> 11527b2 (Initial commit)
 
 class CaregiverDetailScreen
     extends
@@ -195,6 +201,69 @@ class _CaregiverDetailScreenState
                 ],
               ),
             ),
+<<<<<<< HEAD
+=======
+            const SizedBox(height: 16),
+
+            // COMMUNICATION OPTIONS
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildCommunicationOption(
+                  context,
+                  icon: Icons.chat_bubble_outline,
+                  label: "Chat",
+                  color: const Color(0xFF2196F3),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChatWithCaregiverScreen(
+                          caregiverName: widget.name,
+                          role: widget.role,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                _buildCommunicationOption(
+                  context,
+                  icon: Icons.videocam_outlined,
+                  label: "Video Call",
+                  color: const Color(0xFF4CAF50),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => VideoConsultationScreen(
+                          providerName: widget.name,
+                          providerType: "Caregiver",
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                _buildCommunicationOption(
+                  context,
+                  icon: Icons.star_outline,
+                  label: "Reviews",
+                  color: const Color(0xFFFFC107),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReviewsRatingsScreen(
+                          providerName: widget.name,
+                          providerType: "Caregiver",
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+
+>>>>>>> 11527b2 (Initial commit)
             const SizedBox(
               height: 24,
             ),
@@ -476,4 +545,43 @@ class _CaregiverDetailScreenState
       ),
     );
   }
+<<<<<<< HEAD
+=======
+
+  Widget _buildCommunicationOption(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: color.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey.shade700,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+>>>>>>> 11527b2 (Initial commit)
 }

@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import '../../../shared/widgets/common_widgets.dart';
 import '../../../shared/widgets/form_widgets.dart';
+=======
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../shared/widgets/common_widgets.dart';
+import '../../../shared/widgets/form_widgets.dart';
+import '../../../providers/theme_provider.dart';
+import '../../../providers/auth_provider.dart';
+import '../../auth/view/welcome_screen.dart';
+>>>>>>> 11527b2 (Initial commit)
 import '../../profile/view/edit_personal_info_screen.dart';
 import '../../profile/view/change_password_screen.dart';
 import '../../profile/view/login_methods_screen.dart';
@@ -18,6 +28,7 @@ import 'workout_preferences_screen.dart';
 import 'nutrition_settings_screen.dart';
 import 'connected_devices_security_screen.dart';
 
+<<<<<<< HEAD
 class SettingsScreen
     extends
         StatefulWidget {
@@ -38,10 +49,21 @@ class _SettingsScreenState
           SettingsScreen
         > {
   bool darkMode = false;
+=======
+class SettingsScreen extends ConsumerStatefulWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+>>>>>>> 11527b2 (Initial commit)
   bool notifications = true;
   bool twoFactorAuth = false;
 
   @override
+<<<<<<< HEAD
   Widget build(
     BuildContext context,
   ) {
@@ -53,6 +75,15 @@ class _SettingsScreenState
       backgroundColor: const Color(
         0xFFF5FAFA,
       ),
+=======
+  Widget build(BuildContext context) {
+    final themeState = ref.watch(themeProvider);
+    final isDarkMode = themeState.isDarkMode(context);
+    const primary = AppColors.primary;
+
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+>>>>>>> 11527b2 (Initial commit)
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,6 +233,7 @@ class _SettingsScreenState
                       SettingItemWithSwitch(
                         icon: Icons.dark_mode_outlined,
                         title: "Dark Mode",
+<<<<<<< HEAD
                         value: darkMode,
                         onChanged:
                             (
@@ -209,6 +241,12 @@ class _SettingsScreenState
                             ) => setState(
                               () => darkMode = value,
                             ),
+=======
+                        value: isDarkMode,
+                        onChanged: (value) {
+                          ref.read(themeProvider.notifier).toggleTheme();
+                        },
+>>>>>>> 11527b2 (Initial commit)
                       ),
                       const SizedBox(
                         height: 8,
@@ -394,6 +432,18 @@ class _SettingsScreenState
                         height: 8,
                       ),
                       SettingItem(
+<<<<<<< HEAD
+=======
+                        icon: Icons.logout,
+                        title: "Logout",
+                        onTap: () => _handleLogout(context, ref),
+                        textColor: Colors.red,
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      SettingItem(
+>>>>>>> 11527b2 (Initial commit)
                         icon: Icons.delete_outline,
                         title: "Delete Account",
                         onTap: () {},
@@ -486,4 +536,45 @@ class _SettingsScreenState
       ),
     );
   }
+<<<<<<< HEAD
+=======
+
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
+    // Show confirmation dialog
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+            ),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout == true && context.mounted) {
+      // Logout user
+      await ref.read(authProvider.notifier).logout();
+
+      // Navigate to welcome screen
+      if (context.mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+          (route) => false,
+        );
+      }
+    }
+  }
+>>>>>>> 11527b2 (Initial commit)
 }

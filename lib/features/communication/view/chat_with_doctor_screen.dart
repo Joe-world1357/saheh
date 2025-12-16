@@ -9,7 +9,11 @@ class ChatWithDoctorScreen extends StatefulWidget {
     super.key,
     required this.doctorName,
     required this.specialty,
+<<<<<<< HEAD
     required this.color,
+=======
+    this.color = const Color(0xFF20C6B7),
+>>>>>>> 11527b2 (Initial commit)
   });
 
   @override

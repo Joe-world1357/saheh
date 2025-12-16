@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import '../../../main.dart';
 
 class AnimatedSplash extends StatefulWidget {
@@ -9,6 +10,21 @@ class AnimatedSplash extends StatefulWidget {
 }
 
 class _AnimatedSplashState extends State<AnimatedSplash>
+=======
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../providers/auth_provider.dart';
+import '../../home/view/guest_navbar.dart';
+import 'welcome_screen.dart';
+
+class AnimatedSplash extends ConsumerStatefulWidget {
+  const AnimatedSplash({super.key});
+
+  @override
+  ConsumerState<AnimatedSplash> createState() => _AnimatedSplashState();
+}
+
+class _AnimatedSplashState extends ConsumerState<AnimatedSplash>
+>>>>>>> 11527b2 (Initial commit)
     with SingleTickerProviderStateMixin {
 
   late AnimationController _controller;
@@ -29,12 +45,31 @@ class _AnimatedSplashState extends State<AnimatedSplash>
 
     _controller.forward();
 
+<<<<<<< HEAD
     // After 3 sec go to WelcomeScreen
     Future.delayed(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const WelcomeScreen()),
       );
+=======
+    // After 3 sec navigate based on auth state
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        final authState = ref.read(authProvider);
+        if (authState.isAuthenticated) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const GuestNavbar()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+          );
+        }
+      }
+>>>>>>> 11527b2 (Initial commit)
     });
   }
 

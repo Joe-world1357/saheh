@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+<<<<<<< HEAD
 import 'core/theme/app_colors.dart';
 import 'features/auth/view/login_screen.dart';
 import 'features/auth/view/register_screen.dart';
@@ -7,6 +8,24 @@ import 'features/auth/view/splash_screen.dart';
 import 'features/home/view/guest_navbar.dart';
 
 void main() {
+=======
+import 'core/theme/app_theme.dart';
+import 'core/storage/auth_storage.dart';
+import 'providers/theme_provider.dart';
+import 'providers/auth_provider.dart';
+import 'features/auth/view/login_screen.dart';
+import 'features/auth/view/register_screen.dart';
+import 'features/auth/view/splash_screen.dart';
+import 'features/auth/view/welcome_screen.dart';
+import 'features/home/view/guest_navbar.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Hive for local storage
+  await AuthStorage.init();
+  
+>>>>>>> 11527b2 (Initial commit)
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -14,6 +33,7 @@ void main() {
   );
 }
 
+<<<<<<< HEAD
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -33,10 +53,39 @@ class MyApp extends StatelessWidget {
 
       // Start with splash animation
       home: const AnimatedSplash(),
+=======
+class MyApp extends ConsumerWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeState = ref.watch(themeProvider);
+    final authState = ref.watch(authProvider);
+    
+    // Check if user is authenticated and navigate accordingly
+    Widget home = const AnimatedSplash();
+    
+    // If authenticated, go to main app, otherwise show splash
+    if (authState.isAuthenticated && !authState.isLoading) {
+      home = const GuestNavbar();
+    } else if (!authState.isLoading && !authState.isAuthenticated) {
+      // Will be handled by splash screen navigation
+      home = const AnimatedSplash();
+    }
+    
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Sehati Health App',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeState.themeMode,
+      home: home,
+>>>>>>> 11527b2 (Initial commit)
     );
   }
 }
 
+<<<<<<< HEAD
 // ===================================================================
 //                       WELCOME SCREEN (INSIDE MAIN)
 // ===================================================================
@@ -205,3 +254,5 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 }
+=======
+>>>>>>> 11527b2 (Initial commit)

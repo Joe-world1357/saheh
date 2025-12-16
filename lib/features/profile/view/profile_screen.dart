@@ -3,6 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../../shared/widgets/common_widgets.dart';
 import '../../../providers/user_provider.dart';
+<<<<<<< HEAD
+=======
+import '../../../providers/auth_provider.dart';
+import '../../../core/theme/app_colors.dart';
+import 'achievements_screen.dart';
+import 'favorites_screen.dart';
+import '../../health/view/medical_records_screen.dart';
+import '../../health/view/appointment_history_screen.dart';
+import '../../health/view/progress_reports_screen.dart';
+import '../../auth/view/welcome_screen.dart';
+>>>>>>> 11527b2 (Initial commit)
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -147,10 +158,174 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
 
+<<<<<<< HEAD
             const SizedBox(
               height: 20,
             ),
 
+=======
+            const SizedBox(height: 20),
+
+            // QUICK ACTIONS --------------------------------------------------
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildProfileQuickAction(
+                      context,
+                      icon: Icons.emoji_events,
+                      label: "Achievements",
+                      color: const Color(0xFFFFC107),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AchievementsScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildProfileQuickAction(
+                      context,
+                      icon: Icons.favorite,
+                      label: "Favorites",
+                      color: const Color(0xFFE91E63),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const FavoritesScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildProfileQuickAction(
+                      context,
+                      icon: Icons.folder_shared,
+                      label: "Medical Records",
+                      color: const Color(0xFF2196F3),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MedicalRecordsScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildProfileQuickAction(
+                      context,
+                      icon: Icons.history,
+                      label: "Appointments",
+                      color: const Color(0xFF4CAF50),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AppointmentHistoryScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ProgressReportsScreen(),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF20C6B7), Color(0xFF17A89A)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.trending_up,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Progress Reports",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              "View your health progress over time",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.white70,
+                        size: 16,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+>>>>>>> 11527b2 (Initial commit)
             // PERSONAL INFORMATION -------------------------------------------
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -587,6 +762,29 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
 
+<<<<<<< HEAD
+=======
+                  const SizedBox(height: 24),
+
+                  // LOGOUT BUTTON
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _handleLogout(context, ref),
+                      icon: const Icon(Icons.logout),
+                      label: const Text('Logout'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.error,
+                        side: const BorderSide(color: AppColors.error, width: 2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+
+>>>>>>> 11527b2 (Initial commit)
                   const SizedBox(
                     height: 40,
                   ),
@@ -598,4 +796,88 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
+<<<<<<< HEAD
+=======
+
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
+    // Show confirmation dialog
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+            ),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout == true && context.mounted) {
+      // Logout user
+      await ref.read(authProvider.notifier).logout();
+
+      // Navigate to welcome screen
+      if (context.mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+          (route) => false,
+        );
+      }
+    }
+  }
+
+  Widget _buildProfileQuickAction(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.dividerColor),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+>>>>>>> 11527b2 (Initial commit)
 }
