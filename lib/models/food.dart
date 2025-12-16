@@ -2,6 +2,8 @@ class Food {
   final String id; // Firestore document ID
   final String foodName;
   final String? brand;
+
+  // required nutrition (safe defaults)
   final double calories;
   final double protein;
   final double carbs;
@@ -9,10 +11,13 @@ class Food {
   final double sugar;
   final double sodium;
   final double fiber;
+
+  // optional micronutrients
   final double? vitaminA;
   final double? vitaminB;
   final double? vitaminC;
   final double? vitaminD;
+
   final String? servingSize;
 
   Food({
@@ -33,30 +38,45 @@ class Food {
     this.servingSize,
   });
 
-  factory Food.fromMap(Map<String, dynamic> data, String id) {
+  // 🔒 SAFE fromMap
+  factory Food.fromMap(
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return Food(
       id: id,
-      foodName: data['food_name'],
-      brand: data['brand'],
-      calories: data['calories']?.toDouble(),
-      protein: data['protein']?.toDouble(),
-      carbs: data['carbs']?.toDouble(),
-      fat: data['fat']?.toDouble(),
-      sugar: data['sugar']?.toDouble(),
-      sodium: data['sodium']?.toDouble(),
-      fiber: data['fiber']?.toDouble(),
-      vitaminA: data['vitamin_a']?.toDouble(),
-      vitaminB: data['vitamin_b']?.toDouble(),
-      vitaminC: data['vitamin_c']?.toDouble(),
-      vitaminD: data['vitamin_d']?.toDouble(),
-      servingSize: data['serving_size'],
+
+      // required text
+      foodName: map['food_name'] as String? ?? '',
+
+      // optional text
+      brand: map['brand'] as String?,
+      servingSize: map['serving_size'] as String?,
+
+      // required macros (num-safe)
+      calories: (map['calories'] as num?)?.toDouble() ?? 0.0,
+      protein: (map['protein'] as num?)?.toDouble() ?? 0.0,
+      carbs: (map['carbs'] as num?)?.toDouble() ?? 0.0,
+      fat: (map['fat'] as num?)?.toDouble() ?? 0.0,
+      sugar: (map['sugar'] as num?)?.toDouble() ?? 0.0,
+      sodium: (map['sodium'] as num?)?.toDouble() ?? 0.0,
+      fiber: (map['fiber'] as num?)?.toDouble() ?? 0.0,
+
+      // optional micros
+      vitaminA: (map['vitamin_a'] as num?)?.toDouble(),
+      vitaminB: (map['vitamin_b'] as num?)?.toDouble(),
+      vitaminC: (map['vitamin_c'] as num?)?.toDouble(),
+      vitaminD: (map['vitamin_d'] as num?)?.toDouble(),
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'food_name': foodName,
-      'brand': brand,
+      if (brand != null) 'brand': brand,
       'calories': calories,
       'protein': protein,
       'carbs': carbs,
