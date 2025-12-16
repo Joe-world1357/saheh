@@ -15,18 +15,37 @@ class UserActivityLog {
     required this.logDate,
   });
 
+  // 🔒 SAFE fromMap
   factory UserActivityLog.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return UserActivityLog(
       id: id,
-      userId: data['user_id'],
-      steps: data['steps'],
-      caloriesBurned: data['calories_burned']?.toDouble(),
-      workoutMinutes: data['workout_minutes'],
-      logDate: DateTime.parse(data['log_date']),
+
+      // required FK
+      userId: map['user_id'] as String? ?? '',
+
+      // activity-safe numbers
+      steps: (map['steps'] as num?)?.toInt() ?? 0,
+      caloriesBurned:
+          (map['calories_burned'] as num?)?.toDouble() ?? 0.0,
+      workoutMinutes:
+          (map['workout_minutes'] as num?)?.toInt() ?? 0,
+
+      // Firestore / offline safe date
+      logDate: map['log_date'] != null
+          ? DateTime.tryParse(
+                map['log_date'].toString(),
+              ) ??
+              DateTime.now()
+          : DateTime.now(),
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'user_id': userId,
