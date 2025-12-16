@@ -9,15 +9,25 @@ class UserMedicalCondition {
     required this.condition,
   });
 
+  // 🔒 SAFE fromMap
   factory UserMedicalCondition.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return UserMedicalCondition(
       id: id,
-      userId: data['user_id'],
-      condition: data['condition'],
+
+      // required FK
+      userId: map['user_id'] as String? ?? '',
+
+      // required text
+      condition: map['condition'] as String? ?? '',
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'user_id': userId,
