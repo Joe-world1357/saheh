@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
 import '../core/storage/auth_storage.dart';
+import '../database/database_helper.dart';
 
 /// Authentication state
 class AuthState {
@@ -63,6 +65,12 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Refresh authentication state (public method)
+  Future<bool> refreshAuthState() async {
+    await _checkAuthStatus();
+    return state.isAuthenticated;
+  }
+
   /// Login with email and password
   Future<bool> login(String email, String password) async {
     state = state.copyWith(isLoading: true, error: null);
@@ -78,14 +86,28 @@ class AuthNotifier extends Notifier<AuthState> {
         return false;
       }
 
-      // Get user data
-      final user = AuthStorage.getUserByEmail(email);
+      // Get user data from Hive
+      var user = AuthStorage.getUserByEmail(email);
       if (user == null) {
         state = state.copyWith(
           isLoading: false,
           error: 'User not found',
         );
         return false;
+      }
+
+      // Try to load user from SQLite database (more complete data)
+      final db = DatabaseHelper.instance;
+      final dbUser = await db.getUser();
+      
+      // If SQLite has user data, use it (it might have more updated XP/level)
+      if (dbUser != null && dbUser.email == email) {
+        user = dbUser;
+        // Sync to Hive
+        await AuthStorage.updateUser(user);
+      } else {
+        // If no SQLite user, create one from Hive data
+        await db.insertUser(user);
       }
 
       // Login user
@@ -136,16 +158,38 @@ class AuthNotifier extends Notifier<AuthState> {
         level: 1,
       );
 
-      // Register user
+      // Register user in Hive (this also logs them in via AuthStorage.register)
       await AuthStorage.register(user, password);
+      
+      // Also save to SQLite database
+      try {
+        final db = DatabaseHelper.instance;
+        await db.insertUser(user);
+      } catch (e) {
+        // If SQLite insert fails, continue anyway (Hive has the data)
+        debugPrint('Warning: Could not save user to SQLite: $e');
+      }
 
-      state = AuthState(
-        isAuthenticated: true,
-        user: user,
-        isLoading: false,
-      );
-
-      return true;
+      // Verify login was successful and get user from storage
+      final isLoggedIn = AuthStorage.isLoggedIn();
+      final loggedInUser = AuthStorage.getCurrentUser();
+      
+      if (isLoggedIn && loggedInUser != null) {
+        state = AuthState(
+          isAuthenticated: true,
+          user: loggedInUser,
+          isLoading: false,
+        );
+        return true;
+      } else {
+        // Fallback: set state manually
+        state = AuthState(
+          isAuthenticated: true,
+          user: user,
+          isLoading: false,
+        );
+        return true;
+      }
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -160,6 +204,13 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true);
 
     try {
+      // Clear user-specific data from database
+      final userEmail = state.user?.email;
+      if (userEmail != null) {
+        final db = DatabaseHelper.instance;
+        await db.clearUserData(userEmail);
+      }
+      
       await AuthStorage.logout();
       state = AuthState(isLoading: false);
     } catch (e) {
@@ -173,7 +224,10 @@ class AuthNotifier extends Notifier<AuthState> {
   /// Update user profile
   Future<void> updateUser(UserModel user) async {
     try {
+      // Update in both Hive and SQLite
       await AuthStorage.updateUser(user);
+      final db = DatabaseHelper.instance;
+      await db.updateUser(user);
       state = state.copyWith(user: user);
     } catch (e) {
       state = state.copyWith(error: e.toString());

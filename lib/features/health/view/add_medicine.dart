@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/widgets/form_widgets.dart';
 import '../../../providers/reminders_provider.dart';
+import '../../../providers/home_data_provider.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../models/medicine_reminder_model.dart';
 
 class AddMedicinePage extends ConsumerStatefulWidget {
@@ -290,23 +292,41 @@ class _AddMedicinePageState extends ConsumerState<AddMedicinePage> {
 
                   final timeStr = '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}';
 
+                  final authState = ref.read(authProvider);
+                  final userEmail = authState.user?.email ?? '';
+                  
                   final reminder = MedicineReminderModel(
+                    userEmail: userEmail,
                     medicineName: nameCtrl.text.trim(),
                     dosage: doseCtrl.text.trim(),
                     daysOfWeek: daysOfWeek,
                     time: timeStr,
                   );
 
-                  await ref.read(remindersProvider.notifier).addReminder(reminder);
+                  try {
+                    await ref.read(remindersProvider.notifier).addReminder(reminder);
+                    
+                    // Refresh home data
+                    ref.read(homeDataProvider.notifier).refresh();
 
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Medicine reminder added successfully'),
-                        backgroundColor: Color(0xFF4CAF50),
-                      ),
-                    );
-                    Navigator.pop(context);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Medicine reminder added successfully'),
+                          backgroundColor: Color(0xFF4CAF50),
+                        ),
+                      );
+                      Navigator.pop(context);
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error adding medicine: ${e.toString()}'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(

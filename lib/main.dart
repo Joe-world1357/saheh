@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+<<<<<<< HEAD
 <<<<<<< HEAD
 import 'core/theme/app_colors.dart';
 import 'features/auth/view/login_screen.dart';
@@ -9,6 +11,10 @@ import 'features/home/view/guest_navbar.dart';
 
 void main() {
 =======
+=======
+import 'dart:io' show Platform;
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+>>>>>>> ae69bd0 (Initial commit)
 import 'core/theme/app_theme.dart';
 import 'core/storage/auth_storage.dart';
 import 'providers/theme_provider.dart';
@@ -18,14 +24,32 @@ import 'features/auth/view/register_screen.dart';
 import 'features/auth/view/splash_screen.dart';
 import 'features/auth/view/welcome_screen.dart';
 import 'features/home/view/guest_navbar.dart';
+// import 'database/database_test.dart'; // Uncomment to test database
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // Initialize sqflite for Linux/Desktop platforms
+  if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+  
   // Initialize Hive for local storage
   await AuthStorage.init();
   
+<<<<<<< HEAD
 >>>>>>> 11527b2 (Initial commit)
+=======
+  // Optional: Test database connection
+  // Uncomment to test database on startup:
+  // try {
+  //   await DatabaseTest.testDatabase();
+  // } catch (e) {
+  //   debugPrint('Database initialization warning: $e');
+  // }
+  
+>>>>>>> ae69bd0 (Initial commit)
   runApp(
     const ProviderScope(
       child: MyApp(),

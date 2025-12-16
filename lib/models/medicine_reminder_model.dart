@@ -1,5 +1,6 @@
 class MedicineReminderModel {
   final int? id;
+  final String userEmail; // User isolation
   final String medicineName;
   final String dosage;
   final List<int> daysOfWeek; // 0=Sunday, 1=Monday, etc.
@@ -10,6 +11,7 @@ class MedicineReminderModel {
 
   MedicineReminderModel({
     this.id,
+    required this.userEmail,
     required this.medicineName,
     required this.dosage,
     required this.daysOfWeek,
@@ -22,6 +24,7 @@ class MedicineReminderModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'user_email': userEmail,
       'medicine_name': medicineName,
       'dosage': dosage,
       'days_of_week': daysOfWeek.join(','),
@@ -35,6 +38,7 @@ class MedicineReminderModel {
   factory MedicineReminderModel.fromMap(Map<String, dynamic> map) {
     return MedicineReminderModel(
       id: map['id'] as int?,
+      userEmail: map['user_email'] as String? ?? '',
       medicineName: map['medicine_name'] as String,
       dosage: map['dosage'] as String,
       daysOfWeek: (map['days_of_week'] as String)

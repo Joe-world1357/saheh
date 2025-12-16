@@ -169,12 +169,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     if (mounted) {
       if (success) {
-        // Navigate to main app
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const GuestNavbar()),
-          (route) => false,
-        );
+        // Registration successful - user should be logged in automatically
+        // Wait a moment for state to propagate
+        await Future.delayed(const Duration(milliseconds: 300));
+        
+        // Check auth state again
+        final authState = ref.read(authProvider);
+        if (authState.isAuthenticated && authState.user != null) {
+          // Navigate to main app
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const GuestNavbar()),
+            (route) => false,
+          );
+        } else {
+          // Fallback: navigate to login with success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Registration successful! Please login.'),
+              backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+          );
+        }
       } else {
         // Show error message
         final error = ref.read(authProvider).error;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../health/view/reminder_screen.dart';
 <<<<<<< HEAD
 =======
@@ -11,770 +12,624 @@ import '../../fitness/view/workout_library.dart';
 import '../../nutrition/view/nutrition_screen.dart';
 import '../../fitness/view/xp_system.dart';
 import '../../../shared/widgets/common_widgets.dart';
+import '../../../providers/home_data_provider.dart';
 import '../../services/view/clinic/clinic_dashboard.dart';
 import 'notifications_screen.dart';
 import 'view_suggestions_screen.dart';
+import 'package:intl/intl.dart';
 
-class HomeScreen
-    extends
-        StatelessWidget {
-  const HomeScreen({
-    super.key,
-  });
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
-    const primary = Color(
-      0xFF20C6B7,
-    );
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Refresh home data when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(homeDataProvider.notifier).refresh();
+    });
+  }
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final homeData = ref.watch(homeDataProvider);
 
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFF5FAFA,
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // TOP BAR --------------------------------------------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(
-                        8,
+        child: RefreshIndicator(
+          onRefresh: () => ref.read(homeDataProvider.notifier).refresh(),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // TOP BAR
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: primary,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.health_and_safety,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
+                      const SizedBox(width: 10),
+                      Text(
+                        "Sehati",
+                        style: theme.textTheme.titleLarge,
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.notifications_outlined),
+                        color: theme.colorScheme.onSurface,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // GREETING CARD
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const XPSystem(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: primary,
-                        borderRadius: BorderRadius.circular(
-                          10,
+                        gradient: LinearGradient(
+                          colors: [
+                            primary,
+                            primary.withValues(alpha: 0.8),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Icon(
-                        Icons.health_and_safety,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    const Text(
-                      "Sehati",
-                      style: TextStyle(
-                        color: Color(
-                          0xFF1A2A2C,
-                        ),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.notifications_outlined,
-                        color: Color(
-                          0xFF1A2A2C,
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const NotificationsScreen(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  "${_getGreeting()}, ${homeData.userName}!",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const Icon(
+                                Icons.emoji_events,
+                                color: Color(0xFFFFC107),
+                                size: 28,
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(
-                height: 10,
-              ),
-
-              // GREETING CARD --------------------------------------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (
-                              _,
-                            ) => const XPSystem(),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(
-                      20,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(
-                            0xFF20C6B7,
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Text(
+                                "Level ${homeData.userLevel}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Text(
+                                "•",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                "${homeData.userXP}/${homeData.userLevel * 100} XP",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
                           ),
-                          Color(
-                            0xFF17A89A,
+                          const SizedBox(height: 12),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: homeData.userLevel * 100 > 0
+                                  ? homeData.userXP / (homeData.userLevel * 100)
+                                  : 0,
+                              minHeight: 8,
+                              backgroundColor: Colors.white.withValues(alpha: 0.3),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
                           ),
                         ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(
-                        16,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // QUICK ACTIONS
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      HomeQuickAction(
+                        icon: Icons.medical_services_outlined,
+                        label: "Medicines",
+                        color: primary,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ReminderScreen(),
+                            ),
+                          );
+                        },
                       ),
+                      HomeQuickAction(
+                        icon: Icons.restaurant_outlined,
+                        label: "Nutrition",
+                        color: const Color(0xFF9C27B0),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NutritionScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      HomeQuickAction(
+                        icon: Icons.fitness_center_outlined,
+                        label: "Workout",
+                        color: const Color(0xFFFF5722),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const WorkoutLibrary(),
+                            ),
+                          );
+                        },
+                      ),
+                      HomeQuickAction(
+                        icon: Icons.calendar_today_outlined,
+                        label: "Book",
+                        color: const Color(0xFFFFC107),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ClinicDashboard(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // TODAY'S SUMMARY TITLE
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    "Today's Summary",
+                    style: theme.textTheme.titleLarge,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // DAILY OVERVIEW CARD
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: theme.dividerColor),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          children: const [
-                            Expanded(
-                              child: Text(
-                                "Good Morning, John!",
+                          children: [
+                            Text(
+                              "Daily Overview",
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            const Spacer(),
+                            Icon(
+                              Icons.show_chart,
+                              color: primary,
+                              size: 20,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Text(
+                              "${homeData.caloriesConsumed.toInt()}/${homeData.caloriesGoal.toInt()} kcal",
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              "${homeData.totalSteps} steps",
+                              style: const TextStyle(
+                                color: Color(0xFF9C27B0),
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              homeData.sleepHours != null
+                                  ? "${homeData.sleepHours!.toStringAsFixed(1)}h sleep"
+                                  : "No sleep data",
+                              style: const TextStyle(
+                                color: Color(0xFFFF5722),
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Calories • Steps • Sleep",
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // MEDICINE REMINDERS CARD
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: theme.dividerColor),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              "Medicine Reminders",
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFC107)
+                                    .withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.medication,
+                                color: Color(0xFFFFC107),
+                                size: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "${homeData.pendingReminders} pending ${homeData.pendingReminders == 1 ? 'reminder' : 'reminders'}",
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        if (homeData.nextReminder != null) ...[
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Text(
+                                "Next: ${homeData.nextReminder} ${homeData.nextReminderTime ?? ''}",
+                                style: theme.textTheme.bodyLarge,
+                              ),
+                              const Spacer(),
+                              const Text(
+                                "Due soon",
                                 style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
+                                  color: Color(0xFFFF9800),
+                                  fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
-                            Icon(
-                              Icons.emoji_events,
-                              color: Color(
-                                0xFFFFC107,
-                              ),
-                              size: 28,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        Row(
-                          children: const [
-                            Text(
-                              "Level 10",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Text(
-                              "•",
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Text(
-                              "2,450/3,000 XP",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 12,
-                        ),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                            10,
+                            ],
                           ),
-                          child: LinearProgressIndicator(
-                            value:
-                                2450 /
-                                3000,
-                            minHeight: 8,
-                            backgroundColor: Colors.white.withOpacity(
-                              0.3,
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // NUTRITION PROGRESS CARD
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: theme.dividerColor),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              "Nutrition Progress",
+                              style: theme.textTheme.titleMedium,
                             ),
-                            valueColor:
-                                const AlwaysStoppedAnimation<
-                                  Color
-                                >(
-                                  Colors.white,
-                                ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4CAF50)
+                                    .withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.restaurant,
+                                color: Color(0xFF4CAF50),
+                                size: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "${((homeData.caloriesConsumed / homeData.caloriesGoal) * 100).toStringAsFixed(0)}% of daily goal",
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 12),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: LinearProgressIndicator(
+                            value: homeData.caloriesGoal > 0
+                                ? homeData.caloriesConsumed / homeData.caloriesGoal
+                                : 0,
+                            minHeight: 8,
+                            backgroundColor: Colors.grey.shade200,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              Color(0xFF4CAF50),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(
-                height: 24,
-              ),
+                const SizedBox(height: 12),
 
-              // QUICK ACTIONS --------------------------------------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    HomeQuickAction(
-                      icon: Icons.medical_services_outlined,
-                      label: "Medicines",
-                      color: primary,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (
-                                  _,
-                                ) => const ReminderScreen(),
-                          ),
-                        );
-                      },
+                // TODAY'S WORKOUT CARD
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: theme.dividerColor),
                     ),
-                    HomeQuickAction(
-                      icon: Icons.restaurant_outlined,
-                      label: "Nutrition",
-                      color: const Color(
-                        0xFF9C27B0,
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (
-                                  _,
-                                ) => const NutritionScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    HomeQuickAction(
-                      icon: Icons.fitness_center_outlined,
-                      label: "Workout",
-                      color: const Color(
-                        0xFFFF5722,
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (
-                                  _,
-                                ) => const WorkoutLibrary(),
-                          ),
-                        );
-                      },
-                    ),
-                    HomeQuickAction(
-                      icon: Icons.calendar_today_outlined,
-                      label: "Book",
-                      color: const Color(
-                        0xFFFFC107,
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (
-                                  context,
-                                ) => const ClinicDashboard(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(
-                height: 24,
-              ),
-
-              // TODAY'S SUMMARY TITLE ------------------------------------------
-              const Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: Text(
-                  "Today's Summary",
-                  style: TextStyle(
-                    color: Color(
-                      0xFF1A2A2C,
-                    ),
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-
-              const SizedBox(
-                height: 16,
-              ),
-
-              // DAILY OVERVIEW CARD --------------------------------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(
-                    16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(
-                      16,
-                    ),
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: const [
-                          Text(
-                            "Daily Overview",
-                            style: TextStyle(
-                              color: Color(
-                                0xFF1A2A2C,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              "Today's Workout",
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF9C27B0)
+                                    .withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Spacer(),
-                          Icon(
-                            Icons.show_chart,
-                            color: Color(
-                              0xFF20C6B7,
-                            ),
-                            size: 20,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 12,
-                      ),
-                      Row(
-                        children: const [
-                          Text(
-                            "1,450/2,000 kcal",
-                            style: TextStyle(
-                              color: Color(
-                                0xFF20C6B7,
+                              child: const Icon(
+                                Icons.fitness_center,
+                                color: Color(0xFF9C27B0),
+                                size: 18,
                               ),
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
                             ),
-                          ),
-                          SizedBox(
-                            width: 16,
-                          ),
-                          Text(
-                            "7,234 steps",
-                            style: TextStyle(
-                              color: Color(
-                                0xFF9C27B0,
-                              ),
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(
-                            width: 16,
-                          ),
-                          Text(
-                            "7h 30m sleep",
-                            style: TextStyle(
-                              color: Color(
-                                0xFFFF5722,
-                              ),
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                      const Text(
-                        "Calories • Steps • Sleep",
-                        style: TextStyle(
-                          color: Color(
-                            0xFF687779,
-                          ),
-                          fontSize: 12,
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(
-                height: 12,
-              ),
-
-              // MEDICINE REMINDERS CARD ----------------------------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(
-                    16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(
-                      16,
-                    ),
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Text(
-                            "Medicine Reminders",
-                            style: TextStyle(
-                              color: Color(
-                                0xFF1A2A2C,
-                              ),
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.all(
-                              6,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  const Color(
-                                    0xFFFFC107,
-                                  ).withOpacity(
-                                    0.2,
-                                  ),
-                              borderRadius: BorderRadius.circular(
-                                8,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.medication,
-                              color: Color(
-                                0xFFFFC107,
-                              ),
-                              size: 18,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 8,
-                      ),
-                      const Text(
-                        "3 pending reminders",
-                        style: TextStyle(
-                          color: Color(
-                            0xFF687779,
-                          ),
-                          fontSize: 13,
+                        const SizedBox(height: 8),
+                        Text(
+                          homeData.todaysWorkout != null
+                              ? "${homeData.todaysWorkout!.name} • ${homeData.todaysWorkout!.duration} min"
+                              : "No workout today",
+                          style: theme.textTheme.bodyMedium,
                         ),
-                      ),
-                      const SizedBox(
-                        height: 12,
-                      ),
-                      Row(
-                        children: const [
-                          Text(
-                            "Next: Aspirin 9:00 AM",
-                            style: TextStyle(
-                              color: Color(
-                                0xFF1A2A2C,
+                        if (homeData.todaysWorkout == null) ...[
+                          const SizedBox(height: 14),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const WorkoutLibrary(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF9C27B0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              fontSize: 14,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
-                          ),
-                          Spacer(),
-                          Text(
-                            "Due soon",
-                            style: TextStyle(
-                              color: Color(
-                                0xFFFF9800,
-                              ),
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(
-                height: 12,
-              ),
-
-              // NUTRITION PROGRESS CARD ----------------------------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(
-                    16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(
-                      16,
-                    ),
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Text(
-                            "Nutrition Progress",
-                            style: TextStyle(
-                              color: Color(
-                                0xFF1A2A2C,
-                              ),
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.all(
-                              6,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  const Color(
-                                    0xFF4CAF50,
-                                  ).withOpacity(
-                                    0.2,
-                                  ),
-                              borderRadius: BorderRadius.circular(
-                                8,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.restaurant,
-                              color: Color(
-                                0xFF4CAF50,
-                              ),
-                              size: 18,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 8,
-                      ),
-                      const Text(
-                        "73% of daily goal",
-                        style: TextStyle(
-                          color: Color(
-                            0xFF687779,
-                          ),
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 12,
-                      ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(
-                          10,
-                        ),
-                        child: LinearProgressIndicator(
-                          value: 0.73,
-                          minHeight: 8,
-                          backgroundColor: Colors.grey.shade200,
-                          valueColor:
-                              const AlwaysStoppedAnimation<
-                                Color
-                              >(
-                                Color(
-                                  0xFF4CAF50,
+                            child: const Center(
+                              child: Text(
+                                "Start Workout",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(
-                height: 12,
-              ),
-
-              // TODAY'S WORKOUT CARD -------------------------------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(
-                    16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(
-                      16,
-                    ),
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Text(
-                            "Today's Workout",
-                            style: TextStyle(
-                              color: Color(
-                                0xFF1A2A2C,
-                              ),
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.all(
-                              6,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  const Color(
-                                    0xFF9C27B0,
-                                  ).withOpacity(
-                                    0.2,
-                                  ),
-                              borderRadius: BorderRadius.circular(
-                                8,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.fitness_center,
-                              color: Color(
-                                0xFF9C27B0,
-                              ),
-                              size: 18,
                             ),
                           ),
                         ],
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // AI HEALTH INSIGHT CARD
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE3F2FD),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFF2196F3)
+                            .withValues(alpha: 0.3),
                       ),
-                      const SizedBox(
-                        height: 8,
-                      ),
-                      const Text(
-                        "Full Body Strength • 45 min",
-                        style: TextStyle(
-                          color: Color(
-                            0xFF687779,
-                          ),
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 14,
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (
-                                    _,
-                                  ) => const WorkoutLibrary(),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF2196F3),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.psychology,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(
-                            0xFF9C27B0,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              12,
+                            const SizedBox(width: 10),
+                            Text(
+                              "AI Health Insight",
+                              style: theme.textTheme.titleMedium,
                             ),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          homeData.proteinConsumed < 50
+                              ? "Your protein intake is ${(50 - homeData.proteinConsumed).toStringAsFixed(0)}g below target. Consider adding lean meats or protein shakes to your next meal."
+                              : "Great job on your nutrition today! Keep up the healthy eating habits.",
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            height: 1.5,
                           ),
                         ),
-                        child: const Center(
+                        const SizedBox(height: 12),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ViewSuggestionsScreen(),
+                              ),
+                            );
+                          },
                           child: Text(
-                            "Start Workout",
+                            "View Suggestions",
                             style: TextStyle(
-                              color: Colors.white,
+                              color: primary,
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              const SizedBox(
-                height: 12,
-              ),
+                const SizedBox(height: 24),
 
-              // AI HEALTH INSIGHT CARD -----------------------------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
+                // HEALTH TRACKING SECTION
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    "Health Tracking",
+                    style: theme.textTheme.titleLarge,
+                  ),
                 ),
+<<<<<<< HEAD
                 child: Container(
                   padding: const EdgeInsets.all(
                     16,
@@ -817,88 +672,109 @@ class HomeScreen
                               color: Color(
 >>>>>>> 11527b2 (Initial commit)
                                 0xFF2196F3,
+=======
+
+                const SizedBox(height: 16),
+
+                // HEALTH TRACKING CARDS
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildHealthTrackingCard(
+                          context,
+                          icon: Icons.bedtime,
+                          label: "Sleep",
+                          value: homeData.sleepHours != null
+                              ? "${homeData.sleepHours!.toStringAsFixed(1)}h"
+                              : "Not logged",
+                          color: const Color(0xFF6C5CE7),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SleepTrackerScreen(),
+>>>>>>> ae69bd0 (Initial commit)
                               ),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.psychology,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          const Text(
-                            "AI Health Insight",
-                            style: TextStyle(
-                              color: Color(
-                                0xFF1A2A2C,
-                              ),
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 12,
-                      ),
-                      const Text(
-                        "Your protein intake is 25g below target. Consider adding lean meats or protein shakes to your next meal.",
-                        style: TextStyle(
-                          color: Color(
-                            0xFF1A2A2C,
-                          ),
-                          fontSize: 14,
-                          height: 1.5,
+                            );
+                          },
                         ),
                       ),
-                      const SizedBox(
-                        height: 12,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ViewSuggestionsScreen(),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          "View Suggestions",
-                          style: TextStyle(
-                            color: Color(
-                              0xFF2196F3,
-                            ),
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildHealthTrackingCard(
+                          context,
+                          icon: Icons.water_drop,
+                          label: "Water",
+                          value: "${(homeData.waterIntake / 1000).toStringAsFixed(1)}L / ${(homeData.waterGoal / 1000).toStringAsFixed(1)}L",
+                          color: const Color(0xFF2196F3),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const WaterIntakeScreen(),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
               const SizedBox(height: 24),
+=======
+                const SizedBox(height: 12),
+>>>>>>> ae69bd0 (Initial commit)
 
-              // HEALTH TRACKING SECTION ------------------------------------------
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  "Health Tracking",
-                  style: TextStyle(
-                    color: Color(0xFF1A2A2C),
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildHealthTrackingCard(
+                          context,
+                          icon: Icons.flag,
+                          label: "Goals",
+                          value: "${homeData.activeGoals} active",
+                          color: const Color(0xFF4CAF50),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const HealthGoalsScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildHealthTrackingCard(
+                          context,
+                          icon: Icons.analytics,
+                          label: "Reports",
+                          value: "View all",
+                          color: const Color(0xFFFF9800),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const HealthReportsScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
 
+<<<<<<< HEAD
               const SizedBox(height: 16),
 
               // HEALTH TRACKING CARDS
@@ -995,6 +871,11 @@ class HomeScreen
                 height: 30,
               ),
             ],
+=======
+                const SizedBox(height: 30),
+              ],
+            ),
+>>>>>>> ae69bd0 (Initial commit)
           ),
         ),
       ),
@@ -1011,14 +892,15 @@ class HomeScreen
     required Color color,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: theme.dividerColor),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1034,19 +916,12 @@ class HomeScreen
             const SizedBox(height: 12),
             Text(
               label,
-              style: const TextStyle(
-                color: Color(0xFF687779),
-                fontSize: 14,
-              ),
+              style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 4),
             Text(
               value,
-              style: const TextStyle(
-                color: Color(0xFF1A2A2C),
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: theme.textTheme.titleSmall,
             ),
           ],
         ),

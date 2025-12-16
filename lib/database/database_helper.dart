@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 import '../models/user_model.dart';
 import '../models/order_model.dart';
 import '../models/medicine_reminder_model.dart';
+import '../models/medicine_intake_model.dart';
 import '../models/meal_model.dart';
 import '../models/workout_model.dart';
 import '../models/appointment_model.dart';
@@ -27,8 +28,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 3, // Incremented for user isolation
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
@@ -73,6 +75,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE medicine_reminders (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
         medicine_name TEXT NOT NULL,
         dosage TEXT NOT NULL,
         days_of_week TEXT NOT NULL,
@@ -80,6 +83,20 @@ class DatabaseHelper {
         is_active INTEGER DEFAULT 1,
         created_at TEXT NOT NULL,
         updated_at TEXT
+      )
+    ''');
+
+    // Medicine intake table
+    await db.execute('''
+      CREATE TABLE medicine_intake (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
+        medicine_name TEXT NOT NULL,
+        dosage TEXT NOT NULL,
+        intake_date TEXT NOT NULL,
+        intake_time TEXT NOT NULL,
+        is_taken INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL
       )
     ''');
 
@@ -225,15 +242,120 @@ class DatabaseHelper {
     return await db.insert('medicine_reminders', reminder.toMap());
   }
 
-  Future<List<MedicineReminderModel>> getAllMedicineReminders() async {
+  Future<List<MedicineReminderModel>> getAllMedicineReminders({String? userEmail}) async {
     final db = await database;
-    final maps = await db.query('medicine_reminders', orderBy: 'time ASC');
+    List<Map<String, dynamic>> maps;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      maps = await db.query(
+        'medicine_reminders',
+        where: 'user_email = ?',
+        whereArgs: [userEmail],
+        orderBy: 'time ASC',
+      );
+    } else {
+      maps = await db.query('medicine_reminders', orderBy: 'time ASC');
+    }
     return maps.map((map) => MedicineReminderModel.fromMap(map)).toList();
   }
 
-  Future<int> deleteMedicineReminder(int id) async {
+  Future<int> deleteMedicineReminder(int id, {String? userEmail}) async {
     final db = await database;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      return await db.delete(
+        'medicine_reminders',
+        where: 'id = ? AND user_email = ?',
+        whereArgs: [id, userEmail],
+      );
+    }
     return await db.delete('medicine_reminders', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // Medicine intake operations
+  Future<int> insertMedicineIntake(MedicineIntakeModel intake) async {
+    final db = await database;
+    return await db.insert('medicine_intake', intake.toMap());
+  }
+
+  Future<List<MedicineIntakeModel>> getMedicineIntakesByDate(DateTime date, {String? userEmail}) async {
+    final db = await database;
+    final dateStr = date.toIso8601String().split('T')[0];
+    List<Map<String, dynamic>> maps;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      maps = await db.query(
+        'medicine_intake',
+        where: "DATE(intake_date) = ? AND user_email = ?",
+        whereArgs: [dateStr, userEmail],
+        orderBy: 'intake_time ASC',
+      );
+    } else {
+      maps = await db.query(
+        'medicine_intake',
+        where: "DATE(intake_date) = ?",
+        whereArgs: [dateStr],
+        orderBy: 'intake_time ASC',
+      );
+    }
+    return maps.map((map) => MedicineIntakeModel.fromMap(map)).toList();
+  }
+
+  Future<int> updateMedicineIntake(MedicineIntakeModel intake) async {
+    final db = await database;
+    if (intake.id == null) return 0;
+    return await db.update(
+      'medicine_intake',
+      intake.toMap(),
+      where: 'id = ? AND user_email = ?',
+      whereArgs: [intake.id, intake.userEmail],
+    );
+  }
+
+  Future<int> deleteMedicineIntake(int id, String userEmail) async {
+    final db = await database;
+    return await db.delete(
+      'medicine_intake',
+      where: 'id = ? AND user_email = ?',
+      whereArgs: [id, userEmail],
+    );
+  }
+
+  Future<int> getTakenCountForDate(DateTime date, {String? userEmail}) async {
+    final db = await database;
+    final dateStr = date.toIso8601String().split('T')[0];
+    String query;
+    List<dynamic> args;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      query = 'SELECT COUNT(*) as count FROM medicine_intake WHERE DATE(intake_date) = ? AND is_taken = 1 AND user_email = ?';
+      args = [dateStr, userEmail];
+    } else {
+      query = 'SELECT COUNT(*) as count FROM medicine_intake WHERE DATE(intake_date) = ? AND is_taken = 1';
+      args = [dateStr];
+    }
+    final result = await db.rawQuery(query, args);
+    return result.first['count'] as int? ?? 0;
+  }
+
+  Future<int> getTotalCountForDate(DateTime date, {String? userEmail}) async {
+    final db = await database;
+    final dateStr = date.toIso8601String().split('T')[0];
+    String query;
+    List<dynamic> args;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      query = 'SELECT COUNT(*) as count FROM medicine_intake WHERE DATE(intake_date) = ? AND user_email = ?';
+      args = [dateStr, userEmail];
+    } else {
+      query = 'SELECT COUNT(*) as count FROM medicine_intake WHERE DATE(intake_date) = ?';
+      args = [dateStr];
+    }
+    final result = await db.rawQuery(query, args);
+    return result.first['count'] as int? ?? 0;
+  }
+
+  // Clear all user-specific data on logout
+  Future<void> clearUserData(String userEmail) async {
+    final db = await database;
+    await db.delete('medicine_reminders', where: 'user_email = ?', whereArgs: [userEmail]);
+    await db.delete('medicine_intake', where: 'user_email = ?', whereArgs: [userEmail]);
+    // Add other user-specific tables here as needed
   }
 
   // Meal operations
@@ -332,6 +454,43 @@ class DatabaseHelper {
   Future<int> deleteHealthGoal(int id) async {
     final db = await database;
     return await db.delete('health_goals', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add medicine_intake table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS medicine_intake (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          medicine_name TEXT NOT NULL,
+          dosage TEXT NOT NULL,
+          intake_date TEXT NOT NULL,
+          intake_time TEXT NOT NULL,
+          is_taken INTEGER DEFAULT 0,
+          created_at TEXT NOT NULL
+        )
+      ''');
+    }
+    
+    if (oldVersion < 3) {
+      // Add user_email column to medicine_reminders
+      try {
+        await db.execute('ALTER TABLE medicine_reminders ADD COLUMN user_email TEXT');
+        // Set default user_email for existing records (will be cleared on logout)
+        await db.execute("UPDATE medicine_reminders SET user_email = '' WHERE user_email IS NULL");
+      } catch (e) {
+        // Column might already exist, ignore
+      }
+      
+      // Add user_email column to medicine_intake
+      try {
+        await db.execute('ALTER TABLE medicine_intake ADD COLUMN user_email TEXT');
+        // Set default user_email for existing records (will be cleared on logout)
+        await db.execute("UPDATE medicine_intake SET user_email = '' WHERE user_email IS NULL");
+      } catch (e) {
+        // Column might already exist, ignore
+      }
+    }
   }
 
   Future<void> close() async {
