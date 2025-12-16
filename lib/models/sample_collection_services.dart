@@ -11,16 +11,28 @@ class SampleCollectionService {
     this.description,
   });
 
+  // 🔒 SAFE fromMap
   factory SampleCollectionService.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return SampleCollectionService(
       id: id,
-      name: data['name'],
-      description: data['description'],
-      price: data['price']?.toDouble(),
+
+      // required text
+      name: map['name'] as String? ?? '',
+
+      // money-safe
+      price: (map['price'] as num?)?.toDouble() ?? 0.0,
+
+      // optional text
+      description: map['description'] as String?,
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'name': name,
