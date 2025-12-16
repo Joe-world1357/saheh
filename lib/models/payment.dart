@@ -15,18 +15,37 @@ class Payment {
     required this.date,
   });
 
+  // 🔒 SAFE fromMap
   factory Payment.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return Payment(
       id: id,
-      userId: data['user_id'],
-      amount: data['amount']?.toDouble(),
-      method: data['method'],
-      status: data['status'],
-      date: DateTime.parse(data['date']),
+
+      // required FK
+      userId: map['user_id'] as String? ?? '',
+
+      // money-safe number
+      amount: (map['amount'] as num?)?.toDouble() ?? 0.0,
+
+      // required text
+      method: map['method'] as String? ?? '',
+      status: map['status'] as String? ?? 'pending',
+
+      // Firestore / offline safe date
+      date: map['date'] != null
+          ? DateTime.tryParse(
+                map['date'].toString(),
+              ) ??
+              DateTime.now()
+          : DateTime.now(),
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'user_id': userId,
