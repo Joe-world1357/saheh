@@ -17,19 +17,33 @@ class PharmacyProduct {
     this.imageUrl,
   });
 
+  // 🔒 SAFE fromMap
   factory PharmacyProduct.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return PharmacyProduct(
       id: id,
-      name: data['name'],
-      description: data['description'],
-      category: data['category'],
-      price: data['price']?.toDouble(),
-      stock: data['stock'],
-      imageUrl: data['image_url'],
+
+      // required text
+      name: map['name'] as String? ?? '',
+      category: map['category'] as String? ?? '',
+
+      // money-safe
+      price: (map['price'] as num?)?.toDouble() ?? 0.0,
+
+      // stock-safe
+      stock: (map['stock'] as num?)?.toInt() ?? 0,
+
+      // optional text
+      description: map['description'] as String?,
+      imageUrl: map['image_url'] as String?,
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'name': name,
