@@ -15,17 +15,33 @@ class Doctor {
     this.rating,
   });
 
-  factory Doctor.fromMap(Map<String, dynamic> data, String id) {
+  // 🔒 SAFE fromMap
+  factory Doctor.fromMap(
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return Doctor(
       id: id,
-      clinicId: data['clinic_id'],
-      name: data['name'],
-      specialty: data['specialty'],
-      yearsExperience: data['years_experience'],
-      rating: data['rating']?.toDouble(),
+
+      // required FK
+      clinicId: map['clinic_id'] as String? ?? '',
+
+      // required text
+      name: map['name'] as String? ?? '',
+      specialty: map['specialty'] as String? ?? '',
+
+      // required int
+      yearsExperience:
+          (map['years_experience'] as num?)?.toInt() ?? 0,
+
+      // optional rating
+      rating: (map['rating'] as num?)?.toDouble(),
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'clinic_id': clinicId,
