@@ -13,18 +13,34 @@ class SampleCollectionRequest {
     required this.status,
   });
 
+  // 🔒 SAFE fromMap
   factory SampleCollectionRequest.fromMap(
-      Map<String, dynamic> data, String id) {
+    Map<String, dynamic>? data,
+    String id,
+  ) {
+    final map = data ?? {};
+
     return SampleCollectionRequest(
       id: id,
-      userId: data['user_id'],
-      serviceId: data['service_id'],
-      requestDate:
-          DateTime.parse(data['request_date']),
-      status: data['status'],
+
+      // required FKs
+      userId: map['user_id'] as String? ?? '',
+      serviceId: map['service_id'] as String? ?? '',
+
+      // Firestore / offline safe date
+      requestDate: map['request_date'] != null
+          ? DateTime.tryParse(
+                map['request_date'].toString(),
+              ) ??
+              DateTime.now()
+          : DateTime.now(),
+
+      // lifecycle-safe status
+      status: map['status'] as String? ?? 'pending',
     );
   }
 
+  // 🧼 CLEAN toMap
   Map<String, dynamic> toMap() {
     return {
       'user_id': userId,
