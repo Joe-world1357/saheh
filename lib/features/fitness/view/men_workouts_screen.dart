@@ -33,7 +33,7 @@ class _MenWorkoutsScreenState extends ConsumerState<MenWorkoutsScreen> with Sing
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: AppColors.getBackground(Theme.of(context).brightness),
       appBar: AppBar(
         title: const Text('Men\'s Workouts', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
