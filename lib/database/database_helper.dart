@@ -30,7 +30,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 7, // Added fitness_preferences table
+      version: 8, // Added user_settings table
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -238,6 +238,18 @@ class DatabaseHelper {
         activity_level TEXT DEFAULT 'moderate',
         onboarding_completed INTEGER DEFAULT 0,
         created_at TEXT NOT NULL
+      )
+    ''');
+
+    // User settings table (for water goal, etc.)
+    await db.execute('''
+      CREATE TABLE user_settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
+        setting_key TEXT NOT NULL,
+        setting_value TEXT,
+        updated_at TEXT,
+        UNIQUE(user_email, setting_key)
       )
     ''');
   }
@@ -540,10 +552,34 @@ class DatabaseHelper {
     return maps.map((map) => AppointmentModel.fromMap(map)).toList();
   }
 
-  // Sleep tracking operations
+  // ========== SLEEP TRACKING OPERATIONS ==========
+
   Future<int> insertSleepTracking(SleepTrackingModel sleep) async {
     final db = await database;
     return await db.insert('sleep_tracking', sleep.toMap());
+  }
+
+  Future<int> insertOrUpdateSleep(SleepTrackingModel sleep) async {
+    final db = await database;
+    final dateStr = sleep.date.toIso8601String().split('T')[0];
+    
+    // Check if exists
+    final existing = await db.query(
+      'sleep_tracking',
+      where: 'DATE(date) = ? AND user_email = ?',
+      whereArgs: [dateStr, sleep.userEmail],
+    );
+    
+    if (existing.isNotEmpty) {
+      return await db.update(
+        'sleep_tracking',
+        sleep.toMap(),
+        where: 'DATE(date) = ? AND user_email = ?',
+        whereArgs: [dateStr, sleep.userEmail],
+      );
+    } else {
+      return await db.insert('sleep_tracking', sleep.toMap());
+    }
   }
 
   Future<SleepTrackingModel?> getSleepByDate(DateTime date, {String? userEmail}) async {
@@ -569,7 +605,20 @@ class DatabaseHelper {
     return SleepTrackingModel.fromMap(maps.first);
   }
 
-  // Water intake operations
+  Future<List<SleepTrackingModel>> getSleepHistory(String userEmail, int days) async {
+    final db = await database;
+    final startDate = DateTime.now().subtract(Duration(days: days));
+    final maps = await db.query(
+      'sleep_tracking',
+      where: 'user_email = ? AND date >= ?',
+      whereArgs: [userEmail, startDate.toIso8601String()],
+      orderBy: 'date DESC',
+    );
+    return maps.map((map) => SleepTrackingModel.fromMap(map)).toList();
+  }
+
+  // ========== WATER INTAKE OPERATIONS ==========
+
   Future<int> insertWaterIntake(WaterIntakeModel water) async {
     final db = await database;
     return await db.insert('water_intake', water.toMap());
@@ -591,7 +640,60 @@ class DatabaseHelper {
     return result.first['total'] as int? ?? 0;
   }
 
-  // Health goals operations
+  Future<List<WaterIntakeModel>> getWaterIntakeByDate(DateTime date, {String? userEmail}) async {
+    final db = await database;
+    final dateStr = date.toIso8601String().split('T')[0];
+    List<Map<String, dynamic>> maps;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      maps = await db.query(
+        'water_intake',
+        where: 'DATE(date) = ? AND user_email = ?',
+        whereArgs: [dateStr, userEmail],
+        orderBy: 'created_at DESC',
+      );
+    } else {
+      maps = await db.query(
+        'water_intake',
+        where: 'DATE(date) = ?',
+        whereArgs: [dateStr],
+        orderBy: 'created_at DESC',
+      );
+    }
+    return maps.map((map) => WaterIntakeModel.fromMap(map)).toList();
+  }
+
+  Future<int> deleteWaterIntake(int id) async {
+    final db = await database;
+    return await db.delete('water_intake', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> getWaterGoal(String userEmail) async {
+    final db = await database;
+    final result = await db.query(
+      'user_settings',
+      where: 'user_email = ? AND setting_key = ?',
+      whereArgs: [userEmail, 'water_goal'],
+    );
+    if (result.isEmpty) return 2000; // Default goal
+    return int.tryParse(result.first['setting_value'] as String? ?? '2000') ?? 2000;
+  }
+
+  Future<void> setWaterGoal(String userEmail, int goal) async {
+    final db = await database;
+    await db.insert(
+      'user_settings',
+      {
+        'user_email': userEmail,
+        'setting_key': 'water_goal',
+        'setting_value': goal.toString(),
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // ========== HEALTH GOALS OPERATIONS ==========
+
   Future<int> insertHealthGoal(HealthGoalModel goal) async {
     final db = await database;
     return await db.insert('health_goals', goal.toMap());
@@ -611,6 +713,20 @@ class DatabaseHelper {
       maps = await db.query('health_goals', orderBy: 'created_at DESC');
     }
     return maps.map((map) => HealthGoalModel.fromMap(map)).toList();
+  }
+
+  Future<int> updateHealthGoalProgress(int id, double progress, String current, String userEmail) async {
+    final db = await database;
+    return await db.update(
+      'health_goals',
+      {
+        'progress': progress,
+        'current': current,
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ? AND user_email = ?',
+      whereArgs: [id, userEmail],
+    );
   }
 
   Future<int> deleteHealthGoal(int id, {String? userEmail}) async {
@@ -732,6 +848,20 @@ class DatabaseHelper {
           activity_level TEXT DEFAULT 'moderate',
           onboarding_completed INTEGER DEFAULT 0,
           created_at TEXT NOT NULL
+        )
+      ''');
+    }
+
+    if (oldVersion < 8) {
+      // Add user_settings table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS user_settings (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_email TEXT NOT NULL,
+          setting_key TEXT NOT NULL,
+          setting_value TEXT,
+          updated_at TEXT,
+          UNIQUE(user_email, setting_key)
         )
       ''');
     }
