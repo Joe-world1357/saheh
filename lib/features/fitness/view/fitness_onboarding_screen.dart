@@ -61,10 +61,14 @@ class _FitnessOnboardingScreenState extends ConsumerState<FitnessOnboardingScree
   Future<void> _completeOnboarding() async {
     final success = await ref.read(fitnessOnboardingProvider.notifier).completeOnboarding();
     if (success && mounted) {
-      if (widget.onComplete != null) {
-        widget.onComplete!();
-      } else {
-        Navigator.of(context).pop(true);
+      // Wait a moment to ensure database is fully updated
+      await Future.delayed(const Duration(milliseconds: 200));
+      if (mounted) {
+        if (widget.onComplete != null) {
+          widget.onComplete!();
+        } else {
+          Navigator.of(context).pop(true);
+        }
       }
     }
   }

@@ -42,23 +42,41 @@ class _OnboardingWrapper extends ConsumerStatefulWidget {
 }
 
 class _OnboardingWrapperState extends ConsumerState<_OnboardingWrapper> {
-  bool _showDashboard = false;
-
   @override
   Widget build(BuildContext context) {
-    if (_showDashboard) {
-      return const FitnessDashboard();
-    }
-
-    return FitnessOnboardingScreen(
-      onComplete: () {
-        setState(() {
-          _showDashboard = true;
-        });
-        // Invalidate the provider to refresh state
-        ref.invalidate(needsFitnessOnboardingProvider);
-        ref.invalidate(fitnessOnboardingProvider);
+    // Watch the onboarding status to automatically switch to dashboard
+    final needsOnboarding = ref.watch(needsFitnessOnboardingProvider);
+    
+    return needsOnboarding.when(
+      data: (needsOnboarding) {
+        if (!needsOnboarding) {
+          // Onboarding completed, show dashboard
+          return const FitnessDashboard();
+        }
+        // Still needs onboarding
+        return FitnessOnboardingScreen(
+          onComplete: () async {
+            // Invalidate providers to refresh state
+            ref.invalidate(needsFitnessOnboardingProvider);
+            ref.invalidate(fitnessOnboardingProvider);
+            // Wait a bit for the provider to refresh
+            await Future.delayed(const Duration(milliseconds: 100));
+            // The widget will rebuild automatically due to watching needsFitnessOnboardingProvider
+          },
+        );
       },
+      loading: () => Scaffold(
+        backgroundColor: AppColors.getBackground(Theme.of(context).brightness),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (_, __) => FitnessOnboardingScreen(
+        onComplete: () {
+          ref.invalidate(needsFitnessOnboardingProvider);
+          ref.invalidate(fitnessOnboardingProvider);
+        },
+      ),
     );
   }
 }
