@@ -145,8 +145,11 @@ class HomeDataNotifier extends Notifier<HomeData> {
     if (workouts.isNotEmpty) {
       todaysWorkout = workouts.first;
     }
-    final totalSteps = 7234; // TODO: Get from activity tracker
-    final caloriesBurned = workouts.fold(0.0, (sum, w) => sum + w.caloriesBurned);
+    
+    // Get activity data for today (filtered by current user)
+    final activity = await _db.getActivityForDate(userEmail, today);
+    final totalSteps = activity?.steps ?? 0;
+    final caloriesBurned = workouts.fold(0.0, (sum, w) => sum + w.caloriesBurned) + (activity?.caloriesBurned ?? 0.0);
 
     // Load health tracking (filtered by current user)
     final sleep = await _db.getSleepByDate(today, userEmail: userEmail);
