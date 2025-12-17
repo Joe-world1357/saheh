@@ -22,7 +22,7 @@ class AuthState {
   final bool isLoading;
   final String? error;
 
-  AuthState({
+  const AuthState({
     this.isAuthenticated = false,
     this.user,
     this.isLoading = false,
@@ -34,12 +34,14 @@ class AuthState {
     UserModel? user,
     bool? isLoading,
     String? error,
+    bool clearUser = false,
+    bool clearError = false,
   }) {
     return AuthState(
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
-      user: user ?? this.user,
+      user: clearUser ? null : (user ?? this.user),
       isLoading: isLoading ?? this.isLoading,
-      error: error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
@@ -49,30 +51,28 @@ class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() {
     _checkAuthStatus();
-    return AuthState();
+    return const AuthState(isLoading: true);
   }
 
   /// Check authentication status on app start
   Future<void> _checkAuthStatus() async {
-    state = state.copyWith(isLoading: true);
-    
     try {
       final isLoggedIn = AuthStorage.isLoggedIn();
       if (isLoggedIn) {
         final user = AuthStorage.getCurrentUser();
-        state = AuthState(
-          isAuthenticated: true,
-          user: user,
-          isLoading: false,
-        );
-      } else {
-        state = AuthState(isLoading: false);
+        if (user != null) {
+          state = AuthState(
+            isAuthenticated: true,
+            user: user,
+            isLoading: false,
+          );
+          return;
+        }
       }
+      state = const AuthState(isLoading: false);
     } catch (e) {
-      state = AuthState(
-        isLoading: false,
-        error: e.toString(),
-      );
+      debugPrint('Auth check error: $e');
+      state = const AuthState(isLoading: false);
     }
   }
 
@@ -84,10 +84,11 @@ class AuthNotifier extends Notifier<AuthState> {
 
   /// Login with email and password
   Future<bool> login(String email, String password) async {
-    state = state.copyWith(isLoading: true, error: null);
+    // Clear previous error and set loading
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      // First check if user exists
+      // Check if user exists
       final userExists = AuthStorage.userExists(email) || AuthStorage.getUserByEmail(email) != null;
       if (!userExists) {
         state = state.copyWith(
@@ -118,42 +119,45 @@ class AuthNotifier extends Notifier<AuthState> {
       }
 
       // Try to load user from SQLite database (more complete data)
-      final db = DatabaseHelper.instance;
-      final dbUser = await db.getUserByEmail(email);
-      
-      // If SQLite has user data, use it (it might have more updated XP/level)
-      if (dbUser != null) {
-        user = dbUser;
-        // Sync to Hive
-        await AuthStorage.updateUser(user);
-      } else {
-        // If no SQLite user, create one from Hive data
-        try {
-          await db.insertUser(user);
-        } catch (e) {
-          // User might already exist, try to update instead
-          debugPrint('Insert failed, trying update: $e');
-          await db.updateUserByEmail(user);
+      try {
+        final db = DatabaseHelper.instance;
+        final dbUser = await db.getUserByEmail(email);
+        
+        if (dbUser != null) {
+          // SQLite has more updated data (XP, level, etc.)
+          user = dbUser;
+          await AuthStorage.updateUser(user);
+        } else {
+          // Create user in SQLite from Hive data
+          try {
+            await db.insertUser(user);
+          } catch (e) {
+            await db.updateUserByEmail(user);
+          }
         }
+      } catch (e) {
+        debugPrint('DB sync warning: $e');
       }
 
-      // Login user
-      await AuthStorage.login(user);
+      // Set login session (user is guaranteed non-null at this point)
+      await AuthStorage.login(user!);
 
+      // Update state with authenticated user
       state = AuthState(
         isAuthenticated: true,
         user: user,
         isLoading: false,
       );
 
-      // Refresh all user-specific data for the newly logged in user
+      // Refresh all user-specific providers
       _invalidateAllUserProviders();
 
       return true;
     } catch (e) {
+      debugPrint('Login error: $e');
       state = state.copyWith(
         isLoading: false,
-        error: e.toString(),
+        error: 'Login failed. Please try again.',
       );
       return false;
     }
@@ -166,12 +170,12 @@ class AuthNotifier extends Notifier<AuthState> {
     required String password,
     String? phone,
   }) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       // Check if user already exists
       final existingUser = AuthStorage.getUserByEmail(email);
-      if (existingUser != null) {
+      if (existingUser != null || AuthStorage.userExists(email)) {
         state = state.copyWith(
           isLoading: false,
           error: 'User with this email already exists',
@@ -188,67 +192,66 @@ class AuthNotifier extends Notifier<AuthState> {
         level: 1,
       );
 
-      // Register user in Hive (this also logs them in via AuthStorage.register)
+      // Register user in Hive
       await AuthStorage.register(user, password);
       
       // Also save to SQLite database
       try {
         final db = DatabaseHelper.instance;
-        // Check if user already exists in SQLite
         final existingDbUser = await db.getUserByEmail(email);
         if (existingDbUser == null) {
           await db.insertUser(user);
         }
       } catch (e) {
-        // If SQLite insert fails, continue anyway (Hive has the data)
         debugPrint('Warning: Could not save user to SQLite: $e');
       }
 
-      // Verify login was successful and get user from storage
-      final isLoggedIn = AuthStorage.isLoggedIn();
-      final loggedInUser = AuthStorage.getCurrentUser();
-      
-      if (isLoggedIn && loggedInUser != null) {
-        state = AuthState(
-          isAuthenticated: true,
-          user: loggedInUser,
-          isLoading: false,
-        );
-        return true;
-      } else {
-        // Fallback: set state manually
-        state = AuthState(
-          isAuthenticated: true,
-          user: user,
-          isLoading: false,
-        );
-        return true;
-      }
+      // Update state
+      state = AuthState(
+        isAuthenticated: true,
+        user: user,
+        isLoading: false,
+      );
+
+      // Refresh providers for new user
+      _invalidateAllUserProviders();
+
+      return true;
     } catch (e) {
+      debugPrint('Registration error: $e');
       state = state.copyWith(
         isLoading: false,
-        error: e.toString(),
+        error: 'Registration failed. Please try again.',
       );
       return false;
     }
   }
 
-  /// Logout user
+  /// Logout user - clears session only, preserves data
   Future<void> logout() async {
     state = state.copyWith(isLoading: true);
 
     try {
+      // Clear session in storage (preserves user data)
       await AuthStorage.logout();
       
-      // Clear state and invalidate all user-specific providers
-      state = AuthState(isLoading: false);
+      // Reset state to logged out
+      state = const AuthState(
+        isAuthenticated: false,
+        user: null,
+        isLoading: false,
+      );
       
-      // These will auto-clear because they watch authProvider
+      // Invalidate all providers so they refresh on next login
       _invalidateAllUserProviders();
     } catch (e) {
-      state = state.copyWith(
+      debugPrint('Logout error: $e');
+      // Even on error, clear state
+      state = const AuthState(
+        isAuthenticated: false,
+        user: null,
         isLoading: false,
-        error: e.toString(),
+        error: 'Logout completed with warnings',
       );
     }
   }
@@ -256,13 +259,12 @@ class AuthNotifier extends Notifier<AuthState> {
   /// Update user profile
   Future<void> updateUser(UserModel user) async {
     try {
-      // Update in both Hive and SQLite
       await AuthStorage.updateUser(user);
       final db = DatabaseHelper.instance;
-      await db.updateUser(user);
+      await db.updateUserByEmail(user);
       state = state.copyWith(user: user);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      debugPrint('Update user error: $e');
     }
   }
 
@@ -271,40 +273,43 @@ class AuthNotifier extends Notifier<AuthState> {
     if (state.user == null) return;
 
     try {
+      final newXP = state.user!.xp + amount;
       final updatedUser = state.user!.copyWith(
-        xp: state.user!.xp + amount,
-        level: _calculateLevel(state.user!.xp + amount),
+        xp: newXP,
+        level: _calculateLevel(newXP),
         updatedAt: DateTime.now(),
       );
 
       await updateUser(updatedUser);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      debugPrint('Add XP error: $e');
     }
   }
 
   int _calculateLevel(int xp) {
-    // Simple level calculation: 100 XP per level
     return (xp / 100).floor() + 1;
   }
 
-  /// Invalidate all user-specific providers to refresh data
+  /// Invalidate all user-specific providers
   void _invalidateAllUserProviders() {
-    ref.invalidate(homeDataProvider);
-    ref.invalidate(remindersProvider);
-    ref.invalidate(medicineIntakeProvider);
-    ref.invalidate(nutritionProvider);
-    ref.invalidate(workoutsProvider);
-    ref.invalidate(appointmentsProvider);
-    ref.invalidate(healthTrackingProvider);
-    ref.invalidate(ordersProvider);
-    ref.invalidate(cartProvider);
-    ref.invalidate(activityProvider);
-    ref.invalidate(menWorkoutProvider);
+    try {
+      ref.invalidate(homeDataProvider);
+      ref.invalidate(remindersProvider);
+      ref.invalidate(medicineIntakeProvider);
+      ref.invalidate(nutritionProvider);
+      ref.invalidate(workoutsProvider);
+      ref.invalidate(appointmentsProvider);
+      ref.invalidate(healthTrackingProvider);
+      ref.invalidate(ordersProvider);
+      ref.invalidate(cartProvider);
+      ref.invalidate(activityProvider);
+      ref.invalidate(menWorkoutProvider);
+    } catch (e) {
+      debugPrint('Provider invalidation warning: $e');
+    }
   }
 }
 
 final authProvider = NotifierProvider<AuthNotifier, AuthState>(() {
   return AuthNotifier();
 });
-
