@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/validators/validators.dart';
+import '../../../shared/widgets/app_form_fields.dart';
 import '../../../providers/health_tracking_provider.dart';
 
 class WaterIntakeScreen extends ConsumerStatefulWidget {
@@ -64,17 +66,22 @@ class _WaterIntakeScreenState extends ConsumerState<WaterIntakeScreen>
     _goalController.text = state.waterGoal.toString();
     final brightness = Theme.of(context).brightness;
 
+    final formKey = GlobalKey<FormState>();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.getSurface(brightness),
         title: Text('Set Daily Goal', style: AppTextStyles.titleLarge(brightness)),
-        content: TextField(
-          controller: _goalController,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Goal (ml)',
-            suffixText: 'ml',
+        content: Form(
+          key: formKey,
+          child: AppNumberField(
+            controller: _goalController,
+            label: 'Daily Goal',
+            hint: 'Enter goal in ml',
+            min: 500,
+            max: 10000,
+            suffix: 'ml',
+            validator: (value) => Validators.waterIntake(value),
           ),
         ),
         actions: [
@@ -84,6 +91,7 @@ class _WaterIntakeScreenState extends ConsumerState<WaterIntakeScreen>
           ),
           FilledButton(
             onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
               final goal = int.tryParse(_goalController.text);
               if (goal != null && goal > 0) {
                 await ref.read(healthTrackingProvider.notifier).setWaterGoal(goal);
@@ -270,16 +278,14 @@ class _WaterIntakeScreenState extends ConsumerState<WaterIntakeScreen>
                       child: Row(
                         children: [
                           Expanded(
-                            child: TextField(
+                            child: AppNumberField(
                               controller: _customAmountController,
-                              keyboardType: TextInputType.number,
-                              onTap: () => setState(() => _isAddingCustom = true),
-                              decoration: InputDecoration(
-                                hintText: 'Enter amount (ml)',
-                                border: InputBorder.none,
-                                prefixIcon: Icon(Icons.water_drop_rounded,
-                                    color: AppColors.getPrimary(brightness)),
-                              ),
+                              hint: 'Enter amount (ml)',
+                              min: 100,
+                              max: 10000,
+                              suffix: 'ml',
+                              prefixIcon: Icons.water_drop_rounded,
+                              validator: Validators.waterIntake,
                             ),
                           ),
                           FilledButton(

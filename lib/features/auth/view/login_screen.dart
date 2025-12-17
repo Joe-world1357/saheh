@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/auth_provider.dart';
-import '../../../shared/widgets/form_widgets.dart';
+import '../../../shared/widgets/app_form_fields.dart';
 import '../../home/view/guest_navbar.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
@@ -14,9 +14,9 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
   bool _isLoading = false;
 
   @override
@@ -27,10 +27,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+    // Validate form
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -103,62 +101,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               const SizedBox(height: 40),
 
-              // Email field
-              CustomInputField(
-                label: 'Email',
-                controller: _emailController,
-                hint: 'Enter your email',
-              ),
-
-              const SizedBox(height: 20),
-
-              // Password field
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Password',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
+              // Form
+              Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Email field
+                    AppEmailField(
+                      controller: _emailController,
+                      label: 'Email',
+                      hint: 'Enter your email',
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: theme.dividerColor),
-                    ),
-                    child: TextField(
+
+                    const SizedBox(height: 20),
+
+                    // Password field
+                    AppPasswordField(
                       controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      style: TextStyle(color: theme.colorScheme.onSurface),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Enter your password',
-                        hintStyle: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 14,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                      ),
+                      label: 'Password',
+                      hint: 'Enter your password',
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
               const SizedBox(height: 12),

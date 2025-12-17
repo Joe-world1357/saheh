@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/validators/validators.dart';
+import '../../../shared/widgets/app_form_fields.dart';
 import '../../../providers/health_tracking_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../models/health_tracking_model.dart';
@@ -165,6 +167,7 @@ class _HealthGoalsScreenState extends ConsumerState<HealthGoalsScreen> {
   }
 
   void _showAddGoalDialog(BuildContext context, Brightness brightness) {
+    final formKey = GlobalKey<FormState>();
     final titleController = TextEditingController();
     final targetController = TextEditingController();
     final deadlineController = TextEditingController();
@@ -223,29 +226,33 @@ class _HealthGoalsScreenState extends ConsumerState<HealthGoalsScreen> {
               ),
               const SizedBox(height: AppTheme.spacingM),
 
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Goal Title',
-                  hintText: 'e.g., Run 5km daily',
-                ),
-              ),
-              const SizedBox(height: AppTheme.spacingM),
+              Form(
+                key: formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AppTextField(
+                      controller: titleController,
+                      label: 'Goal Title',
+                      hint: 'e.g., Run 5km daily',
+                      validator: Validators.required,
+                    ),
+                    const SizedBox(height: AppTheme.spacingM),
 
-              TextField(
-                controller: targetController,
-                decoration: const InputDecoration(
-                  labelText: 'Target',
-                  hintText: 'e.g., 5 km, 70 kg, 8 hours',
-                ),
-              ),
-              const SizedBox(height: AppTheme.spacingM),
+                    AppTextField(
+                      controller: targetController,
+                      label: 'Target',
+                      hint: 'e.g., 5 km, 70 kg, 8 hours',
+                      validator: Validators.goalTarget,
+                    ),
+                    const SizedBox(height: AppTheme.spacingM),
 
-              TextField(
-                controller: deadlineController,
-                decoration: const InputDecoration(
-                  labelText: 'Deadline',
-                  hintText: 'e.g., 30 days, End of month',
+                    AppTextField(
+                      controller: deadlineController,
+                      label: 'Deadline (Optional)',
+                      hint: 'e.g., 30 days, End of month',
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: AppTheme.spacingL),
@@ -254,7 +261,7 @@ class _HealthGoalsScreenState extends ConsumerState<HealthGoalsScreen> {
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: () async {
-                    if (titleController.text.isEmpty || targetController.text.isEmpty) {
+                    if (!formKey.currentState!.validate()) {
                       return;
                     }
 

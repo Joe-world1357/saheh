@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../shared/widgets/app_form_fields.dart';
+import '../../../core/validators/validators.dart';
+import '../../../core/validators/input_formatters.dart';
 import '../../home/view/guest_navbar.dart';
 import 'login_screen.dart';
-import '../../../shared/widgets/form_widgets.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -13,13 +15,12 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _phoneController = TextEditingController();
-  bool _obscurePassword1 = true;
-  bool _obscurePassword2 = true;
   bool _isLoading = false;
 
   @override
@@ -33,28 +34,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
-    // Validation
-    if (_nameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _confirmPasswordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all required fields')),
-      );
-      return;
-    }
-
-    if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
-      return;
-    }
-
-    if (_passwordController.text.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password must be at least 6 characters')),
-      );
+    // Validate form
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -131,131 +112,79 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
               const SizedBox(height: 40),
 
-              // Name field
-              CustomInputField(
-                label: 'Full Name',
-                controller: _nameController,
-                hint: 'Enter your full name',
-              ),
-
-              const SizedBox(height: 20),
-
-              // Email field
-              CustomInputField(
-                label: 'Email',
-                controller: _emailController,
-                hint: 'Enter your email',
-              ),
-
-              const SizedBox(height: 20),
-
-              // Phone field (optional)
-              CustomInputField(
-                label: 'Phone (Optional)',
-                controller: _phoneController,
-                hint: 'Enter your phone number',
-              ),
-
-              const SizedBox(height: 20),
-
-              // Password field
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Password',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
+              // Form
+              Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Name field
+                    AppTextField(
+                      controller: _nameController,
+                      label: 'Full Name',
+                      hint: 'Enter your full name',
+                      validator: Validators.name,
+                      prefixIcon: Icons.person_outline,
+                      inputFormatters: [AppInputFormatters.name()],
+                      textCapitalization: TextCapitalization.words,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: theme.dividerColor),
+
+                    const SizedBox(height: 20),
+
+                    // Email field
+                    AppEmailField(
+                      controller: _emailController,
+                      label: 'Email',
+                      hint: 'Enter your email',
                     ),
-                    child: TextField(
+
+                    const SizedBox(height: 20),
+
+                    // Phone field (optional)
+                    AppTextField(
+                      controller: _phoneController,
+                      label: 'Phone (Optional)',
+                      hint: 'Enter your phone number',
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return null; // Optional field
+                        }
+                        return Validators.phone(value);
+                      },
+                      keyboardType: TextInputType.phone,
+                      prefixIcon: Icons.phone_outlined,
+                      inputFormatters: [AppInputFormatters.phone()],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Password field
+                    AppPasswordField(
                       controller: _passwordController,
-                      obscureText: _obscurePassword1,
-                      style: TextStyle(color: theme.colorScheme.onSurface),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Enter your password',
-                        hintStyle: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 14,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword1
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword1 = !_obscurePassword1;
-                            });
-                          },
-                        ),
-                      ),
+                      label: 'Password',
+                      hint: 'Enter your password',
+                      minLength: 6,
                     ),
-                  ),
-                ],
-              ),
 
-              const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-              // Confirm Password field
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Confirm Password',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: theme.dividerColor),
-                    ),
-                    child: TextField(
+                    // Confirm Password field
+                    AppPasswordField(
                       controller: _confirmPasswordController,
-                      obscureText: _obscurePassword2,
-                      style: TextStyle(color: theme.colorScheme.onSurface),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Confirm your password',
-                        hintStyle: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 14,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword2
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword2 = !_obscurePassword2;
-                            });
-                          },
-                        ),
-                      ),
+                      label: 'Confirm Password',
+                      hint: 'Confirm your password',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please confirm your password';
+                        }
+                        if (value != _passwordController.text) {
+                          return 'Passwords do not match';
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
               const SizedBox(height: 32),
