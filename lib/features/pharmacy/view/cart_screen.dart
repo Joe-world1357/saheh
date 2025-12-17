@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'checkout_screen.dart';
 import '../../../providers/cart_provider.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../shared/widgets/network_image_widget.dart';
+import '../../auth/view/login_screen.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
@@ -11,6 +13,8 @@ class CartScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cartItems = ref.watch(cartProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
+    final authState = ref.watch(authProvider);
+    final isGuest = !authState.isAuthenticated;
     const primary = Color(0xFF20C6B7);
 
     final subtotal = cartNotifier.subtotal;
@@ -224,26 +228,31 @@ class CartScreen extends ConsumerWidget {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CheckoutScreen(
-                                totalAmount: total,
-                                cartItems: cartItems,
+                          if (isGuest) {
+                            // Show login required dialog
+                            _showLoginRequiredDialog(context);
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CheckoutScreen(
+                                  totalAmount: total,
+                                  cartItems: cartItems,
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: primary,
+                          backgroundColor: isGuest ? Colors.grey : primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: const Text(
-                          "Checkout",
-                          style: TextStyle(
+                        child: Text(
+                          isGuest ? "Login to Checkout" : "Checkout",
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -412,6 +421,45 @@ class CartScreen extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  void _showLoginRequiredDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.lock_outline, color: Color(0xFF20C6B7)),
+            SizedBox(width: 8),
+            Text('Login Required'),
+          ],
+        ),
+        content: const Text(
+          'You need to be logged in to checkout.\n\n'
+          'Please login or create an account to complete your purchase.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF20C6B7),
+            ),
+            child: const Text('Login', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
     );
   }
 }

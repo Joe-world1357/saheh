@@ -6,6 +6,14 @@ import '../database/database_helper.dart';
 import 'home_data_provider.dart';
 import 'reminders_provider.dart';
 import 'medicine_intake_provider.dart';
+import 'nutrition_provider.dart';
+import 'workouts_provider.dart';
+import 'appointments_provider.dart';
+import 'health_tracking_provider.dart';
+import 'orders_provider.dart';
+import 'cart_provider.dart';
+import 'activity_provider.dart';
+import 'men_workout_provider.dart';
 
 /// Authentication state
 class AuthState {
@@ -139,9 +147,7 @@ class AuthNotifier extends Notifier<AuthState> {
       );
 
       // Refresh all user-specific data for the newly logged in user
-      ref.invalidate(homeDataProvider);
-      ref.invalidate(remindersProvider);
-      ref.invalidate(medicineIntakeProvider);
+      _invalidateAllUserProviders();
 
       return true;
     } catch (e) {
@@ -238,9 +244,7 @@ class AuthNotifier extends Notifier<AuthState> {
       state = AuthState(isLoading: false);
       
       // These will auto-clear because they watch authProvider
-      ref.invalidate(homeDataProvider);
-      ref.invalidate(remindersProvider);
-      ref.invalidate(medicineIntakeProvider);
+      _invalidateAllUserProviders();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -282,6 +286,21 @@ class AuthNotifier extends Notifier<AuthState> {
   int _calculateLevel(int xp) {
     // Simple level calculation: 100 XP per level
     return (xp / 100).floor() + 1;
+  }
+
+  /// Invalidate all user-specific providers to refresh data
+  void _invalidateAllUserProviders() {
+    ref.invalidate(homeDataProvider);
+    ref.invalidate(remindersProvider);
+    ref.invalidate(medicineIntakeProvider);
+    ref.invalidate(nutritionProvider);
+    ref.invalidate(workoutsProvider);
+    ref.invalidate(appointmentsProvider);
+    ref.invalidate(healthTrackingProvider);
+    ref.invalidate(ordersProvider);
+    ref.invalidate(cartProvider);
+    ref.invalidate(activityProvider);
+    ref.invalidate(menWorkoutProvider);
   }
 }
 

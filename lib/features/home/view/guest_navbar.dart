@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import '../../pharmacy/view/pharmacy_screen.dart';
-import '../../fitness/view/fitness_dashboard.dart';
+import '../../fitness/view/fitness_screen.dart';
 import '../../profile/view/profile_screen.dart';
 import '../../services/view/services_screen.dart';
 
@@ -40,7 +40,7 @@ class _GuestNavbarState
     screens = [
       const HomeScreen(), // Tab 0: Home
       const PharmacyScreen(), // Tab 1: Pharmacy
-      const FitnessDashboard(), // Tab 2: Fitness
+      const FitnessScreen(), // Tab 2: Fitness
       const ServicesScreen(), // Tab 3: Services
       const ProfileScreen(), // Tab 4: Profile
     ];

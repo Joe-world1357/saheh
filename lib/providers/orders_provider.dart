@@ -2,19 +2,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/order_model.dart';
 import '../database/database_helper.dart';
 import 'cart_provider.dart';
+import 'auth_provider.dart';
 
 class OrdersNotifier extends Notifier<List<OrderModel>> {
   final _db = DatabaseHelper.instance;
 
+  String? get _userEmail => ref.read(authProvider).user?.email;
+
   @override
   List<OrderModel> build() {
-    _loadOrders();
+    // Watch auth provider to reload when user changes
+    final authState = ref.watch(authProvider);
+    if (authState.isAuthenticated && authState.user != null) {
+      _loadOrders();
+    }
     return [];
   }
 
   Future<void> _loadOrders() async {
-    final orders = await _db.getAllOrders();
+    final userEmail = _userEmail;
+    if (userEmail == null || userEmail.isEmpty) {
+      state = [];
+      return;
+    }
+    final orders = await _db.getAllOrders(userEmail: userEmail);
     state = orders;
+  }
+
+  Future<void> refresh() async {
+    await _loadOrders();
   }
 
   Future<String> createOrder({
@@ -46,13 +62,14 @@ class OrdersNotifier extends Notifier<List<OrderModel>> {
       paymentMethod: paymentMethod,
     );
 
-    await _db.insertOrder(order);
+    final userEmail = _userEmail ?? '';
+    await _db.insertOrder(order, userEmail: userEmail);
     await _loadOrders();
     return orderId;
   }
 
   Future<void> updateOrderStatus(int id, String status) async {
-    await _db.updateOrderStatus(id, status);
+    await _db.updateOrderStatus(id, status, userEmail: _userEmail);
     await _loadOrders();
   }
 }
@@ -60,4 +77,3 @@ class OrdersNotifier extends Notifier<List<OrderModel>> {
 final ordersProvider = NotifierProvider<OrdersNotifier, List<OrderModel>>(() {
   return OrdersNotifier();
 });
-

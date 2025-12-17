@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'auth_provider.dart';
 
 class CartItem {
   final String productId;
@@ -40,7 +41,14 @@ class CartItem {
 
 class CartNotifier extends Notifier<List<CartItem>> {
   @override
-  List<CartItem> build() => [];
+  List<CartItem> build() {
+    // Watch auth provider - clear cart when user changes
+    final authState = ref.watch(authProvider);
+    if (!authState.isAuthenticated) {
+      return [];
+    }
+    return [];
+  }
 
   void addItem(CartItem item) {
     final existingIndex = state.indexWhere((i) => i.productId == item.productId);
@@ -83,4 +91,3 @@ class CartNotifier extends Notifier<List<CartItem>> {
 final cartProvider = NotifierProvider<CartNotifier, List<CartItem>>(() {
   return CartNotifier();
 });
-

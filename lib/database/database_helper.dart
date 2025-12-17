@@ -9,6 +9,8 @@ import '../models/meal_model.dart';
 import '../models/workout_model.dart';
 import '../models/appointment_model.dart';
 import '../models/health_tracking_model.dart';
+import '../models/activity_model.dart';
+import '../models/fitness_preferences_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -28,7 +30,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 4, // Incremented for full user isolation across all tables
+      version: 7, // Added fitness_preferences table
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -58,6 +60,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE orders (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
         order_id TEXT NOT NULL UNIQUE,
         items TEXT NOT NULL,
         subtotal REAL NOT NULL,
@@ -186,6 +189,57 @@ class DatabaseHelper {
         updated_at TEXT
       )
     ''');
+
+    // Activity tracking table
+    await db.execute('''
+      CREATE TABLE activity_tracking (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
+        date TEXT NOT NULL,
+        steps INTEGER DEFAULT 0,
+        active_minutes INTEGER DEFAULT 0,
+        calories_burned REAL DEFAULT 0,
+        workout_minutes INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT,
+        UNIQUE(user_email, date)
+      )
+    ''');
+
+    // Men's workouts table
+    await db.execute('''
+      CREATE TABLE men_workouts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
+        name TEXT NOT NULL,
+        muscle_group TEXT NOT NULL,
+        difficulty TEXT NOT NULL,
+        duration_minutes INTEGER NOT NULL,
+        calories_burned REAL NOT NULL,
+        is_completed INTEGER DEFAULT 0,
+        completed_at TEXT,
+        workout_date TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      )
+    ''');
+
+    // Fitness preferences table
+    await db.execute('''
+      CREATE TABLE fitness_preferences (
+        id TEXT PRIMARY KEY,
+        user_email TEXT NOT NULL UNIQUE,
+        fitness_goals TEXT,
+        preferred_days TEXT,
+        workout_duration INTEGER DEFAULT 30,
+        workout_type TEXT DEFAULT 'mixed',
+        age INTEGER DEFAULT 25,
+        weight REAL DEFAULT 70.0,
+        height REAL DEFAULT 170.0,
+        activity_level TEXT DEFAULT 'moderate',
+        onboarding_completed INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL
+      )
+    ''');
   }
 
   // User operations
@@ -234,16 +288,29 @@ class DatabaseHelper {
   }
 
   // Order operations
-  Future<int> insertOrder(OrderModel order) async {
+  Future<int> insertOrder(OrderModel order, {required String userEmail}) async {
     final db = await database;
     final orderMap = order.toMap();
     orderMap['items'] = jsonEncode(order.items.map((item) => item.toMap()).toList());
+    orderMap['user_email'] = userEmail;
     return await db.insert('orders', orderMap);
   }
 
-  Future<List<OrderModel>> getAllOrders() async {
+  Future<List<OrderModel>> getAllOrders({String? userEmail}) async {
     final db = await database;
-    final maps = await db.query('orders', orderBy: 'created_at DESC');
+    List<Map<String, dynamic>> maps;
+    
+    if (userEmail != null && userEmail.isNotEmpty) {
+      maps = await db.query(
+        'orders',
+        where: 'user_email = ?',
+        whereArgs: [userEmail],
+        orderBy: 'created_at DESC',
+      );
+    } else {
+      maps = await db.query('orders', orderBy: 'created_at DESC');
+    }
+    
     return maps.map((map) {
       // Parse items from JSON string
       final itemsJson = jsonDecode(map['items'] as String) as List<dynamic>;
@@ -254,8 +321,16 @@ class DatabaseHelper {
     }).toList();
   }
 
-  Future<int> updateOrderStatus(int id, String status) async {
+  Future<int> updateOrderStatus(int id, String status, {String? userEmail}) async {
     final db = await database;
+    if (userEmail != null && userEmail.isNotEmpty) {
+      return await db.update(
+        'orders',
+        {'status': status, 'updated_at': DateTime.now().toIso8601String()},
+        where: 'id = ? AND user_email = ?',
+        whereArgs: [id, userEmail],
+      );
+    }
     return await db.update(
       'orders',
       {'status': status, 'updated_at': DateTime.now().toIso8601String()},
@@ -596,6 +671,279 @@ class DatabaseHelper {
         }
       }
     }
+    
+    if (oldVersion < 5) {
+      // Add user_email column to orders table
+      try {
+        await db.execute('ALTER TABLE orders ADD COLUMN user_email TEXT');
+        await db.execute("UPDATE orders SET user_email = '' WHERE user_email IS NULL");
+      } catch (e) {
+        // Column might already exist, ignore
+      }
+    }
+    
+    if (oldVersion < 6) {
+      // Add activity_tracking and men_workouts tables
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS activity_tracking (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_email TEXT NOT NULL,
+          date TEXT NOT NULL,
+          steps INTEGER DEFAULT 0,
+          active_minutes INTEGER DEFAULT 0,
+          calories_burned REAL DEFAULT 0,
+          workout_minutes INTEGER DEFAULT 0,
+          created_at TEXT NOT NULL,
+          updated_at TEXT,
+          UNIQUE(user_email, date)
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS men_workouts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_email TEXT NOT NULL,
+          name TEXT NOT NULL,
+          muscle_group TEXT NOT NULL,
+          difficulty TEXT NOT NULL,
+          duration_minutes INTEGER NOT NULL,
+          calories_burned REAL NOT NULL,
+          is_completed INTEGER DEFAULT 0,
+          completed_at TEXT,
+          workout_date TEXT NOT NULL,
+          created_at TEXT NOT NULL
+        )
+      ''');
+    }
+
+    if (oldVersion < 7) {
+      // Add fitness_preferences table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS fitness_preferences (
+          id TEXT PRIMARY KEY,
+          user_email TEXT NOT NULL UNIQUE,
+          fitness_goals TEXT,
+          preferred_days TEXT,
+          workout_duration INTEGER DEFAULT 30,
+          workout_type TEXT DEFAULT 'mixed',
+          age INTEGER DEFAULT 25,
+          weight REAL DEFAULT 70.0,
+          height REAL DEFAULT 170.0,
+          activity_level TEXT DEFAULT 'moderate',
+          onboarding_completed INTEGER DEFAULT 0,
+          created_at TEXT NOT NULL
+        )
+      ''');
+    }
+  }
+
+  // ========== ACTIVITY TRACKING OPERATIONS ==========
+  
+  Future<int> insertOrUpdateActivity(ActivityModel activity) async {
+    final db = await database;
+    final dateStr = activity.date.toIso8601String().split('T')[0];
+    
+    // Check if exists
+    final existing = await db.query(
+      'activity_tracking',
+      where: 'user_email = ? AND date = ?',
+      whereArgs: [activity.userEmail, dateStr],
+    );
+    
+    if (existing.isNotEmpty) {
+      return await db.update(
+        'activity_tracking',
+        {
+          ...activity.toMap(),
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        where: 'user_email = ? AND date = ?',
+        whereArgs: [activity.userEmail, dateStr],
+      );
+    } else {
+      return await db.insert('activity_tracking', activity.toMap());
+    }
+  }
+
+  Future<ActivityModel?> getActivityForDate(String userEmail, DateTime date) async {
+    final db = await database;
+    final dateStr = date.toIso8601String().split('T')[0];
+    
+    final maps = await db.query(
+      'activity_tracking',
+      where: 'user_email = ? AND date = ?',
+      whereArgs: [userEmail, dateStr],
+    );
+    
+    if (maps.isEmpty) return null;
+    return ActivityModel.fromMap(maps.first);
+  }
+
+  Future<List<ActivityModel>> getActivityHistory(String userEmail, {int limit = 30}) async {
+    final db = await database;
+    final maps = await db.query(
+      'activity_tracking',
+      where: 'user_email = ?',
+      whereArgs: [userEmail],
+      orderBy: 'date DESC',
+      limit: limit,
+    );
+    return maps.map((m) => ActivityModel.fromMap(m)).toList();
+  }
+
+  Future<Map<String, dynamic>> getActivityStats(String userEmail) async {
+    final db = await database;
+    final today = DateTime.now().toIso8601String().split('T')[0];
+    
+    // Today's activity
+    final todayActivity = await getActivityForDate(userEmail, DateTime.now());
+    
+    // Weekly totals
+    final weekAgo = DateTime.now().subtract(const Duration(days: 7)).toIso8601String().split('T')[0];
+    final weeklyResult = await db.rawQuery('''
+      SELECT 
+        COALESCE(SUM(steps), 0) as total_steps,
+        COALESCE(SUM(active_minutes), 0) as total_active_minutes,
+        COALESCE(SUM(calories_burned), 0) as total_calories,
+        COALESCE(SUM(workout_minutes), 0) as total_workout_minutes
+      FROM activity_tracking
+      WHERE user_email = ? AND date >= ?
+    ''', [userEmail, weekAgo]);
+    
+    return {
+      'today': todayActivity,
+      'weekly': weeklyResult.isNotEmpty ? weeklyResult.first : {},
+    };
+  }
+
+  // ========== MEN'S WORKOUTS OPERATIONS ==========
+  
+  Future<int> insertMenWorkout(MenWorkoutModel workout) async {
+    final db = await database;
+    return await db.insert('men_workouts', workout.toMap());
+  }
+
+  Future<List<MenWorkoutModel>> getMenWorkoutsForDate(String userEmail, DateTime date) async {
+    final db = await database;
+    final dateStr = date.toIso8601String().split('T')[0];
+    
+    final maps = await db.query(
+      'men_workouts',
+      where: 'user_email = ? AND workout_date = ?',
+      whereArgs: [userEmail, dateStr],
+      orderBy: 'created_at DESC',
+    );
+    return maps.map((m) => MenWorkoutModel.fromMap(m)).toList();
+  }
+
+  Future<List<MenWorkoutModel>> getMenWorkoutHistory(String userEmail, {int limit = 50}) async {
+    final db = await database;
+    final maps = await db.query(
+      'men_workouts',
+      where: 'user_email = ?',
+      whereArgs: [userEmail],
+      orderBy: 'workout_date DESC, created_at DESC',
+      limit: limit,
+    );
+    return maps.map((m) => MenWorkoutModel.fromMap(m)).toList();
+  }
+
+  Future<int> completeMenWorkout(int workoutId, String userEmail) async {
+    final db = await database;
+    return await db.update(
+      'men_workouts',
+      {
+        'is_completed': 1,
+        'completed_at': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ? AND user_email = ?',
+      whereArgs: [workoutId, userEmail],
+    );
+  }
+
+  Future<int> deleteMenWorkout(int workoutId, String userEmail) async {
+    final db = await database;
+    return await db.delete(
+      'men_workouts',
+      where: 'id = ? AND user_email = ?',
+      whereArgs: [workoutId, userEmail],
+    );
+  }
+
+  Future<Map<String, dynamic>> getMenWorkoutStats(String userEmail) async {
+    final db = await database;
+    
+    // Total completed workouts
+    final totalResult = await db.rawQuery('''
+      SELECT 
+        COUNT(*) as total_workouts,
+        COALESCE(SUM(duration_minutes), 0) as total_minutes,
+        COALESCE(SUM(calories_burned), 0) as total_calories
+      FROM men_workouts
+      WHERE user_email = ? AND is_completed = 1
+    ''', [userEmail]);
+    
+    // This week
+    final weekAgo = DateTime.now().subtract(const Duration(days: 7)).toIso8601String().split('T')[0];
+    final weeklyResult = await db.rawQuery('''
+      SELECT 
+        COUNT(*) as weekly_workouts,
+        COALESCE(SUM(duration_minutes), 0) as weekly_minutes,
+        COALESCE(SUM(calories_burned), 0) as weekly_calories
+      FROM men_workouts
+      WHERE user_email = ? AND is_completed = 1 AND workout_date >= ?
+    ''', [userEmail, weekAgo]);
+    
+    // By muscle group
+    final muscleGroupResult = await db.rawQuery('''
+      SELECT muscle_group, COUNT(*) as count
+      FROM men_workouts
+      WHERE user_email = ? AND is_completed = 1
+      GROUP BY muscle_group
+    ''', [userEmail]);
+    
+    return {
+      'total': totalResult.isNotEmpty ? totalResult.first : {},
+      'weekly': weeklyResult.isNotEmpty ? weeklyResult.first : {},
+      'byMuscleGroup': muscleGroupResult,
+    };
+  }
+
+  // Fitness Preferences operations
+  Future<int> insertFitnessPreferences(FitnessPreferencesModel prefs) async {
+    final db = await database;
+    return await db.insert(
+      'fitness_preferences',
+      prefs.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<FitnessPreferencesModel?> getFitnessPreferences(String userEmail) async {
+    final db = await database;
+    final maps = await db.query(
+      'fitness_preferences',
+      where: 'user_email = ?',
+      whereArgs: [userEmail],
+      limit: 1,
+    );
+    if (maps.isEmpty) return null;
+    return FitnessPreferencesModel.fromMap(maps.first);
+  }
+
+  Future<int> updateFitnessPreferences(FitnessPreferencesModel prefs) async {
+    final db = await database;
+    return await db.update(
+      'fitness_preferences',
+      prefs.toMap(),
+      where: 'user_email = ?',
+      whereArgs: [prefs.userEmail],
+    );
+  }
+
+  Future<bool> hasCompletedFitnessOnboarding(String userEmail) async {
+    final prefs = await getFitnessPreferences(userEmail);
+    return prefs?.onboardingCompleted ?? false;
   }
 
   Future<void> close() async {

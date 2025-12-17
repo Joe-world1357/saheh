@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../settings/view/settings_screen.dart';
 import '../../../shared/widgets/common_widgets.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/activity_provider.dart';
+import '../../../providers/men_workout_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -267,187 +269,7 @@ class ProfileScreen extends ConsumerWidget {
                   ),
 
                   // HEALTH STATS -----------------------------------------------
-                  Row(
-                    children: const [
-                      Icon(
-                        Icons.favorite_outline,
-                        color: primary,
-                        size: 20,
-                      ),
-                      SizedBox(
-                        width: 8,
-                      ),
-                      Text(
-                        "Health Stats",
-                        style: TextStyle(
-                          color: Color(
-                            0xFF1A2A2C,
-                          ),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(
-                      18,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(
-                        16,
-                      ),
-                      border: Border.all(
-                        color: Colors.grey.shade200,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Body Mass Index",
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        Row(
-                          children: const [
-                            Text(
-                              "23.7",
-                              style: TextStyle(
-                                color: Color(
-                                  0xFF1A2A2C,
-                                ),
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Spacer(),
-                            Icon(
-                              Icons.check_circle,
-                              color: Color(
-                                0xFF4CAF50,
-                              ),
-                              size: 28,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 4,
-                        ),
-                        const Text(
-                          "Normal Range",
-                          style: TextStyle(
-                            color: Color(
-                              0xFF4CAF50,
-                            ),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        Text(
-                          "Medical Conditions",
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            ConditionChip(
-                              "Mild Hypertension",
-                              const Color(
-                                0xFFFF9800,
-                              ),
-                            ),
-                            ConditionChip(
-                              "Seasonal Allergies",
-                              const Color(
-                                0xFF2196F3,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        Text(
-                          "Activity Level",
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        Row(
-                          children: const [
-                            Text(
-                              "Moderately Active",
-                              style: TextStyle(
-                                color: Color(
-                                  0xFF1A2A2C,
-                                ),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Spacer(),
-                            Icon(
-                              Icons.directions_run,
-                              color: primary,
-                              size: 24,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 4,
-                        ),
-                        Text(
-                          "3-5 days/week exercise",
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                            10,
-                          ),
-                          child: LinearProgressIndicator(
-                            value: 0.7,
-                            minHeight: 6,
-                            backgroundColor: Colors.grey.shade200,
-                            valueColor:
-                                const AlwaysStoppedAnimation<
-                                  Color
-                                >(
-                                  primary,
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _buildHealthStats(context, ref, primary, userHeight, userWeight),
 
                   const SizedBox(
                     height: 24,
@@ -616,6 +438,132 @@ class ProfileScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildHealthStats(BuildContext context, WidgetRef ref, Color primary, double? height, double? weight) {
+    final activityState = ref.watch(activityProvider);
+    final workoutState = ref.watch(menWorkoutProvider);
+    
+    // Calculate BMI
+    double? bmi;
+    String bmiCategory = 'N/A';
+    Color bmiColor = Colors.grey;
+    if (height != null && weight != null && height > 0) {
+      final heightM = height / 100;
+      bmi = weight / (heightM * heightM);
+      if (bmi < 18.5) {
+        bmiCategory = 'Underweight';
+        bmiColor = Colors.orange;
+      } else if (bmi < 25) {
+        bmiCategory = 'Normal';
+        bmiColor = Colors.green;
+      } else if (bmi < 30) {
+        bmiCategory = 'Overweight';
+        bmiColor = Colors.orange;
+      } else {
+        bmiCategory = 'Obese';
+        bmiColor = Colors.red;
+      }
+    }
+
+    final todayActivity = activityState.todayActivity;
+    final weeklyStats = activityState.stats['weekly'] as Map<String, dynamic>? ?? {};
+    final workoutStats = workoutState.stats['total'] as Map<String, dynamic>? ?? {};
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: const [
+            Icon(Icons.favorite_outline, color: Color(0xFF20C6B7), size: 20),
+            SizedBox(width: 8),
+            Text("Health Stats", style: TextStyle(color: Color(0xFF1A2A2C), fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // BMI Section
+              Text("Body Mass Index", style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Text(
+                    bmi != null ? bmi.toStringAsFixed(1) : 'N/A',
+                    style: const TextStyle(color: Color(0xFF1A2A2C), fontSize: 28, fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  Icon(bmi != null ? Icons.check_circle : Icons.help_outline, color: bmiColor, size: 28),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(bmiCategory, style: TextStyle(color: bmiColor, fontSize: 13, fontWeight: FontWeight.w600)),
+              
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+              
+              // Today's Activity
+              Text("Today's Activity", style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _StatColumn(Icons.directions_walk, '${todayActivity?.steps ?? 0}', 'Steps', Colors.blue),
+                  _StatColumn(Icons.timer, '${todayActivity?.activeMinutes ?? 0}', 'Minutes', Colors.green),
+                  _StatColumn(Icons.local_fire_department, '${(todayActivity?.caloriesBurned ?? 0).toInt()}', 'Calories', Colors.orange),
+                ],
+              ),
+              
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+              
+              // Weekly Summary
+              Text("This Week", style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _StatColumn(Icons.directions_walk, '${weeklyStats['total_steps'] ?? 0}', 'Steps', Colors.blue),
+                  _StatColumn(Icons.fitness_center, '${workoutStats['total_workouts'] ?? 0}', 'Workouts', primary),
+                  _StatColumn(Icons.local_fire_department, '${((weeklyStats['total_calories'] ?? 0) as num).toInt()}', 'Calories', Colors.orange),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatColumn extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+  final Color color;
+
+  const _StatColumn(this.icon, this.value, this.label, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 24),
+        const SizedBox(height: 4),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 11)),
+      ],
     );
   }
 }
