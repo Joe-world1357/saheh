@@ -4,6 +4,8 @@ import '../models/user_model.dart';
 import '../core/storage/auth_storage.dart';
 import '../database/database_helper.dart';
 import 'home_data_provider.dart';
+import 'reminders_provider.dart';
+import 'medicine_intake_provider.dart';
 
 /// Authentication state
 class AuthState {
@@ -77,12 +79,22 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
+      // First check if user exists
+      final userExists = AuthStorage.userExists(email) || AuthStorage.getUserByEmail(email) != null;
+      if (!userExists) {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'No account found with this email. Please register first.',
+        );
+        return false;
+      }
+
       // Verify credentials
       final isValid = AuthStorage.verifyPassword(email, password);
       if (!isValid) {
         state = state.copyWith(
           isLoading: false,
-          error: 'Invalid email or password',
+          error: 'Incorrect password. Please try again.',
         );
         return false;
       }
@@ -92,23 +104,29 @@ class AuthNotifier extends Notifier<AuthState> {
       if (user == null) {
         state = state.copyWith(
           isLoading: false,
-          error: 'User not found',
+          error: 'User data not found. Please register again.',
         );
         return false;
       }
 
       // Try to load user from SQLite database (more complete data)
       final db = DatabaseHelper.instance;
-      final dbUser = await db.getUser();
+      final dbUser = await db.getUserByEmail(email);
       
       // If SQLite has user data, use it (it might have more updated XP/level)
-      if (dbUser != null && dbUser.email == email) {
+      if (dbUser != null) {
         user = dbUser;
         // Sync to Hive
         await AuthStorage.updateUser(user);
       } else {
         // If no SQLite user, create one from Hive data
-        await db.insertUser(user);
+        try {
+          await db.insertUser(user);
+        } catch (e) {
+          // User might already exist, try to update instead
+          debugPrint('Insert failed, trying update: $e');
+          await db.updateUserByEmail(user);
+        }
       }
 
       // Login user
@@ -120,8 +138,10 @@ class AuthNotifier extends Notifier<AuthState> {
         isLoading: false,
       );
 
-      // Refresh home data for the newly logged in user
+      // Refresh all user-specific data for the newly logged in user
       ref.invalidate(homeDataProvider);
+      ref.invalidate(remindersProvider);
+      ref.invalidate(medicineIntakeProvider);
 
       return true;
     } catch (e) {
@@ -168,7 +188,11 @@ class AuthNotifier extends Notifier<AuthState> {
       // Also save to SQLite database
       try {
         final db = DatabaseHelper.instance;
-        await db.insertUser(user);
+        // Check if user already exists in SQLite
+        final existingDbUser = await db.getUserByEmail(email);
+        if (existingDbUser == null) {
+          await db.insertUser(user);
+        }
       } catch (e) {
         // If SQLite insert fails, continue anyway (Hive has the data)
         debugPrint('Warning: Could not save user to SQLite: $e');
@@ -208,15 +232,15 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true);
 
     try {
-      // Clear user-specific data from database
-      final userEmail = state.user?.email;
-      if (userEmail != null) {
-        final db = DatabaseHelper.instance;
-        await db.clearUserData(userEmail);
-      }
-      
       await AuthStorage.logout();
+      
+      // Clear state and invalidate all user-specific providers
       state = AuthState(isLoading: false);
+      
+      // These will auto-clear because they watch authProvider
+      ref.invalidate(homeDataProvider);
+      ref.invalidate(remindersProvider);
+      ref.invalidate(medicineIntakeProvider);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,

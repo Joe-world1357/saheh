@@ -62,9 +62,32 @@ class AuthStorage {
 
   /// Verify password for a specific user
   static bool verifyPassword(String email, String password) {
-    // Get credentials for this specific user
-    final creds = getCredentialsForUser(email);
-    if (creds == null) return false;
+    // Get credentials for this specific user from new credentials box
+    var creds = getCredentialsForUser(email);
+    
+    // Fallback: Check old auth box format (for backward compatibility)
+    if (creds == null) {
+      final oldCreds = _authBox?.get('credentials');
+      if (oldCreds != null) {
+        final oldCredsMap = Map<String, dynamic>.from(oldCreds);
+        if (oldCredsMap['email'] == email) {
+          // Migrate to new format
+          final hashedPwd = oldCredsMap['password'] as String?;
+          if (hashedPwd != null) {
+            // Check password with old format
+            if (hashedPwd == _hashPassword(password)) {
+              // Migrate credentials to new format
+              _credentialsBox?.put(email, {
+                'email': email,
+                'password': hashedPwd,
+              });
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
     
     // Verify the password hash matches
     return creds['password'] == _hashPassword(password);

@@ -10,13 +10,26 @@ class MedicineIntakeNotifier extends Notifier<List<MedicineIntakeModel>> {
 
   @override
   List<MedicineIntakeModel> build() {
-    _loadIntakesForToday();
+    // Watch auth provider to reload when user changes
+    final authState = ref.watch(authProvider);
+    
+    if (authState.isAuthenticated && authState.user != null) {
+      _loadIntakesForToday();
+    } else {
+      return [];
+    }
+    
     return [];
   }
 
   Future<void> _loadIntakesForToday() async {
     final today = DateTime.now();
-    final intakes = await _db.getMedicineIntakesByDate(today, userEmail: _userEmail);
+    final userEmail = _userEmail;
+    if (userEmail == null || userEmail.isEmpty) {
+      state = [];
+      return;
+    }
+    final intakes = await _db.getMedicineIntakesByDate(today, userEmail: userEmail);
     state = intakes;
   }
 

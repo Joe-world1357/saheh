@@ -1020,4 +1020,4 @@ Screen reader support considerations
 Proper animation curves
 No jarring visual changes
 
-The dark mode uses true dark (#121212) instead of pure black to prevent OLED burn-in, with lighter surfaces appearing "elevated" above the background - a key Material Design 3 principle. All your primary teal colors are adjusted to lighter variants (#4DD0E1) for better contrast on dark backgrounds
+The dark mode uses true dark (#121212) instead of pure black to prevent OLED burn-in, with lighter surfaces appearing "elevated" above the background - a key Material Design 3 principle. All your primary teal colors are adjusted to lighter variants (#4DD0E1) for better contrast on dark backgroundscl

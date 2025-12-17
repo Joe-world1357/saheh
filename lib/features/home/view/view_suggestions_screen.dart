@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../health/view/ai_chatbot_screen.dart';
 
 class ViewSuggestionsScreen extends StatelessWidget {
   const ViewSuggestionsScreen({super.key});
@@ -144,16 +145,37 @@ class ViewSuggestionsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2196F3).withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.psychology,
-                      color: Color(0xFF2196F3),
-                      size: 24,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AIChatbotScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF20C6B7), Color(0xFF17A89A)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF20C6B7).withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.chat_bubble_outline,
+                        color: Colors.white,
+                        size: 24,
+                      ),
                     ),
                   ),
                 ],

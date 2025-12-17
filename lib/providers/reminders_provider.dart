@@ -9,24 +9,43 @@ class RemindersNotifier extends Notifier<List<MedicineReminderModel>> {
 
   @override
   List<MedicineReminderModel> build() {
-    _loadReminders();
+    // Watch auth provider to reload when user changes
+    final authState = ref.watch(authProvider);
+    
+    // Only load if user is authenticated
+    if (authState.isAuthenticated && authState.user != null) {
+      _loadReminders(authState.user!.email);
+    } else {
+      // Clear reminders if not authenticated
+      return [];
+    }
+    
     return [];
   }
 
-  Future<void> _loadReminders() async {
-    final authState = ref.read(authProvider);
-    final userEmail = authState.user?.email;
+  Future<void> _loadReminders(String? userEmail) async {
+    if (userEmail == null || userEmail.isEmpty) {
+      state = [];
+      return;
+    }
     final reminders = await _db.getAllMedicineReminders(userEmail: userEmail);
     state = reminders;
+  }
+
+  /// Refresh reminders for current user
+  Future<void> refresh() async {
+    final authState = ref.read(authProvider);
+    final userEmail = authState.user?.email;
+    await _loadReminders(userEmail);
   }
 
   Future<void> addReminder(MedicineReminderModel reminder) async {
     try {
       await _db.insertMedicineReminder(reminder);
-      await _loadReminders();
+      await refresh();
     } catch (e) {
       debugPrint('Error adding reminder: $e');
-      rethrow; // Re-throw so caller can handle it
+      rethrow;
     }
   }
 
@@ -34,7 +53,7 @@ class RemindersNotifier extends Notifier<List<MedicineReminderModel>> {
     final authState = ref.read(authProvider);
     final userEmail = authState.user?.email;
     await _db.deleteMedicineReminder(id, userEmail: userEmail);
-    await _loadReminders();
+    await refresh();
   }
 }
 
