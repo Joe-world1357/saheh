@@ -82,27 +82,29 @@ All widgets:
 
 ## 📋 Remaining Forms to Update
 
-### High Priority
-1. **Add Medicine Screen** (`lib/features/health/view/add_medicine.dart`)
-   - Medicine name field
-   - Dosage field
+### ✅ Completed
+1. ✅ **Add Medicine Screen** (`lib/features/health/view/add_medicine.dart`)
+   - Medicine name field with validation
+   - Dosage field with validation
+   - Form validation before submission
 
-2. **Sleep Tracker Screen** (`lib/features/health/view/sleep_tracker_screen.dart`)
-   - Sleep duration field
-   - Bedtime/wake time fields
+2. ✅ **Fitness Onboarding** (`lib/features/fitness/view/fitness_onboarding_screen.dart`)
+   - Age field with validation (1-150)
+   - Weight field with validation (10-500 kg, decimal)
+   - Height field with validation (50-300 cm, decimal)
 
-3. **Fitness Onboarding** (`lib/features/fitness/view/fitness_onboarding_screen.dart`)
-   - Age field
-   - Weight field
-   - Height field
+3. ✅ **Profile Edit Screen** (`lib/features/profile/view/edit_personal_info_screen.dart`)
+   - Name field with validation
+   - Email field with validation
+   - Phone field (optional) with validation
+   - Age field with validation
+   - Height field with validation
+   - Weight field with validation
 
-4. **Profile Edit Screen** (`lib/features/profile/view/edit_personal_info_screen.dart`)
-   - Name field
-   - Email field
-   - Phone field
-   - Age field
-   - Height field
-   - Weight field
+### Remaining (Lower Priority)
+4. **Sleep Tracker Screen** (`lib/features/health/view/sleep_tracker_screen.dart`)
+   - Sleep duration field (uses time picker, may not need validation)
+   - Bedtime/wake time fields (time pickers)
 
 ### Medium Priority
 5. **Men Workouts Screen** (`lib/features/fitness/view/men_workouts_screen.dart`)

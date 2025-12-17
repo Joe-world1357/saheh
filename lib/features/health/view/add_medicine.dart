@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../shared/widgets/form_widgets.dart';
+import '../../../shared/widgets/app_form_fields.dart';
+import '../../../core/validators/validators.dart';
 import '../../../providers/reminders_provider.dart';
 import '../../../providers/home_data_provider.dart';
 import '../../../providers/auth_provider.dart';
@@ -14,6 +15,7 @@ class AddMedicinePage extends ConsumerStatefulWidget {
 }
 
 class _AddMedicinePageState extends ConsumerState<AddMedicinePage> {
+  final _formKey = GlobalKey<FormState>();
   final Color primary = const Color(
     0xFF20C6B7,
   );
@@ -88,24 +90,35 @@ class _AddMedicinePageState extends ConsumerState<AddMedicinePage> {
                 height: 30,
               ),
 
-              // INPUT: MEDICINE NAME -------------------------------------------
-              // INPUT: MEDICINE NAME -------------------------------------------
-              CustomInputField(
-                label: "Medicine Name",
-                controller: nameCtrl,
-                hint: "e.g. Vitamin D",
-              ),
+              // FORM WITH VALIDATION -------------------------------------------
+              Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // INPUT: MEDICINE NAME
+                    AppTextField(
+                      controller: nameCtrl,
+                      label: "Medicine Name",
+                      hint: "e.g. Vitamin D",
+                      validator: Validators.medicineName,
+                      prefixIcon: Icons.medication_outlined,
+                    ),
 
-              const SizedBox(
-                height: 20,
-              ),
+                    const SizedBox(
+                      height: 20,
+                    ),
 
-              // INPUT: DOSE ----------------------------------------------------
-              // INPUT: DOSE ----------------------------------------------------
-              CustomInputField(
-                label: "Dose",
-                controller: doseCtrl,
-                hint: "e.g. 1 capsule, 500mg",
+                    // INPUT: DOSE
+                    AppTextField(
+                      controller: doseCtrl,
+                      label: "Dose",
+                      hint: "e.g. 1 capsule, 500mg",
+                      validator: Validators.dosage,
+                      prefixIcon: Icons.science_outlined,
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(
@@ -250,22 +263,8 @@ class _AddMedicinePageState extends ConsumerState<AddMedicinePage> {
               // SAVE BUTTON ----------------------------------------------------
               ElevatedButton(
                 onPressed: () async {
-                  if (nameCtrl.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please enter medicine name'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-                  if (doseCtrl.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please enter dosage'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
+                  // Validate form
+                  if (!_formKey.currentState!.validate()) {
                     return;
                   }
                   if (selectedTime == null) {

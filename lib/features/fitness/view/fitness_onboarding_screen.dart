@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/validators/validators.dart';
+import '../../../shared/widgets/app_form_fields.dart';
 import '../../../providers/fitness_onboarding_provider.dart';
 
 class FitnessOnboardingScreen extends ConsumerStatefulWidget {
@@ -653,6 +655,9 @@ class _PersonalizationStepState extends ConsumerState<_PersonalizationStep> {
                           label: 'Age',
                           suffix: 'years',
                           controller: _ageController,
+                          validator: Validators.age,
+                          min: 1,
+                          max: 150,
                           onChanged: (v) {
                             final age = int.tryParse(v) ?? 25;
                             ref.read(fitnessOnboardingProvider.notifier).setAge(age);
@@ -666,6 +671,10 @@ class _PersonalizationStepState extends ConsumerState<_PersonalizationStep> {
                           label: 'Weight',
                           suffix: 'kg',
                           controller: _weightController,
+                          validator: Validators.weight,
+                          min: 10,
+                          max: 500,
+                          allowDecimal: true,
                           onChanged: (v) {
                             final weight = double.tryParse(v) ?? 70.0;
                             ref.read(fitnessOnboardingProvider.notifier).setWeight(weight);
@@ -679,6 +688,10 @@ class _PersonalizationStepState extends ConsumerState<_PersonalizationStep> {
                           label: 'Height',
                           suffix: 'cm',
                           controller: _heightController,
+                          validator: Validators.height,
+                          min: 50,
+                          max: 300,
+                          allowDecimal: true,
                           onChanged: (v) {
                             final height = double.tryParse(v) ?? 170.0;
                             ref.read(fitnessOnboardingProvider.notifier).setHeight(height);
@@ -731,6 +744,10 @@ class _InputField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final Brightness brightness;
+  final String? Function(String?)? validator;
+  final int? min;
+  final int? max;
+  final bool allowDecimal;
 
   const _InputField({
     required this.label,
@@ -738,28 +755,24 @@ class _InputField extends StatelessWidget {
     required this.controller,
     required this.onChanged,
     required this.brightness,
+    this.validator,
+    this.min,
+    this.max,
+    this.allowDecimal = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: AppTextStyles.labelMedium(brightness)),
-        const SizedBox(height: AppTheme.spacingS),
-        TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            suffixText: suffix,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppTheme.spacingM,
-              vertical: AppTheme.spacingS,
-            ),
-          ),
-        ),
-      ],
+    return AppNumberField(
+      controller: controller,
+      label: label,
+      hint: 'Enter $label',
+      suffix: suffix,
+      min: min,
+      max: max,
+      allowDecimal: allowDecimal,
+      validator: validator,
+      onChanged: onChanged,
     );
   }
 }

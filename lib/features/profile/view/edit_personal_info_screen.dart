@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/user_model.dart';
 import '../../../providers/user_provider.dart';
+import '../../../shared/widgets/app_form_fields.dart';
+import '../../../core/validators/validators.dart';
+import '../../../core/validators/input_formatters.dart';
 
 class EditPersonalInfoScreen extends ConsumerStatefulWidget {
   const EditPersonalInfoScreen({super.key});
@@ -197,36 +200,41 @@ class _EditPersonalInfoScreenState extends ConsumerState<EditPersonalInfoScreen>
                       const SizedBox(height: 32),
 
                       // NAME
-                      _buildSectionTitle("Full Name"),
-                      const SizedBox(height: 8),
-                      _buildTextField(
+                      AppTextField(
                         controller: _nameController,
+                        label: "Full Name",
                         hint: "Enter your full name",
-                        icon: Icons.person_outline,
+                        validator: Validators.name,
+                        prefixIcon: Icons.person_outline,
+                        inputFormatters: [AppInputFormatters.name()],
+                        textCapitalization: TextCapitalization.words,
                       ),
 
                       const SizedBox(height: 20),
 
                       // EMAIL
-                      _buildSectionTitle("Email"),
-                      const SizedBox(height: 8),
-                      _buildTextField(
+                      AppEmailField(
                         controller: _emailController,
+                        label: "Email",
                         hint: "Enter your email",
-                        icon: Icons.email_outlined,
-                        keyboardType: TextInputType.emailAddress,
                       ),
 
                       const SizedBox(height: 20),
 
                       // PHONE
-                      _buildSectionTitle("Phone Number"),
-                      const SizedBox(height: 8),
-                      _buildTextField(
+                      AppTextField(
                         controller: _phoneController,
+                        label: "Phone Number",
                         hint: "Enter your phone number",
-                        icon: Icons.phone_outlined,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return null; // Optional field
+                          }
+                          return Validators.phone(value);
+                        },
                         keyboardType: TextInputType.phone,
+                        prefixIcon: Icons.phone_outlined,
+                        inputFormatters: [AppInputFormatters.phone()],
                       ),
 
                       const SizedBox(height: 20),
@@ -238,13 +246,14 @@ class _EditPersonalInfoScreenState extends ConsumerState<EditPersonalInfoScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildSectionTitle("Age"),
-                                const SizedBox(height: 8),
-                                _buildTextField(
+                                AppNumberField(
                                   controller: _ageController,
-                                  hint: "Age",
-                                  icon: Icons.calendar_today_outlined,
-                                  keyboardType: TextInputType.number,
+                                  label: "Age",
+                                  hint: "Enter age",
+                                  validator: Validators.age,
+                                  min: 1,
+                                  max: 150,
+                                  prefixIcon: Icons.calendar_today_outlined,
                                 ),
                               ],
                             ),
@@ -305,13 +314,15 @@ class _EditPersonalInfoScreenState extends ConsumerState<EditPersonalInfoScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildSectionTitle("Height (cm)"),
-                                const SizedBox(height: 8),
-                                _buildTextField(
+                                AppNumberField(
                                   controller: _heightController,
-                                  hint: "Height",
-                                  icon: Icons.height,
-                                  keyboardType: TextInputType.number,
+                                  label: "Height (cm)",
+                                  hint: "Enter height",
+                                  validator: Validators.height,
+                                  min: 50,
+                                  max: 300,
+                                  allowDecimal: true,
+                                  prefixIcon: Icons.height,
                                 ),
                               ],
                             ),
@@ -321,13 +332,15 @@ class _EditPersonalInfoScreenState extends ConsumerState<EditPersonalInfoScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildSectionTitle("Weight (kg)"),
-                                const SizedBox(height: 8),
-                                _buildTextField(
+                                AppNumberField(
                                   controller: _weightController,
-                                  hint: "Weight",
-                                  icon: Icons.monitor_weight_outlined,
-                                  keyboardType: TextInputType.number,
+                                  label: "Weight (kg)",
+                                  hint: "Enter weight",
+                                  validator: Validators.weight,
+                                  min: 10,
+                                  max: 500,
+                                  allowDecimal: true,
+                                  prefixIcon: Icons.monitor_weight_outlined,
                                 ),
                               ],
                             ),
@@ -338,13 +351,18 @@ class _EditPersonalInfoScreenState extends ConsumerState<EditPersonalInfoScreen>
                       const SizedBox(height: 20),
 
                       // ADDRESS
-                      _buildSectionTitle("Address"),
-                      const SizedBox(height: 8),
-                      _buildTextField(
+                      AppTextField(
                         controller: _addressController,
+                        label: "Address",
                         hint: "Enter your address",
-                        icon: Icons.location_on_outlined,
+                        prefixIcon: Icons.location_on_outlined,
                         maxLines: 3,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return null; // Optional field
+                          }
+                          return null;
+                        },
                       ),
 
                       const SizedBox(height: 40),
