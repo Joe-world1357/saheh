@@ -1,38 +1,308 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
-
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="idk">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>idk</title>
-  <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sehati - Your Complete Health Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="../assets/Logo.png">
 </head>
-<body>
-  <script src="flutter_bootstrap.js" async></script>
+<body class="light-mode">
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="#" class="logo">
+        <span class="logo-icon">💚</span>
+        <span class="logo-text">Sehati</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#testimonials">Reviews</a>
+        <a href="#download">Download</a>
+        <a href="admin.html" class="nav-admin">Admin</a>
+      </div>
+      <div class="nav-actions">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span class="theme-icon">🌙</span>
+        </button>
+        <a href="#download" class="btn btn-primary">Get Started</a>
+      </div>
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#features">Features</a>
+    <a href="#testimonials">Reviews</a>
+    <a href="#download">Download</a>
+    <a href="admin.html">Admin Dashboard</a>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          Your Complete <span class="gradient-text">Health</span> Companion
+        </h1>
+        <p class="hero-subtitle">
+          Track fitness, monitor sleep, stay hydrated, earn XP, and get AI-powered health insights — all in one beautiful app.
+        </p>
+        <div class="hero-actions">
+          <a href="#download" class="btn btn-primary btn-lg">
+            <span>📱</span> Download App
+          </a>
+          <a href="#features" class="btn btn-outline btn-lg">
+            Learn More
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-value">10K+</span>
+            <span class="stat-label">Active Users</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">50K+</span>
+            <span class="stat-label">Goals Completed</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">4.9</span>
+            <span class="stat-label">App Rating</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="app-preview">
+              <div class="preview-header">
+                <span class="preview-greeting">Good Morning! 👋</span>
+                <span class="preview-xp">⭐ Lv.5 • 450 XP</span>
+              </div>
+              <div class="preview-cards">
+                <div class="preview-card sleep">
+                  <span class="preview-icon">🌙</span>
+                  <span class="preview-label">Sleep</span>
+                  <span class="preview-value">7.5h</span>
+                </div>
+                <div class="preview-card water">
+                  <span class="preview-icon">💧</span>
+                  <span class="preview-label">Water</span>
+                  <span class="preview-value">1.8L</span>
+                </div>
+                <div class="preview-card steps">
+                  <span class="preview-icon">👟</span>
+                  <span class="preview-label">Steps</span>
+                  <span class="preview-value">8,234</span>
+                </div>
+                <div class="preview-card calories">
+                  <span class="preview-icon">🔥</span>
+                  <span class="preview-label">Calories</span>
+                  <span class="preview-value">1,850</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Features</span>
+        <h2 class="section-title">Everything You Need for a Healthier Life</h2>
+        <p class="section-subtitle">Comprehensive health tracking with gamification and AI-powered insights</p>
+      </div>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon fitness">💪</div>
+          <h3 class="feature-title">Fitness & Workouts</h3>
+          <p class="feature-desc">Track workouts, earn XP, and level up. Men-focused training programs for chest, back, legs, arms, and more.</p>
+          <ul class="feature-list">
+            <li>✓ Customizable workout plans</li>
+            <li>✓ Real-time activity tracking</li>
+            <li>✓ Calorie burn calculation</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon sleep">🌙</div>
+          <h3 class="feature-title">Sleep Tracker</h3>
+          <p class="feature-desc">Monitor your sleep patterns, track quality, and get insights to improve your rest.</p>
+          <ul class="feature-list">
+            <li>✓ Bedtime & wake time logging</li>
+            <li>✓ Sleep quality rating</li>
+            <li>✓ Weekly trends & analytics</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon water">💧</div>
+          <h3 class="feature-title">Water Intake</h3>
+          <p class="feature-desc">Stay hydrated with smart reminders and track your daily water consumption goals.</p>
+          <ul class="feature-list">
+            <li>✓ Quick-add buttons</li>
+            <li>✓ Customizable daily goals</li>
+            <li>✓ Progress visualization</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon xp">⭐</div>
+          <h3 class="feature-title">XP & Gamification</h3>
+          <p class="feature-desc">Earn experience points for healthy habits. Level up and unlock achievements.</p>
+          <ul class="feature-list">
+            <li>✓ XP for workouts & goals</li>
+            <li>✓ Level progression system</li>
+            <li>✓ Achievement badges</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon ai">🧠</div>
+          <h3 class="feature-title">AI Health Insights</h3>
+          <p class="feature-desc">Get personalized health recommendations powered by AI based on your data.</p>
+          <ul class="feature-list">
+            <li>✓ Smart suggestions</li>
+            <li>✓ Pattern recognition</li>
+            <li>✓ Actionable tips</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon pharmacy">💊</div>
+          <h3 class="feature-title">Pharmacy & Medicine</h3>
+          <p class="feature-desc">Browse medicines, set reminders, and never miss a dose again.</p>
+          <ul class="feature-list">
+            <li>✓ Medicine reminders</li>
+            <li>✓ Pharmacy browsing</li>
+            <li>✓ Intake tracking</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials" id="testimonials">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Testimonials</span>
+        <h2 class="section-title">What Our Users Say</h2>
+        <p class="section-subtitle">Join thousands of happy users on their health journey</p>
+      </div>
+
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-text">"Sehati completely changed how I approach my health. The XP system keeps me motivated every day!"</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">AK</div>
+            <div class="author-info">
+              <span class="author-name">Ahmed K.</span>
+              <span class="author-role">Fitness Enthusiast</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-text">"The sleep tracker helped me identify patterns I never noticed. Now I sleep better than ever."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">SM</div>
+            <div class="author-info">
+              <span class="author-name">Sara M.</span>
+              <span class="author-role">Health Coach</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-text">"Finally an app that combines everything! Water tracking, workouts, and AI tips in one place."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">MR</div>
+            <div class="author-info">
+              <span class="author-name">Mohammed R.</span>
+              <span class="author-role">Software Engineer</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta" id="download">
+    <div class="container">
+      <div class="cta-content">
+        <h2 class="cta-title">Start Your Health Journey Today</h2>
+        <p class="cta-subtitle">Download Sehati and take the first step towards a healthier, happier you.</p>
+        <div class="cta-actions">
+          <a href="#" class="btn btn-white btn-lg">
+            <span>🍎</span> App Store
+          </a>
+          <a href="#" class="btn btn-white btn-lg">
+            <span>🤖</span> Google Play
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="logo">
+            <span class="logo-icon">💚</span>
+            <span class="logo-text">Sehati</span>
+          </a>
+          <p class="footer-desc">Your complete health companion. Track, improve, and thrive.</p>
+          <div class="social-links">
+            <a href="#" class="social-link">𝕏</a>
+            <a href="#" class="social-link">📘</a>
+            <a href="#" class="social-link">📸</a>
+          </div>
+        </div>
+
+        <div class="footer-links">
+          <h4>Product</h4>
+          <a href="#features">Features</a>
+          <a href="#download">Download</a>
+          <a href="#">Pricing</a>
+        </div>
+
+        <div class="footer-links">
+          <h4>Company</h4>
+          <a href="#">About Us</a>
+          <a href="#">Careers</a>
+          <a href="#">Contact</a>
+        </div>
+
+        <div class="footer-links">
+          <h4>Legal</h4>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Cookie Policy</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2025 Sehati. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
