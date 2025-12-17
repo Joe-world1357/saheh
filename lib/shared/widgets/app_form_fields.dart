@@ -52,8 +52,7 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = AppColors.of(context);
+    final brightness = Theme.of(context).brightness;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +60,7 @@ class AppTextField extends StatelessWidget {
         if (label != null) ...[
           Text(
             label!,
-            style: AppTextStyles.labelLarge(context),
+            style: AppTextStyles.labelLarge(brightness),
           ),
           const SizedBox(height: 8),
         ],
@@ -79,52 +78,52 @@ class AppTextField extends StatelessWidget {
           readOnly: readOnly,
           inputFormatters: inputFormatters,
           textCapitalization: textCapitalization,
-          style: AppTextStyles.bodyLarge(context),
+          style: AppTextStyles.bodyLarge(brightness),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: AppTextStyles.bodyLarge(context).copyWith(
-              color: colors.textSecondary,
+            hintStyle: AppTextStyles.bodyLarge(brightness).copyWith(
+              color: AppColors.getTextSecondary(brightness),
             ),
             prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, color: colors.primary)
+                ? Icon(prefixIcon, color: AppColors.getPrimary(brightness))
                 : null,
             suffixIcon: suffixIcon != null
                 ? IconButton(
                     icon: Icon(suffixIcon),
                     onPressed: onSuffixTap,
-                    color: colors.textSecondary,
+                    color: AppColors.getTextSecondary(brightness),
                   )
                 : null,
             helperText: helperText,
-            helperStyle: AppTextStyles.bodySmall(context).copyWith(
-              color: colors.textSecondary,
+            helperStyle: AppTextStyles.bodySmall(brightness).copyWith(
+              color: AppColors.getTextSecondary(brightness),
             ),
             counterText: maxLength != null ? '' : null,
             filled: true,
-            fillColor: colors.surface,
+            fillColor: AppColors.getSurface(brightness),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colors.border),
+              borderSide: BorderSide(color: AppColors.getBorder(brightness)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colors.border),
+              borderSide: BorderSide(color: AppColors.getBorder(brightness)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colors.primary, width: 2),
+              borderSide: BorderSide(color: AppColors.getPrimary(brightness), width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colors.error),
+              borderSide: BorderSide(color: AppColors.getError(brightness)),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colors.error, width: 2),
+              borderSide: BorderSide(color: AppColors.getError(brightness), width: 2),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colors.border.withOpacity(0.5)),
+              borderSide: BorderSide(color: AppColors.getBorder(brightness).withOpacity(0.5)),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -172,8 +171,6 @@ class AppNumberField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    
     List<TextInputFormatter> formatters = [
       if (allowDecimal)
         AppInputFormatters.numberWithDecimal
