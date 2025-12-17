@@ -61,9 +61,12 @@
       </nav>
       
       <div style="margin-top: auto; padding: var(--spacing-m);">
-        <button class="theme-toggle" onclick="toggleTheme()" style="width: 100%;">
+        <button class="theme-toggle" onclick="toggleTheme()" style="width: 100%; margin-bottom: var(--spacing-s);">
           <span class="theme-icon">🌙</span>
           <span style="margin-left: 8px;">Toggle Theme</span>
+        </button>
+        <button class="btn btn-outline" onclick="handleLogout()" style="width: 100%;">
+          🚪 Logout
         </button>
       </div>
     </aside>
@@ -442,6 +445,157 @@
   </div>
 
   <script src="script.js"></script>
+  <script>
+    const API_URL = 'http://localhost:3000/api';
+    let adminToken = localStorage.getItem('adminToken');
+
+    // Check authentication on page load
+    async function checkAuth() {
+      if (!adminToken) {
+        window.location.href = 'admin-login.html';
+        return false;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/auth/verify`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+
+        const data = await response.json();
+        if (!data.valid) {
+          throw new Error('Invalid token');
+        }
+
+        // Update welcome message
+        const adminEmail = localStorage.getItem('adminEmail') || 'Admin';
+        document.querySelector('.page-header p').textContent = `Welcome back, ${adminEmail}`;
+        return true;
+      } catch (error) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminEmail');
+        window.location.href = 'admin-login.html';
+        return false;
+      }
+    }
+
+    // Fetch overview stats
+    async function loadOverview() {
+      try {
+        const response = await fetch(`${API_URL}/admin/overview`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch overview');
+
+        const data = await response.json();
+
+        // Update stats cards
+        document.querySelectorAll('.stat-card-value')[0].textContent = data.totalUsers?.toLocaleString() || '0';
+        document.querySelectorAll('.stat-card-value')[1].textContent = data.activeUsers?.toLocaleString() || '0';
+        document.querySelectorAll('.stat-card-value')[2].textContent = data.goalsCompleted?.toLocaleString() || '0';
+        document.querySelectorAll('.stat-card-value')[3].textContent = data.avgXP?.toLocaleString() || '0';
+      } catch (error) {
+        console.error('Failed to load overview:', error);
+      }
+    }
+
+    // Fetch users
+    async function loadUsers() {
+      try {
+        const response = await fetch(`${API_URL}/admin/users`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch users');
+
+        const users = await response.json();
+        const tbody = document.querySelector('.data-table tbody');
+        
+        if (users.length > 0) {
+          tbody.innerHTML = users.map(user => `
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <div class="user-avatar">${user.name?.charAt(0) || 'U'}</div>
+                  <span>${user.name || 'Unknown'}</span>
+                </div>
+              </td>
+              <td>${user.email || '-'}</td>
+              <td>⭐ ${user.level || 0}</td>
+              <td>${user.xp?.toLocaleString() || 0}</td>
+              <td>-</td>
+              <td><span class="status-badge active">Active</span></td>
+              <td>${user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}</td>
+            </tr>
+          `).join('');
+        }
+      } catch (error) {
+        console.error('Failed to load users:', error);
+      }
+    }
+
+    // Fetch activity analytics
+    async function loadActivityAnalytics() {
+      try {
+        const response = await fetch(`${API_URL}/admin/analytics/activity?days=7`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch activity');
+
+        const activity = await response.json();
+        // Update chart if needed
+        console.log('Activity data:', activity);
+      } catch (error) {
+        console.error('Failed to load activity:', error);
+      }
+    }
+
+    // Logout
+    function handleLogout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminEmail');
+        window.location.href = 'admin-login.html';
+      }
+    }
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', async () => {
+      const isAuthenticated = await checkAuth();
+      if (isAuthenticated) {
+        await Promise.all([
+          loadOverview(),
+          loadUsers(),
+          loadActivityAnalytics()
+        ]);
+      }
+    });
+
+    // Search users
+    function searchUsers(query) {
+      const rows = document.querySelectorAll('.data-table tbody tr');
+      const lowerQuery = query.toLowerCase();
+      
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(lowerQuery) ? '' : 'none';
+      });
+    }
+
+    // Export data
+    function exportData(format) {
+      alert(`Exporting data as ${format}... (Feature coming soon)`);
+    }
+  </script>
 </body>
 </html>
 

@@ -294,7 +294,7 @@ class _AddMedicinePageState extends ConsumerState<AddMedicinePage> {
 
                   final authState = ref.read(authProvider);
                   final userEmail = authState.user?.email ?? '';
-                  
+
                   final reminder = MedicineReminderModel(
                     userEmail: userEmail,
                     medicineName: nameCtrl.text.trim(),
@@ -304,19 +304,19 @@ class _AddMedicinePageState extends ConsumerState<AddMedicinePage> {
                   );
 
                   try {
-                    await ref.read(remindersProvider.notifier).addReminder(reminder);
+                  await ref.read(remindersProvider.notifier).addReminder(reminder);
                     
                     // Refresh home data
                     ref.read(homeDataProvider.notifier).refresh();
 
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Medicine reminder added successfully'),
-                          backgroundColor: Color(0xFF4CAF50),
-                        ),
-                      );
-                      Navigator.pop(context);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Medicine reminder added successfully'),
+                        backgroundColor: Color(0xFF4CAF50),
+                      ),
+                    );
+                    Navigator.pop(context);
                     }
                   } catch (e) {
                     if (mounted) {
