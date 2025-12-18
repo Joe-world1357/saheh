@@ -61,10 +61,67 @@ class _FitnessOnboardingScreenState extends ConsumerState<FitnessOnboardingScree
   }
 
   Future<void> _completeOnboarding() async {
+    final state = ref.read(fitnessOnboardingProvider);
+    
+    // Validate all required fields before completing
+    if (state.selectedGoals.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select at least one fitness goal'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    if (state.selectedDays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select at least one workout day'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    if (state.age < 1 || state.age > 150) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid age (1-150)'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    if (state.weight < 10 || state.weight > 500) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid weight (10-500 kg)'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    if (state.height < 50 || state.height > 300) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid height (50-300 cm)'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
     final success = await ref.read(fitnessOnboardingProvider.notifier).completeOnboarding();
     if (success && mounted) {
+      // Invalidate providers to refresh state
+      ref.invalidate(needsFitnessOnboardingProvider);
+      ref.invalidate(fitnessOnboardingProvider);
+      
       // Wait a moment to ensure database is fully updated
-      await Future.delayed(const Duration(milliseconds: 200));
+      await Future.delayed(const Duration(milliseconds: 300));
       if (mounted) {
         if (widget.onComplete != null) {
           widget.onComplete!();
@@ -72,6 +129,13 @@ class _FitnessOnboardingScreenState extends ConsumerState<FitnessOnboardingScree
           Navigator.of(context).pop(true);
         }
       }
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to save preferences. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -596,6 +660,7 @@ class _PersonalizationStepState extends ConsumerState<_PersonalizationStep> {
   late TextEditingController _ageController;
   late TextEditingController _weightController;
   late TextEditingController _heightController;
+  final _formKey = GlobalKey<FormState>();
 
   static const _activityLevels = [
     {'id': 'sedentary', 'title': 'Sedentary', 'desc': 'Little or no exercise'},
@@ -612,6 +677,12 @@ class _PersonalizationStepState extends ConsumerState<_PersonalizationStep> {
     _ageController = TextEditingController(text: state.age.toString());
     _weightController = TextEditingController(text: state.weight.toString());
     _heightController = TextEditingController(text: state.height.toString());
+  }
+  
+  void _validateAndNext() {
+    if (_formKey.currentState!.validate()) {
+      widget.onNext();
+    }
   }
 
   @override
@@ -644,63 +715,65 @@ class _PersonalizationStepState extends ConsumerState<_PersonalizationStep> {
           
           Expanded(
             child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Age, Weight, Height
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _InputField(
-                          label: 'Age',
-                          suffix: 'years',
-                          controller: _ageController,
-                          validator: Validators.age,
-                          min: 1,
-                          max: 150,
-                          onChanged: (v) {
-                            final age = int.tryParse(v) ?? 25;
-                            ref.read(fitnessOnboardingProvider.notifier).setAge(age);
-                          },
-                          brightness: brightness,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Age, Weight, Height
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _InputField(
+                            label: 'Age',
+                            suffix: 'years',
+                            controller: _ageController,
+                            validator: Validators.age,
+                            min: 1,
+                            max: 150,
+                            onChanged: (v) {
+                              final age = int.tryParse(v) ?? 25;
+                              ref.read(fitnessOnboardingProvider.notifier).setAge(age);
+                            },
+                            brightness: brightness,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: AppTheme.spacingM),
-                      Expanded(
-                        child: _InputField(
-                          label: 'Weight',
-                          suffix: 'kg',
-                          controller: _weightController,
-                          validator: Validators.weight,
-                          min: 10,
-                          max: 500,
-                          allowDecimal: true,
-                          onChanged: (v) {
-                            final weight = double.tryParse(v) ?? 70.0;
-                            ref.read(fitnessOnboardingProvider.notifier).setWeight(weight);
-                          },
-                          brightness: brightness,
+                        const SizedBox(width: AppTheme.spacingM),
+                        Expanded(
+                          child: _InputField(
+                            label: 'Weight',
+                            suffix: 'kg',
+                            controller: _weightController,
+                            validator: Validators.weight,
+                            min: 10,
+                            max: 500,
+                            allowDecimal: true,
+                            onChanged: (v) {
+                              final weight = double.tryParse(v) ?? 70.0;
+                              ref.read(fitnessOnboardingProvider.notifier).setWeight(weight);
+                            },
+                            brightness: brightness,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: AppTheme.spacingM),
-                      Expanded(
-                        child: _InputField(
-                          label: 'Height',
-                          suffix: 'cm',
-                          controller: _heightController,
-                          validator: Validators.height,
-                          min: 50,
-                          max: 300,
-                          allowDecimal: true,
-                          onChanged: (v) {
-                            final height = double.tryParse(v) ?? 170.0;
-                            ref.read(fitnessOnboardingProvider.notifier).setHeight(height);
-                          },
-                          brightness: brightness,
+                        const SizedBox(width: AppTheme.spacingM),
+                        Expanded(
+                          child: _InputField(
+                            label: 'Height',
+                            suffix: 'cm',
+                            controller: _heightController,
+                            validator: Validators.height,
+                            min: 50,
+                            max: 300,
+                            allowDecimal: true,
+                            onChanged: (v) {
+                              final height = double.tryParse(v) ?? 170.0;
+                              ref.read(fitnessOnboardingProvider.notifier).setHeight(height);
+                            },
+                            brightness: brightness,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                   
                   const SizedBox(height: AppTheme.spacingL),
                   
@@ -721,7 +794,8 @@ class _PersonalizationStepState extends ConsumerState<_PersonalizationStep> {
                       ),
                     );
                   }),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -729,7 +803,7 @@ class _PersonalizationStepState extends ConsumerState<_PersonalizationStep> {
           const SizedBox(height: AppTheme.spacingM),
           _NavigationButtons(
             onBack: widget.onBack,
-            onNext: widget.onNext,
+            onNext: _validateAndNext,
             brightness: brightness,
           ),
         ],

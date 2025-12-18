@@ -61,8 +61,10 @@ class AuthStorage {
   }
 
   /// Save user credentials (per user - keyed by email)
-  static Future<void> saveCredentials(String email, String hashedPassword) async {
+  /// Password will be hashed automatically
+  static Future<void> saveCredentials(String email, String password) async {
     await _ensureBoxesOpen();
+    final hashedPassword = _hashPassword(password);
     await _credentialsBox?.put(email, {
       'email': email,
       'password': hashedPassword,
@@ -152,7 +154,8 @@ class AuthStorage {
   static Future<void> register(UserModel user, String password) async {
     await _ensureBoxesOpen();
     await saveUser(user);
-    await saveCredentials(user.email, _hashPassword(password));
+    // saveCredentials already hashes the password, so pass plain password
+    await saveCredentials(user.email, password);
     await login(user);
   }
 

@@ -13,6 +13,9 @@ import '../../../providers/home_data_provider.dart';
 import '../../services/view/clinic/clinic_dashboard.dart';
 import 'notifications_screen.dart';
 import 'view_suggestions_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_card.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -308,9 +311,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             const SizedBox(width: 16),
                             Text(
                               "${homeData.totalSteps} steps",
-                              style: const TextStyle(
-                                color: Color(0xFF9C27B0),
-                                fontSize: 14,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: AppColors.getInfo(theme.brightness),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -319,9 +321,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               homeData.sleepHours != null
                                   ? "${homeData.sleepHours!.toStringAsFixed(1)}h sleep"
                                   : "No sleep data",
-                              style: const TextStyle(
-                                color: Color(0xFFFF5722),
-                                fontSize: 14,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: AppColors.getWarning(theme.brightness),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -490,13 +491,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF9C27B0)
+                                color: AppColors.getInfo(theme.brightness)
                                     .withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.fitness_center,
-                                color: Color(0xFF9C27B0),
+                                color: AppColors.getInfo(theme.brightness),
                                 size: 18,
                               ),
                             ),
@@ -510,29 +511,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           style: theme.textTheme.bodyMedium,
                         ),
                         if (homeData.todaysWorkout == null) ...[
-                          const SizedBox(height: 14),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const WorkoutLibrary(),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const WorkoutLibrary(),
+                                  ),
+                                );
+                              },
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppColors.getInfo(theme.brightness),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                                 ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF9C27B0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
                               ),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                            child: const Center(
                               child: Text(
                                 "Start Workout",
-                                style: TextStyle(
+                                style: theme.textTheme.titleMedium?.copyWith(
                                   color: Colors.white,
-                                  fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -549,15 +551,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 // AI HEALTH INSIGHT CARD
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
+                  child: AppCard(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE3F2FD),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFF2196F3)
-                            .withValues(alpha: 0.3),
-                      ),
+                    backgroundColor: AppColors.getInfo(theme.brightness).withValues(alpha: 0.1),
+                    border: Border.all(
+                      color: AppColors.getInfo(theme.brightness).withValues(alpha: 0.3),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -566,8 +564,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           children: [
                             Container(
                               padding: const EdgeInsets.all(8),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF2196F3),
+                              decoration: BoxDecoration(
+                                color: AppColors.getInfo(theme.brightness),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -589,6 +587,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ? "Your protein intake is ${(50 - homeData.proteinConsumed).toStringAsFixed(0)}g below target. Consider adding lean meats or protein shakes to your next meal."
                               : "Great job on your nutrition today! Keep up the healthy eating habits.",
                           style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
                             height: 1.5,
                           ),
                         ),
@@ -604,9 +603,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           },
                           child: Text(
                             "View Suggestions",
-                            style: TextStyle(
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               color: primary,
-                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -642,7 +640,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           value: homeData.sleepHours != null
                               ? "${homeData.sleepHours!.toStringAsFixed(1)}h"
                               : "Not logged",
-                          color: const Color(0xFF6C5CE7),
+                          color: AppColors.getInfo(theme.brightness),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -660,7 +658,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           icon: Icons.water_drop,
                           label: "Water",
                           value: "${(homeData.waterIntake / 1000).toStringAsFixed(1)}L / ${(homeData.waterGoal / 1000).toStringAsFixed(1)}L",
-                          color: const Color(0xFF2196F3),
+                          color: AppColors.getInfo(theme.brightness),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -687,7 +685,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           icon: Icons.flag,
                           label: "Goals",
                           value: "${homeData.activeGoals} active",
-                          color: const Color(0xFF4CAF50),
+                          color: AppColors.getSuccess(theme.brightness),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -705,7 +703,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           icon: Icons.analytics,
                           label: "Reports",
                           value: "View all",
-                          color: const Color(0xFFFF9800),
+                          color: AppColors.getWarning(theme.brightness),
                           onTap: () {
                             Navigator.push(
                               context,

@@ -1,5 +1,9 @@
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/notifications/notification_manager.dart';
+import '../core/notifications/notification_service.dart';
 import '../models/user_model.dart';
 import '../core/storage/auth_storage.dart';
 import '../database/database_helper.dart';
@@ -152,6 +156,9 @@ class AuthNotifier extends Notifier<AuthState> {
       // Refresh all user-specific providers
       _invalidateAllUserProviders();
 
+      // Setup notifications after login
+      _setupNotifications();
+
       return true;
     } catch (e) {
       debugPrint('Login error: $e');
@@ -216,6 +223,9 @@ class AuthNotifier extends Notifier<AuthState> {
       // Refresh providers for new user
       _invalidateAllUserProviders();
 
+      // Setup notifications after registration
+      _setupNotifications();
+
       return true;
     } catch (e) {
       debugPrint('Registration error: $e');
@@ -244,6 +254,15 @@ class AuthNotifier extends Notifier<AuthState> {
       
       // Invalidate all providers so they refresh on next login
       _invalidateAllUserProviders();
+      
+      // Cancel all notifications on logout
+      if (Platform.isAndroid) {
+        try {
+          await NotificationService.instance.cancelAll();
+        } catch (e) {
+          debugPrint('Error canceling notifications on logout: $e');
+        }
+      }
     } catch (e) {
       debugPrint('Logout error: $e');
       // Even on error, clear state
@@ -273,21 +292,54 @@ class AuthNotifier extends Notifier<AuthState> {
     if (state.user == null) return;
 
     try {
+      final oldLevel = state.user!.level;
       final newXP = state.user!.xp + amount;
+      final newLevel = _calculateLevel(newXP);
+      final levelUp = newLevel > oldLevel;
+      
       final updatedUser = state.user!.copyWith(
         xp: newXP,
-        level: _calculateLevel(newXP),
+        level: newLevel,
         updatedAt: DateTime.now(),
       );
 
       await updateUser(updatedUser);
+
+      // Show notification for XP earned
+      if (Platform.isAndroid) {
+        try {
+          await NotificationService.instance.showXPEarnedNotification(
+            xpAmount: amount,
+            totalXP: newXP,
+            level: newLevel,
+            levelUp: levelUp,
+          );
+        } catch (e) {
+          debugPrint('Error showing XP notification: $e');
+        }
+      }
     } catch (e) {
       debugPrint('Add XP error: $e');
     }
   }
 
+
   int _calculateLevel(int xp) {
     return (xp / 100).floor() + 1;
+  }
+
+  /// Setup notifications after login
+  void _setupNotifications() {
+    if (!Platform.isAndroid) return;
+    
+    // Use post-frame callback to avoid calling during build
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await NotificationManager.instance.setupNotifications(ref);
+      } catch (e) {
+        debugPrint('Error setting up notifications: $e');
+      }
+    });
   }
 
   /// Invalidate all user-specific providers

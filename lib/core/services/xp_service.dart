@@ -47,17 +47,74 @@ class XPService {
     await ref.read(authProvider.notifier).addXP(xpGoalCompleted);
   }
 
-  /// Calculate level from XP
+  /// Calculate level from XP using exponential progression
+  /// Level 1: 0-99 XP (100 XP needed)
+  /// Level 2: 100-249 XP (150 XP needed, total 250)
+  /// Level 3: 250-499 XP (250 XP needed, total 500)
+  /// Level 4: 500-999 XP (500 XP needed, total 1000)
+  /// Level 5: 1000-1749 XP (750 XP needed, total 1750)
+  /// Formula: Progressive exponential growth
   static int calculateLevel(int xp) {
-    // 100 XP per level
-    return (xp / 100).floor() + 1;
+    if (xp < 0) return 1;
+    if (xp == 0) return 1;
+    
+    int level = 1;
+    int xpRequired = 0;
+    
+    while (xpRequired <= xp) {
+      final xpForThisLevel = _getXPRequiredForLevel(level);
+      if (xpRequired + xpForThisLevel > xp) {
+        break;
+      }
+      xpRequired += xpForThisLevel;
+      level++;
+      
+      // Safety: prevent infinite loop
+      if (level > 100) break;
+    }
+    
+    return level;
+  }
+
+  /// Get XP required for a specific level
+  static int _getXPRequiredForLevel(int level) {
+    if (level <= 1) return 100;
+    // Progressive exponential: 100, 150, 250, 500, 750, 1000, 1500...
+    if (level == 2) return 150;
+    if (level == 3) return 250;
+    if (level == 4) return 500;
+    // For higher levels, use formula: base * multiplier^(level-4)
+    final base = 500;
+    final multiplier = 1.5;
+    return (base * (multiplier * (level - 4))).round();
   }
 
   /// Calculate XP needed for next level
   static int xpForNextLevel(int currentLevel, int currentXP) {
-    final xpForCurrentLevel = (currentLevel - 1) * 100;
-    final xpForNextLevel = currentLevel * 100;
-    return xpForNextLevel - currentXP;
+    final totalXPForCurrentLevel = _getTotalXPForLevel(currentLevel);
+    final xpInCurrentLevel = currentXP - totalXPForCurrentLevel;
+    final xpRequiredForNextLevel = _getXPRequiredForLevel(currentLevel);
+    final xpNeeded = xpRequiredForNextLevel - xpInCurrentLevel;
+    return xpNeeded > 0 ? xpNeeded : 0;
+  }
+
+  /// Get total XP required to reach a specific level
+  static int _getTotalXPForLevel(int level) {
+    if (level <= 1) return 0;
+    int total = 0;
+    for (int i = 1; i < level; i++) {
+      total += _getXPRequiredForLevel(i);
+    }
+    return total;
+  }
+
+  /// Get current level progress (0.0 to 1.0)
+  static double getLevelProgress(int currentLevel, int currentXP) {
+    final totalXPForCurrentLevel = _getTotalXPForLevel(currentLevel);
+    final xpInCurrentLevel = currentXP - totalXPForCurrentLevel;
+    final xpRequiredForNextLevel = _getXPRequiredForLevel(currentLevel);
+    if (xpRequiredForNextLevel == 0) return 1.0;
+    return (xpInCurrentLevel / xpRequiredForNextLevel).clamp(0.0, 1.0);
   }
 }
 

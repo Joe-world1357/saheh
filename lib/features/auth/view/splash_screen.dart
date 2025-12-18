@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/auth_provider.dart';
 import '../../home/view/guest_navbar.dart';
-import 'welcome_screen.dart';
+import 'onboarding_screen.dart';
 
 class AnimatedSplash extends ConsumerStatefulWidget {
   const AnimatedSplash({super.key});
@@ -44,7 +44,7 @@ class _AnimatedSplashState extends ConsumerState<AnimatedSplash>
         } else {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+            MaterialPageRoute(builder: (_) => const OnboardingScreen()),
           );
         }
       }

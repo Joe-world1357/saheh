@@ -38,34 +38,22 @@ class AppInputFormatters {
     });
   }
 
-  /// Max value formatter
+  /// Max value formatter - allows all input, validation should be done in validator
+  /// This allows users to type partial numbers without blocking
   static TextInputFormatter maxValue(double max) {
+    // Don't block input - let validator handle min/max validation
+    // This allows partial input while typing
     return TextInputFormatter.withFunction((oldValue, newValue) {
-      if (newValue.text.isEmpty) {
-        return newValue;
-      }
-      
-      final num = double.tryParse(newValue.text);
-      if (num != null && num > max) {
-        return oldValue;
-      }
-      
       return newValue;
     });
   }
 
-  /// Min value formatter
+  /// Min value formatter - allows all input, validation should be done in validator
+  /// This allows users to type partial numbers (e.g., "1" when min is 50, to type "150")
   static TextInputFormatter minValue(double min) {
+    // Don't block input - let validator handle min/max validation
+    // This allows partial input while typing
     return TextInputFormatter.withFunction((oldValue, newValue) {
-      if (newValue.text.isEmpty) {
-        return newValue;
-      }
-      
-      final num = double.tryParse(newValue.text);
-      if (num != null && num < min) {
-        return oldValue;
-      }
-      
       return newValue;
     });
   }

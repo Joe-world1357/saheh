@@ -1,6 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Notification permissions (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Schedule exact alarms (Android 12+) -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <!-- Wake lock for notifications -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- Vibration -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    
     <application
-        android:label="Sehati"
+        android:label="Saheeh"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

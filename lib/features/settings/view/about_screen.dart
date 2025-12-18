@@ -1,56 +1,33 @@
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/localization/localization_helper.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const primary = Color(0xFF20C6B7);
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final l10n = AppLocalizations.of(context)!;
+    final primary = AppColors.getPrimary(brightness);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5FAFA),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(l10n.about, style: theme.textTheme.titleLarge),
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            // TOP BAR
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Color(0xFF1A2A2C),
-                        size: 20,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                    child: Text(
-                      "About",
-                      style: TextStyle(
-                        color: Color(0xFF1A2A2C),
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
 
             Expanded(
               child: SingleChildScrollView(
@@ -77,11 +54,9 @@ class AboutScreen extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     // APP NAME
-                    const Text(
-                      "Sehati",
-                      style: TextStyle(
-                        color: Color(0xFF1A2A2C),
-                        fontSize: 32,
+                    Text(
+                      l10n.appName,
+                      style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -90,10 +65,9 @@ class AboutScreen extends StatelessWidget {
 
                     // VERSION
                     Text(
-                      "Version 1.0.0",
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 14,
+                      l10n.appVersion('1.0.0'),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
 
@@ -103,29 +77,28 @@ class AboutScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                         border: Border.all(
-                          color: Colors.grey.shade200,
+                          color: theme.colorScheme.outline.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "About Sehati",
-                            style: TextStyle(
-                              color: Color(0xFF1A2A2C),
-                              fontSize: 18,
+                          Text(
+                            "${l10n.about} ${l10n.appName}",
+                            style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            "Sehati is your comprehensive health and wellness companion. Manage your medications, track your fitness, monitor your nutrition, and access healthcare services all in one place.",
-                            style: TextStyle(
-                              color: Colors.grey.shade700,
-                              fontSize: 14,
+                            context.isRTL
+                                ? "${l10n.appName} هو رفيقك الشامل للصحة والعافية. قم بإدارة أدويتك، وتتبع لياقتك البدنية، وراقب تغذيتك، والوصول إلى خدمات الرعاية الصحية كلها في مكان واحد."
+                                : "${l10n.appName} is your comprehensive health and wellness companion. Manage your medications, track your fitness, monitor your nutrition, and access healthcare services all in one place.",
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
                               height: 1.6,
                             ),
                           ),
@@ -139,29 +112,27 @@ class AboutScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                         border: Border.all(
-                          color: Colors.grey.shade200,
+                          color: theme.colorScheme.outline.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Key Features",
-                            style: TextStyle(
-                              color: Color(0xFF1A2A2C),
-                              fontSize: 18,
+                          Text(
+                            context.isRTL ? "الميزات الرئيسية" : "Key Features",
+                            style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 16),
-                          _buildFeatureItem(Icons.local_pharmacy, "Pharmacy & Medications"),
-                          _buildFeatureItem(Icons.fitness_center, "Fitness Tracking"),
-                          _buildFeatureItem(Icons.restaurant, "Nutrition Management"),
-                          _buildFeatureItem(Icons.calendar_today, "Appointment Booking"),
-                          _buildFeatureItem(Icons.health_and_safety, "Health Insights"),
+                          _buildFeatureItem(context, theme, primary, Icons.local_pharmacy, context.isRTL ? "الصيدلية والأدوية" : "Pharmacy & Medications"),
+                          _buildFeatureItem(context, theme, primary, Icons.fitness_center, l10n.workout),
+                          _buildFeatureItem(context, theme, primary, Icons.restaurant, l10n.nutrition),
+                          _buildFeatureItem(context, theme, primary, Icons.calendar_today, l10n.appointments),
+                          _buildFeatureItem(context, theme, primary, Icons.health_and_safety, context.isRTL ? "رؤى صحية" : "Health Insights"),
                         ],
                       ),
                     ),
@@ -172,28 +143,26 @@ class AboutScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                         border: Border.all(
-                          color: Colors.grey.shade200,
+                          color: theme.colorScheme.outline.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Company Information",
-                            style: TextStyle(
-                              color: Color(0xFF1A2A2C),
-                              fontSize: 18,
+                          Text(
+                            context.isRTL ? "معلومات الشركة" : "Company Information",
+                            style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 16),
-                          _buildInfoRow(Icons.business, "Sehati Health Solutions"),
-                          _buildInfoRow(Icons.email, "contact@sehati.com"),
-                          _buildInfoRow(Icons.phone, "+1 (555) 123-4567"),
-                          _buildInfoRow(Icons.language, "www.sehati.com"),
+                          _buildInfoRow(context, theme, Icons.business, "${l10n.appName} Health Solutions"),
+                          _buildInfoRow(context, theme, Icons.email, "contact@saheeh.com"),
+                          _buildInfoRow(context, theme, Icons.phone, "+1 (555) 123-4567"),
+                          _buildInfoRow(context, theme, Icons.language, "www.saheeh.com"),
                         ],
                       ),
                     ),
@@ -204,28 +173,26 @@ class AboutScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                         border: Border.all(
-                          color: Colors.grey.shade200,
+                          color: theme.colorScheme.outline.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Legal",
-                            style: TextStyle(
-                              color: Color(0xFF1A2A2C),
-                              fontSize: 18,
+                          Text(
+                            context.isRTL ? "قانوني" : "Legal",
+                            style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 16),
-                          _buildLegalLink("Privacy Policy", () {
+                          _buildLegalLink(context, theme, primary, l10n.privacyPolicy, () {
                             // Navigate to privacy policy
                           }),
-                          _buildLegalLink("Terms of Service", () {
+                          _buildLegalLink(context, theme, primary, l10n.termsOfService, () {
                             // Navigate to terms
                           }),
                         ],
@@ -243,22 +210,23 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatureItem(IconData icon, String text) {
+  Widget _buildFeatureItem(BuildContext context, ThemeData theme, Color primary, IconData icon, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Icon(
             icon,
-            color: const Color(0xFF20C6B7),
+            color: primary,
             size: 20,
           ),
           const SizedBox(width: 12),
-          Text(
-            text,
-            style: TextStyle(
-              color: Colors.grey.shade700,
-              fontSize: 14,
+          Expanded(
+            child: Text(
+              text,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],
@@ -266,22 +234,23 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
+  Widget _buildInfoRow(BuildContext context, ThemeData theme, IconData icon, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Icon(
             icon,
-            color: Colors.grey.shade600,
+            color: theme.colorScheme.onSurfaceVariant,
             size: 20,
           ),
           const SizedBox(width: 12),
-          Text(
-            text,
-            style: TextStyle(
-              color: Colors.grey.shade700,
-              fontSize: 14,
+          Expanded(
+            child: Text(
+              text,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],
@@ -289,7 +258,7 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLegalLink(String text, VoidCallback onTap) {
+  Widget _buildLegalLink(BuildContext context, ThemeData theme, Color primary, String text, VoidCallback onTap) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GestureDetector(
@@ -298,16 +267,15 @@ class AboutScreen extends StatelessWidget {
           children: [
             Text(
               text,
-              style: const TextStyle(
-                color: Color(0xFF20C6B7),
-                fontSize: 14,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: primary,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const Spacer(),
-            const Icon(
-              Icons.chevron_right,
-              color: Color(0xFF20C6B7),
+            Icon(
+              context.isRTL ? Icons.chevron_left : Icons.chevron_right,
+              color: primary,
             ),
           ],
         ),

@@ -1,5 +1,5 @@
-name: idk
-description: "A new Flutter project."
+name: saheeh
+description: "Saheeh - Your Health Journey Companion"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -39,6 +39,8 @@ dependencies:
   sqflite_common_ffi: ^2.3.3
   path: ^1.9.1
   intl: ^0.20.2
+  flutter_localizations:
+    sdk: flutter
   shared_preferences: ^2.2.2
   flutter_local_notifications: ^17.0.0
   hive: ^2.2.3
@@ -47,6 +49,13 @@ dependencies:
   cached_network_image: ^3.3.1
   http: ^1.2.0
   url_launcher: ^6.3.2
+  camera: ^0.11.0+1
+  image_picker: ^1.1.2
+  mobile_scanner: ^5.2.3
+  permission_handler: ^11.3.1
+  timezone: ^0.9.4
+  health: ^13.2.1
+  flutter_blue_plus: ^1.32.0
   # Firebase (optional - uncomment if you want to use Firebase)
   # firebase_core: ^3.6.0
   # firebase_auth: ^5.3.1
@@ -71,6 +80,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

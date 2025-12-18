@@ -50,9 +50,7 @@ class MealCard
               12,
             ),
             decoration: BoxDecoration(
-              color: color.withOpacity(
-                0.1,
-              ),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(
                 12,
               ),
@@ -172,26 +170,20 @@ class ProductCard
   });
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 130,
-        margin: const EdgeInsets.only(
-          right: 16,
-        ),
-        padding: const EdgeInsets.all(
-          12,
-        ),
+        margin: const EdgeInsets.only(right: 16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(
-            16,
-          ),
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.grey.shade200,
+            color: theme.colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
         child: Column(
@@ -203,26 +195,19 @@ class ProductCard
               height: 85,
               borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(
-              height: 8,
-            ),
+            const SizedBox(height: 8),
             Text(
               name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Color(
-                  0xFF1A2A2C,
-                ),
-                fontSize: 14,
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
               size,
-              style: TextStyle(
-                color: Colors.grey.shade500,
-                fontSize: 12,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const Spacer(),
@@ -234,35 +219,25 @@ class ProductCard
                   children: [
                     Text(
                       "\$${price.toStringAsFixed(2)}",
-                      style: const TextStyle(
-                        color: Color(
-                          0xFF1A2A2C,
-                        ),
-                        fontSize: 16,
+                      style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (originalPrice !=
-                        null)
+                    if (originalPrice != null)
                       Text(
                         "\$${originalPrice!.toStringAsFixed(2)}",
-                        style: TextStyle(
-                          color: Colors.grey.shade400,
-                          fontSize: 12,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
                           decoration: TextDecoration.lineThrough,
                         ),
                       ),
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.all(
-                    6,
-                  ),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: primary,
-                    borderRadius: BorderRadius.circular(
-                      8,
-                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.add,
@@ -322,9 +297,7 @@ class GoalCard
           16,
         ),
         border: Border.all(
-          color: color.withOpacity(
-            0.3,
-          ),
+          color: color.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -440,9 +413,7 @@ class InfoCard
           14,
         ),
         border: Border.all(
-          color: color.withOpacity(
-            0.3,
-          ),
+          color: color.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -526,9 +497,7 @@ class ActivityCard
               10,
             ),
             decoration: BoxDecoration(
-              color: color.withOpacity(
-                0.1,
-              ),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(
                 12,
               ),
@@ -612,9 +581,7 @@ class SetTrackerCard
       ),
       decoration: BoxDecoration(
         color: isCompleted
-            ? primary.withOpacity(
-                0.1,
-              )
+            ? primary.withValues(alpha: 0.1)
             : Colors.white,
         borderRadius: BorderRadius.circular(
           14,

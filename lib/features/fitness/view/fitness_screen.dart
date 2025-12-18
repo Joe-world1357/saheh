@@ -59,8 +59,10 @@ class _OnboardingWrapperState extends ConsumerState<_OnboardingWrapper> {
             // Invalidate providers to refresh state
             ref.invalidate(needsFitnessOnboardingProvider);
             ref.invalidate(fitnessOnboardingProvider);
-            // Wait a bit for the provider to refresh
-            await Future.delayed(const Duration(milliseconds: 100));
+            // Wait a bit for the provider to refresh and database to update
+            await Future.delayed(const Duration(milliseconds: 500));
+            // Force a rebuild by reading the provider
+            ref.read(needsFitnessOnboardingProvider);
             // The widget will rebuild automatically due to watching needsFitnessOnboardingProvider
           },
         );

@@ -69,21 +69,17 @@ class _DailyCaloriesCardState extends State<DailyCaloriesCard>
   Widget build(BuildContext context) {
     final percentage = (widget.current / widget.target * 100).clamp(0, 100);
     final remaining = (widget.target - widget.current).clamp(0, widget.target);
-    final gradientColors = AppTheme.getPrimaryGradientForBrightness(
-      Theme.of(context).brightness,
-    );
+    final brightness = Theme.of(context).brightness;
+    final gradient = AppTheme.primaryGradient(brightness);
+    final primaryColor = AppColors.getPrimary(brightness);
 
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: gradientColors,
-        ),
+        gradient: gradient,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: gradientColors[0].withOpacity(0.3),
+            color: primaryColor.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),

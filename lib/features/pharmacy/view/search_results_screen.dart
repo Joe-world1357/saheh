@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'drug_details.dart';
 import '../../../shared/widgets/card_widgets.dart';
 import '../../../shared/widgets/network_image_widget.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_card.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   final String searchQuery;
@@ -20,14 +23,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   String _currentQuery = '';
   String _selectedFilter = 'All';
 
-    final List<Map<String, dynamic>> _allProducts = [
+  final List<Map<String, dynamic>> _allProducts = [
     {
       'name': 'Panadol',
       'size': '20pcs',
       'price': 15.99,
       'category': 'Pain Relief',
       'inStock': true,
-      'imageUrl': 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400', // Example URL
+      'imageUrl': 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400',
     },
     {
       'name': 'Bodrex Herbal',
@@ -83,7 +86,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   List<Map<String, dynamic>> get _filteredProducts {
     var filtered = _allProducts;
 
-    // Filter by search query
     if (_currentQuery.isNotEmpty) {
       filtered = filtered
           .where((product) =>
@@ -98,7 +100,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           .toList();
     }
 
-    // Filter by category
     if (_selectedFilter != 'All') {
       filtered = filtered
           .where((product) => product['category'] == _selectedFilter)
@@ -132,86 +133,62 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primary = Color(0xFF20C6B7);
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final primary = AppColors.getPrimary(brightness);
+    final errorColor = AppColors.getError(brightness);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5FAFA),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.2),
+            ),
+          ),
+          child: TextField(
+            controller: _searchController,
+            autofocus: false,
+            style: theme.textTheme.bodyMedium,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: "Search drugs, category...",
+              hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              icon: Icon(
+                Icons.search,
+                color: theme.colorScheme.onSurfaceVariant,
+                size: 22,
+              ),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _currentQuery = value;
+              });
+            },
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            // TOP BAR
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Color(0xFF1A2A2C),
-                        size: 20,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(
-                          color: Colors.grey.shade200,
-                        ),
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        autofocus: false,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Search drugs, category...",
-                          hintStyle: TextStyle(
-                            color: Color(0xFFBDBDBD),
-                            fontSize: 14,
-                          ),
-                          icon: Icon(
-                            Icons.search,
-                            color: Color(0xFF9E9E9E),
-                            size: 22,
-                          ),
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            _currentQuery = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
             // FILTER CHIPS
             SizedBox(
               height: 50,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: _categories.length,
                 itemBuilder: (context, index) {
                   final category = _categories[index];
@@ -230,18 +207,21 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: isSelected ? primary : Colors.white,
+                        color: isSelected ? primary : theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(25),
                         border: Border.all(
-                          color: isSelected ? primary : Colors.grey.shade300,
+                          color: isSelected
+                              ? primary
+                              : theme.colorScheme.outline.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Center(
                         child: Text(
                           category,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : const Color(0xFF1A2A2C),
-                            fontSize: 14,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: isSelected
+                                ? Colors.white
+                                : theme.colorScheme.onSurface,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           ),
                         ),
@@ -256,14 +236,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
             // RESULTS COUNT
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   Text(
                     "${_filteredProducts.length} result${_filteredProducts.length != 1 ? 's' : ''} found",
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 14,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -282,166 +261,150 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                           Icon(
                             Icons.search_off,
                             size: 64,
-                            color: Colors.grey.shade400,
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             "No products found",
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 16,
-                            ),
+                            style: theme.textTheme.bodyLarge,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             "Try a different search term",
-                            style: TextStyle(
-                              color: Colors.grey.shade500,
-                              fontSize: 14,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       itemCount: _filteredProducts.length,
                       itemBuilder: (context, index) {
                         final product = _filteredProducts[index];
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Colors.grey.shade200,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              // PRODUCT IMAGE
-                              Container(
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade100,
-                                  borderRadius: BorderRadius.circular(12),
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: AppCard(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                // PRODUCT IMAGE
+                                Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    Icons.medication,
+                                    size: 30,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
-                                child: Icon(
-                                  Icons.medication,
-                                  size: 30,
-                                  color: Colors.grey.shade400,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              // PRODUCT INFO
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            product['name'] as String,
-                                            style: const TextStyle(
-                                              color: Color(0xFF1A2A2C),
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        if (!product['inStock'] as bool)
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.red.shade50,
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                            child: const Text(
-                                              "Out of stock",
-                                              style: TextStyle(
-                                                color: Colors.red,
-                                                fontSize: 10,
+                                const SizedBox(width: 16),
+                                // PRODUCT INFO
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              product['name'] as String,
+                                              style: theme.textTheme.bodyLarge?.copyWith(
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                           ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      product['size'] as String,
-                                      style: TextStyle(
-                                        color: Colors.grey.shade600,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      product['category'] as String,
-                                      style: TextStyle(
-                                        color: Colors.grey.shade500,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "\$${product['price'].toStringAsFixed(2)}",
-                                          style: const TextStyle(
-                                            color: Color(0xFF1A2A2C),
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const Spacer(),
-                                        if (product['inStock'] as bool)
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>                                                   DrugDetails(
-                                                    imageUrl: product['imageUrl'] as String?,
-                                                    name: product['name'] as String,
-                                                    size: product['size'] as String,
-                                                    price: product['price'] as double,
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: primary,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
+                                          if (!product['inStock'] as bool)
+                                            Container(
                                               padding: const EdgeInsets.symmetric(
-                                                horizontal: 16,
-                                                vertical: 8,
+                                                horizontal: 8,
+                                                vertical: 4,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: errorColor.withValues(alpha: 0.1),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                "Out of stock",
+                                                style: theme.textTheme.labelSmall?.copyWith(
+                                                  color: errorColor,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
                                             ),
-                                            child: const Text(
-                                              "View",
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w600,
-                                              ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        product['size'] as String,
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: theme.colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        product['category'] as String,
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: theme.colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            "\$${product['price'].toStringAsFixed(2)}",
+                                            style: theme.textTheme.titleMedium?.copyWith(
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                      ],
-                                    ),
-                                  ],
+                                          const Spacer(),
+                                          if (product['inStock'] as bool)
+                                            FilledButton(
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) => DrugDetails(
+                                                      imageUrl: product['imageUrl'] as String?,
+                                                      name: product['name'] as String,
+                                                      size: product['size'] as String,
+                                                      price: product['price'] as double,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              style: FilledButton.styleFrom(
+                                                backgroundColor: primary,
+                                                foregroundColor: Colors.white,
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 16,
+                                                  vertical: 8,
+                                                ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                "View",
+                                                style: theme.textTheme.bodySmall?.copyWith(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         );
                       },
@@ -453,5 +416,3 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     );
   }
 }
-
-

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/medicine_reminder_model.dart';
 import '../models/meal_model.dart';
+import '../models/nutrition_goal_model.dart';
 import '../models/workout_model.dart';
 import '../models/health_tracking_model.dart';
 import '../database/database_helper.dart';
@@ -137,7 +138,10 @@ class HomeDataNotifier extends Notifier<HomeData> {
     final proteinConsumed = meals.fold(0.0, (sum, meal) => sum + meal.protein);
     final carbsConsumed = meals.fold(0.0, (sum, meal) => sum + meal.carbs);
     final fatConsumed = meals.fold(0.0, (sum, meal) => sum + meal.fat);
-    const caloriesGoal = 2000.0;
+    
+    // Get actual nutrition goal from nutrition_goals table
+    final nutritionGoal = await _db.getNutritionGoal(userEmail);
+    final caloriesGoal = nutritionGoal?.caloriesGoal ?? 2000.0;
 
     // Load workout data for today (filtered by current user)
     final workouts = await _db.getWorkoutsByDate(today, userEmail: userEmail);

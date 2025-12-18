@@ -1,8 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:io' show Platform;
 import '../models/user_model.dart';
 import '../database/database_helper.dart';
 import '../core/storage/auth_storage.dart';
+import '../core/services/xp_service.dart';
+import '../core/notifications/notification_service.dart';
 import 'auth_provider.dart';
+import 'user_preferences_provider.dart';
+import 'achievements_provider.dart';
 
 class UserNotifier extends Notifier<UserModel?> {
   final _db = DatabaseHelper.instance;
@@ -69,19 +74,48 @@ class UserNotifier extends Notifier<UserModel?> {
 
   Future<void> addXP(int amount) async {
     if (state == null) return;
-    final currentXP = state!.xp + amount;
+    
+    // Prevent negative XP
+    final currentXP = (state!.xp + amount).clamp(0, double.infinity).toInt();
+    final oldLevel = state!.level;
     final newLevel = _calculateLevel(currentXP);
+    final levelUp = newLevel > oldLevel;
+    
     final updatedUser = state!.copyWith(
       xp: currentXP,
       level: newLevel,
       updatedAt: DateTime.now(),
     );
     await updateUser(updatedUser);
+    
+    // Show level-up notification if enabled
+    if (levelUp) {
+      try {
+        final prefs = ref.read(userPreferencesProvider);
+        if (prefs.xpNotifications && Platform.isAndroid) {
+          await NotificationService.instance.showXPEarnedNotification(
+            xpAmount: amount,
+            totalXP: currentXP,
+            level: newLevel,
+            levelUp: true,
+          );
+        }
+      } catch (e) {
+        // Handle error silently
+      }
+    }
+    
+    // Check for achievements after XP change
+    try {
+      await ref.read(achievementsProvider.notifier).checkAndUnlockAchievements();
+    } catch (e) {
+      // Handle error silently
+    }
   }
 
   int _calculateLevel(int xp) {
-    // Simple level calculation: 100 XP per level
-    return (xp / 100).floor() + 1;
+    // Use XP service for exponential progression
+    return XPService.calculateLevel(xp);
   }
 }
 

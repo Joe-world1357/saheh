@@ -67,13 +67,13 @@ class _MacroProgressBarState extends State<MacroProgressBar> with SingleTickerPr
     final brightness = Theme.of(context).brightness;
     switch (widget.type) {
       case MacroType.protein:
-        return AppTheme.getProteinColor(brightness);
+        return AppColors.getProtein(brightness);
       case MacroType.carbs:
-        return AppTheme.getCarbsColor(brightness);
+        return AppColors.getCarbs(brightness);
       case MacroType.fats:
-        return AppTheme.getFatsColor(brightness);
+        return AppColors.getFats(brightness);
       case MacroType.calories:
-        return AppTheme.getCaloriesColor(brightness);
+        return AppColors.getCalories(brightness);
     }
   }
 

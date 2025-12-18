@@ -2,232 +2,263 @@ import 'package:flutter/material.dart';
 import 'clinic/clinic_dashboard.dart';
 import 'home_health/home_health_dashboard.dart';
 import 'lab_tests/lab_tests_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_card.dart';
 
-class ServicesScreen
-    extends
-        StatelessWidget {
-  const ServicesScreen({
-    super.key,
-  });
+class ServicesScreen extends StatefulWidget {
+  const ServicesScreen({super.key});
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  State<ServicesScreen> createState() => _ServicesScreenState();
+}
+
+class _ServicesScreenState extends State<ServicesScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final primary = AppColors.getPrimary(brightness);
+    final infoColor = AppColors.getInfo(brightness);
+    final warningColor = AppColors.getWarning(brightness);
+    final successColor = AppColors.getSuccess(brightness);
+
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        bottom: false,
         child: Column(
           children: [
-            // Header
-            const Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 20,
+            // HEADER
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadowDark.withValues(alpha: 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Services",
-                    style: TextStyle(
-                      fontSize: 24,
+                    'Health Services',
+                    style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Color(
-                        0xFF1A2A2C,
-                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Book appointments, lab tests & more',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(
-              height: 10,
-            ),
-
-            // Content Area
+            // CONTENT
             Expanded(
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // Upcoming Appointment Card
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(
-                          16,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              Color(
-                                0xFFE0F7FA,
-                              ),
-                              Color(
-                                0xFFB2EBF2,
-                              ),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                            20,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(
-                                0.05,
-                              ),
-                              blurRadius: 10,
-                              offset: const Offset(
-                                0,
-                                4,
-                              ),
-                            ),
-                          ],
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+
+                    // Upcoming Appointment Banner
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: AppCard(
+                        padding: const EdgeInsets.all(20),
+                        backgroundColor: infoColor.withValues(alpha: 0.1),
+                        border: Border.all(
+                          color: infoColor.withValues(alpha: 0.3),
                         ),
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(
-                                10,
-                              ),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: infoColor.withValues(alpha: 0.2),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.calendar_today,
-                                color: Color(
-                                  0xFF00ACC1,
-                                ),
-                                size: 24,
+                                color: infoColor,
+                                size: 28,
                               ),
                             ),
-                            const SizedBox(
-                              width: 16,
-                            ),
+                            const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     "Upcoming Appointment",
-                                    style: TextStyle(
-                                      fontSize: 14,
+                                    style: theme.textTheme.titleSmall?.copyWith(
                                       fontWeight: FontWeight.bold,
-                                      color: Color(
-                                        0xFF006064,
-                                      ),
+                                      color: infoColor,
                                     ),
                                   ),
-                                  const SizedBox(
-                                    height: 4,
-                                  ),
+                                  const SizedBox(height: 6),
                                   Text(
-                                    "Your blood test is scheduled for Tuesday at 10 AM.",
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey.shade700,
+                                    "Blood test scheduled for Tuesday at 10:00 AM",
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
                                       height: 1.4,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 18,
+                              color: infoColor,
+                            ),
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        height: 20,
-                      ),
+                    ),
 
-                      // Service List
-                      _buildServiceCard(
-                        context,
-                        title: "Clinic Booking",
-                        subtitle: "Specialist doctors",
-                        icon: Icons.calendar_month_outlined,
-                        color: const Color(
-                          0xFFE0F7FA,
-                        ),
-                        iconColor: const Color(
-                          0xFF00ACC1,
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (
-                                    context,
-                                  ) => const ClinicDashboard(),
+                    const SizedBox(height: 28),
+
+                    // Services Section Header
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Text(
+                            "Available Services",
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                          );
-                        },
+                          ),
+                        ],
                       ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      _buildServiceCard(
-                        context,
-                        title: "Home Health",
-                        subtitle: "Caregivers & Nurses",
-                        icon: Icons.medical_services_outlined,
-                        color: const Color(
-                          0xFFFFF3E0,
-                        ),
-                        iconColor: const Color(
-                          0xFFFF9800,
-                        ),
-                        onTap: () {
-                          Navigator.push(
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Service Cards
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        children: [
+                          _buildServiceCard(
                             context,
-                            MaterialPageRoute(
-                              builder:
-                                  (
-                                    context,
-                                  ) => const HomeHealthDashboard(),
+                            title: "Clinic Booking",
+                            subtitle: "Book appointments with specialist doctors",
+                            icon: Icons.calendar_month,
+                            iconColor: infoColor,
+                            gradient: LinearGradient(
+                              colors: [
+                                infoColor.withValues(alpha: 0.15),
+                                infoColor.withValues(alpha: 0.05),
+                              ],
                             ),
-                          );
-                        },
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      _buildServiceCard(
-                        context,
-                        title: "Lab Tests",
-                        subtitle: "Home sample collection",
-                        icon: Icons.science_outlined,
-                        color: const Color(
-                          0xFFE8F5E9,
-                        ),
-                        iconColor: const Color(
-                          0xFF4DB6AC,
-                        ),
-                        onTap: () {
-                          Navigator.push(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ClinicDashboard(),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildServiceCard(
                             context,
-                            MaterialPageRoute(
-                              builder:
-                                  (
-                                    context,
-                                  ) => const LabTestsScreen(),
+                            title: "Home Health",
+                            subtitle: "Professional caregivers & nurses at home",
+                            icon: Icons.medical_services,
+                            iconColor: warningColor,
+                            gradient: LinearGradient(
+                              colors: [
+                                warningColor.withValues(alpha: 0.15),
+                                warningColor.withValues(alpha: 0.05),
+                              ],
                             ),
-                          );
-                        },
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HomeHealthDashboard(),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildServiceCard(
+                            context,
+                            title: "Lab Tests",
+                            subtitle: "Home sample collection & test results",
+                            icon: Icons.science,
+                            iconColor: successColor,
+                            gradient: LinearGradient(
+                              colors: [
+                                successColor.withValues(alpha: 0.15),
+                                successColor.withValues(alpha: 0.05),
+                              ],
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LabTestsScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                      const SizedBox(
-                        height: 80,
-                      ), // Extra space for bottom nav
-                    ],
-                  ),
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // Quick Stats
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatCard(
+                              context,
+                              icon: Icons.check_circle_outline,
+                              label: "Completed",
+                              value: "12",
+                              color: successColor,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStatCard(
+                              context,
+                              icon: Icons.schedule,
+                              label: "Upcoming",
+                              value: "3",
+                              color: infoColor,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStatCard(
+                              context,
+                              icon: Icons.history,
+                              label: "History",
+                              value: "24",
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+                  ],
                 ),
               ),
             ),
@@ -242,87 +273,110 @@ class ServicesScreen
     required String title,
     required String subtitle,
     required IconData icon,
-    required Color color,
     required Color iconColor,
+    required Gradient gradient,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    final theme = Theme.of(context);
+
+    return AppCard(
+      padding: EdgeInsets.zero,
       onTap: onTap,
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(
-          24,
-        ),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(
-            16,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(
-                0.05,
-              ),
-              blurRadius: 10,
-              offset: const Offset(
-                0,
-                4,
-              ),
-            ),
-          ],
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         ),
+        padding: const EdgeInsets.all(20),
         child: Row(
           children: [
             Container(
-              width: 60,
-              height: 60,
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
-                color: color,
+                color: theme.colorScheme.surface,
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: iconColor.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 30,
-              ),
+              child: Icon(icon, color: iconColor, size: 32),
             ),
-            const SizedBox(
-              width: 20,
-            ),
+            const SizedBox(width: 20),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Color(
-                        0xFF1A2A2C,
-                      ),
                     ),
                   ),
-                  const SizedBox(
-                    height: 8,
-                  ),
+                  const SizedBox(height: 6),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.4,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 20,
-              color: Colors.grey,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: iconColor,
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    final theme = Theme.of(context);
+
+    return AppCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

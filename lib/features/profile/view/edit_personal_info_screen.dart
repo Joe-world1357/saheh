@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../models/user_model.dart';
 import '../../../providers/user_provider.dart';
 import '../../../shared/widgets/app_form_fields.dart';
 import '../../../core/validators/validators.dart';
 import '../../../core/validators/input_formatters.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/localization/localization_helper.dart';
 
 class EditPersonalInfoScreen extends ConsumerStatefulWidget {
   const EditPersonalInfoScreen({super.key});
@@ -15,17 +20,88 @@ class EditPersonalInfoScreen extends ConsumerStatefulWidget {
 
 class _EditPersonalInfoScreenState extends ConsumerState<EditPersonalInfoScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController(text: 'John Doe');
-  final _emailController = TextEditingController(text: 'john.doe@gmail.com');
-  final _phoneController = TextEditingController(text: '+1 (555) 123-4567');
-  final _ageController = TextEditingController(text: '32');
-  final _heightController = TextEditingController(text: '178');
-  final _weightController = TextEditingController(text: '75');
-  final _addressController = TextEditingController(
-    text: '742 Evergreen Terrace\nSpringfield, ST 12345',
-  );
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _ageController = TextEditingController();
+  final _heightController = TextEditingController();
+  final _weightController = TextEditingController();
+  final _addressController = TextEditingController();
 
-  String _selectedGender = 'Male';
+  String? _selectedGender;
+  String? _selectedActivityLevel;
+  bool _isLoading = false;
+  bool _hasChanges = false;
+  UserModel? _originalUser;
+
+  List<String> _getGenders(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return [l10n.male, l10n.female];
+  }
+  final List<String> _activityLevels = [
+    'Sedentary',
+    'Light',
+    'Moderate',
+    'Active',
+    'Very Active',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Load user data when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserData();
+    });
+  }
+
+  void _loadUserData() {
+    final user = ref.read(userProvider);
+    if (user != null) {
+      setState(() {
+        _originalUser = user;
+        _nameController.text = user.name;
+        _emailController.text = user.email;
+        _phoneController.text = user.phone ?? '';
+        _ageController.text = user.age?.toString() ?? '';
+        _heightController.text = user.height?.toString() ?? '';
+        _weightController.text = user.weight?.toString() ?? '';
+        _addressController.text = user.address ?? '';
+        _selectedGender = user.gender;
+        // Activity level is not in UserModel yet, but we'll add it
+        _selectedActivityLevel = 'Moderate'; // Default
+      });
+
+      // Add listeners to track changes
+      _nameController.addListener(_checkForChanges);
+      _emailController.addListener(_checkForChanges);
+      _phoneController.addListener(_checkForChanges);
+      _ageController.addListener(_checkForChanges);
+      _heightController.addListener(_checkForChanges);
+      _weightController.addListener(_checkForChanges);
+      _addressController.addListener(_checkForChanges);
+    }
+  }
+
+  void _checkForChanges() {
+    if (_originalUser == null) return;
+    
+    final hasChanges = 
+        _nameController.text.trim() != _originalUser!.name ||
+        _emailController.text.trim() != _originalUser!.email ||
+        _phoneController.text.trim() != (_originalUser!.phone ?? '') ||
+        _ageController.text.trim() != (_originalUser!.age?.toString() ?? '') ||
+        _heightController.text.trim() != (_originalUser!.height?.toString() ?? '') ||
+        _weightController.text.trim() != (_originalUser!.weight?.toString() ?? '') ||
+        _addressController.text.trim() != (_originalUser!.address ?? '') ||
+        _selectedGender != _originalUser!.gender;
+
+    if (hasChanges != _hasChanges) {
+      setState(() {
+        _hasChanges = hasChanges;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -40,423 +116,322 @@ class _EditPersonalInfoScreenState extends ConsumerState<EditPersonalInfoScreen>
   }
 
   Future<void> _saveChanges() async {
-    if (_formKey.currentState!.validate()) {
+    if (!_formKey.currentState!.validate() || !_hasChanges) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
       final userNotifier = ref.read(userProvider.notifier);
       final currentUser = ref.read(userProvider);
 
-      final updatedUser = UserModel(
-        id: currentUser?.id,
-        name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        phone: _phoneController.text.trim(),
-        age: int.tryParse(_ageController.text.trim()),
-        gender: _selectedGender,
-        height: double.tryParse(_heightController.text.trim()),
-        weight: double.tryParse(_weightController.text.trim()),
-        address: _addressController.text.trim(),
-        xp: currentUser?.xp ?? 0,
-        level: currentUser?.level ?? 1,
-        createdAt: currentUser?.createdAt ?? DateTime.now(),
-      );
-
       if (currentUser == null) {
-        await userNotifier.createUser(updatedUser);
-      } else {
-        await userNotifier.updateUser(updatedUser);
+        throw Exception('User not found. Please log in again.');
       }
 
+      final updatedUser = currentUser.copyWith(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+        age: _ageController.text.trim().isEmpty ? null : int.tryParse(_ageController.text.trim()),
+        gender: _selectedGender,
+        height: _heightController.text.trim().isEmpty ? null : double.tryParse(_heightController.text.trim()),
+        weight: _weightController.text.trim().isEmpty ? null : double.tryParse(_weightController.text.trim()),
+        address: _addressController.text.trim().isEmpty ? null : _addressController.text.trim(),
+        updatedAt: DateTime.now(),
+      );
+
+      await userNotifier.updateUser(updatedUser);
+
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Personal information updated successfully'),
-            backgroundColor: Color(0xFF4CAF50),
+          SnackBar(
+            content: Text(l10n.personalInformationUpdated),
+            backgroundColor: AppColors.getSuccess(Theme.of(context).brightness),
           ),
         );
         Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.errorUpdatingInformation(e.toString())),
+            backgroundColor: AppColors.getError(Theme.of(context).brightness),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final l10n = AppLocalizations.of(context)!;
     final user = ref.watch(userProvider);
-    const primary = Color(0xFF20C6B7);
+    final genders = _getGenders(context);
 
-    // Load user data if available
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (user != null && _nameController.text == 'John Doe') {
-        _nameController.text = user.name;
-        _emailController.text = user.email;
-        _phoneController.text = user.phone ?? '';
-        _ageController.text = user.age?.toString() ?? '';
-        _heightController.text = user.height?.toString() ?? '';
-        _weightController.text = user.weight?.toString() ?? '';
-        _addressController.text = user.address ?? '';
-        _selectedGender = user.gender ?? 'Male';
-      }
-    });
+    // Show loading if user is not loaded yet
+    if (user == null && _originalUser == null) {
+      return Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: theme.colorScheme.surface,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(l10n.editPersonalInfo, style: theme.textTheme.titleLarge),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5FAFA),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(l10n.editPersonalInfo, style: theme.textTheme.titleLarge),
+      ),
       body: SafeArea(
-        child: Column(
-          children: [
-            // TOP BAR
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        width: 1.5,
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+
+                // NAME
+                AppTextField(
+                  controller: _nameController,
+                  label: l10n.fullName,
+                  hint: l10n.enterYourFullName,
+                  validator: Validators.name,
+                  prefixIcon: Icons.person_outline,
+                  inputFormatters: [AppInputFormatters.name()],
+                  textCapitalization: TextCapitalization.words,
+                ),
+
+                const SizedBox(height: 20),
+
+                // EMAIL (read-only - email shouldn't be changed)
+                AppTextField(
+                  controller: _emailController,
+                  label: l10n.email,
+                  hint: l10n.enterYourEmail,
+                  readOnly: true,
+                  prefixIcon: Icons.email_outlined,
+                  validator: Validators.email,
+                ),
+
+                const SizedBox(height: 20),
+
+                // PHONE
+                AppTextField(
+                  controller: _phoneController,
+                  label: l10n.phone,
+                  hint: l10n.enterYourPhone,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return null; // Optional field
+                    }
+                    return Validators.phone(value);
+                  },
+                  keyboardType: TextInputType.phone,
+                  prefixIcon: Icons.phone_outlined,
+                  inputFormatters: [AppInputFormatters.phone()],
+                ),
+
+                const SizedBox(height: 20),
+
+                // AGE & GENDER
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppNumberField(
+                        controller: _ageController,
+                        label: l10n.age,
+                        hint: l10n.enterAge,
+                        validator: Validators.age,
+                        min: 1,
+                        max: 150,
+                        prefixIcon: Icons.calendar_today_outlined,
                       ),
                     ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Color(0xFF1A2A2C),
-                        size: 20,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                    child: Text(
-                      "Edit Personal Info",
-                      style: TextStyle(
-                        color: Color(0xFF1A2A2C),
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Expanded(
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 20),
-
-                      // PROFILE PICTURE SECTION
-                      Center(
-                        child: Stack(
-                          children: [
-                            Container(
-                              width: 100,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                color: primary.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: primary,
-                                  width: 3,
-                                ),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  "JD",
-                                  style: TextStyle(
-                                    color: Color(0xFF20C6B7),
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF20C6B7),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // NAME
-                      AppTextField(
-                        controller: _nameController,
-                        label: "Full Name",
-                        hint: "Enter your full name",
-                        validator: Validators.name,
-                        prefixIcon: Icons.person_outline,
-                        inputFormatters: [AppInputFormatters.name()],
-                        textCapitalization: TextCapitalization.words,
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // EMAIL
-                      AppEmailField(
-                        controller: _emailController,
-                        label: "Email",
-                        hint: "Enter your email",
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // PHONE
-                      AppTextField(
-                        controller: _phoneController,
-                        label: "Phone Number",
-                        hint: "Enter your phone number",
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return null; // Optional field
-                          }
-                          return Validators.phone(value);
-                        },
-                        keyboardType: TextInputType.phone,
-                        prefixIcon: Icons.phone_outlined,
-                        inputFormatters: [AppInputFormatters.phone()],
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // AGE & GENDER
-                      Row(
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                AppNumberField(
-                                  controller: _ageController,
-                                  label: "Age",
-                                  hint: "Enter age",
-                                  validator: Validators.age,
-                                  min: 1,
-                                  max: 150,
-                                  prefixIcon: Icons.calendar_today_outlined,
-                                ),
-                              ],
+                          Text(l10n.gender, style: theme.textTheme.labelLarge),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<String>(
+                            value: _selectedGender,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildSectionTitle("Gender"),
-                                const SizedBox(height: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Colors.grey.shade300,
-                                    ),
-                                  ),
-                                  child: DropdownButtonFormField<String>(
-                                    value: _selectedGender,
-                                    decoration: const InputDecoration(
-                                      border: InputBorder.none,
-                                      icon: Icon(
-                                        Icons.person,
-                                        color: Color(0xFF20C6B7),
-                                      ),
-                                    ),
-                                    items: ['Male', 'Female', 'Other']
-                                        .map((gender) => DropdownMenuItem(
-                                              value: gender,
-                                              child: Text(gender),
-                                            ))
-                                        .toList(),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _selectedGender = value!;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
+                            items: genders.map((gender) => DropdownMenuItem(
+                              value: gender,
+                              child: Text(gender),
+                            )).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedGender = value;
+                                _checkForChanges();
+                              });
+                            },
+                            validator: (value) => value == null ? l10n.pleaseSelectGender : null,
                           ),
                         ],
                       ),
+                    ),
+                  ],
+                ),
 
-                      const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                      // HEIGHT & WEIGHT
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                AppNumberField(
-                                  controller: _heightController,
-                                  label: "Height (cm)",
-                                  hint: "Enter height",
-                                  validator: Validators.height,
-                                  min: 50,
-                                  max: 300,
-                                  allowDecimal: true,
-                                  prefixIcon: Icons.height,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                AppNumberField(
-                                  controller: _weightController,
-                                  label: "Weight (kg)",
-                                  hint: "Enter weight",
-                                  validator: Validators.weight,
-                                  min: 10,
-                                  max: 500,
-                                  allowDecimal: true,
-                                  prefixIcon: Icons.monitor_weight_outlined,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                // HEIGHT & WEIGHT
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppNumberField(
+                        controller: _heightController,
+                        label: l10n.height,
+                        hint: l10n.enterHeight,
+                        validator: Validators.height,
+                        min: 50,
+                        max: 300,
+                        allowDecimal: true,
+                        prefixIcon: Icons.height,
                       ),
-
-                      const SizedBox(height: 20),
-
-                      // ADDRESS
-                      AppTextField(
-                        controller: _addressController,
-                        label: "Address",
-                        hint: "Enter your address",
-                        prefixIcon: Icons.location_on_outlined,
-                        maxLines: 3,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return null; // Optional field
-                          }
-                          return null;
-                        },
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: AppNumberField(
+                        controller: _weightController,
+                        label: l10n.weight,
+                        hint: l10n.enterWeight,
+                        validator: Validators.weight,
+                        min: 10,
+                        max: 500,
+                        allowDecimal: true,
+                        prefixIcon: Icons.monitor_weight_outlined,
                       ),
+                    ),
+                  ],
+                ),
 
-                      const SizedBox(height: 40),
+                const SizedBox(height: 20),
 
-                      // SAVE BUTTON
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _saveChanges,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                          child: const Text(
-                            "Save Changes",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                // ACTIVITY LEVEL
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.activityLevel, style: theme.textTheme.labelLarge),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: _selectedActivityLevel,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                         ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        prefixIcon: const Icon(Icons.fitness_center),
                       ),
+                      items: _activityLevels.map((level) => DropdownMenuItem(
+                        value: level,
+                        child: Text(level),
+                      )).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedActivityLevel = value;
+                          _checkForChanges();
+                        });
+                      },
+                    ),
+                  ],
+                ),
 
-                      const SizedBox(height: 40),
-                    ],
+                const SizedBox(height: 20),
+
+                // ADDRESS
+                AppTextField(
+                  controller: _addressController,
+                  label: l10n.address,
+                  hint: l10n.enterYourAddress,
+                  prefixIcon: Icons.location_on_outlined,
+                  maxLines: 3,
+                  validator: (value) {
+                    // Optional field
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 32),
+
+                // SAVE BUTTON
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: (_isLoading || !_hasChanges) ? null : _saveChanges,
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(
+                            l10n.saveChanges,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                          ),
                   ),
                 ),
-              ),
+
+                if (!_hasChanges && _originalUser != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      l10n.noChangesMade,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                const SizedBox(height: 40),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        color: Color(0xFF1A2A2C),
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-    TextInputType? keyboardType,
-    int maxLines = 1,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.grey.shade300,
-        ),
-      ),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(
-            color: Colors.grey.shade400,
-            fontSize: 14,
-          ),
-          prefixIcon: Icon(
-            icon,
-            color: const Color(0xFF20C6B7),
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
           ),
         ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'This field is required';
-          }
-          return null;
-        },
       ),
     );
   }
 }
-
-

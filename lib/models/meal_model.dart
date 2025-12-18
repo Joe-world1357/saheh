@@ -7,6 +7,7 @@ class MealModel {
   final double protein; // in grams
   final double carbs; // in grams
   final double fat; // in grams
+  final double fiber; // in grams (mandatory)
   final DateTime mealDate;
   final DateTime createdAt;
 
@@ -19,6 +20,7 @@ class MealModel {
     required this.protein,
     required this.carbs,
     required this.fat,
+    required this.fiber,
     required this.mealDate,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
@@ -33,6 +35,7 @@ class MealModel {
       'protein': protein,
       'carbs': carbs,
       'fat': fat,
+      'fiber': fiber,
       'meal_date': mealDate.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
     };
@@ -48,6 +51,7 @@ class MealModel {
       protein: (map['protein'] as num).toDouble(),
       carbs: (map['carbs'] as num).toDouble(),
       fat: (map['fat'] as num).toDouble(),
+      fiber: (map['fiber'] as num?)?.toDouble() ?? 0.0,
       mealDate: DateTime.parse(map['meal_date'] as String),
       createdAt: map['created_at'] != null
           ? DateTime.parse(map['created_at'] as String)

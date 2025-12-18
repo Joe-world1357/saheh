@@ -1,39 +1,35 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme.dart';
+import 'app_card.dart';
 
 // From SettingsScreen
-class SectionHeader
-    extends
-        StatelessWidget {
+class SectionHeader extends StatelessWidget {
   final IconData icon;
   final String title;
-  final Color color;
+  final Color? color;
 
   const SectionHeader({
     super.key,
     required this.icon,
     required this.title,
-    required this.color,
+    this.color,
   });
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final iconColor = color ?? AppColors.getPrimary(brightness);
+    
     return Row(
       children: [
-        Icon(
-          icon,
-          color: color,
-          size: 20,
-        ),
-        const SizedBox(
-          width: 8,
-        ),
+        Icon(icon, color: iconColor, size: 20),
+        const SizedBox(width: 8),
         Text(
           title,
-          style: TextStyle(
-            color: color,
-            fontSize: 15,
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: iconColor,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -43,42 +39,29 @@ class SectionHeader
 }
 
 // From ProfileScreen
-class InfoItem
-    extends
-        StatelessWidget {
+class InfoItem extends StatelessWidget {
   final String label;
   final String value;
 
-  const InfoItem(
-    this.label,
-    this.value, {
-    super.key,
-  });
+  const InfoItem(this.label, this.value, {super.key});
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(
-            color: Colors.grey.shade600,
-            fontSize: 13,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        const SizedBox(
-          height: 4,
-        ),
+        const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            color: Color(
-              0xFF1A2A2C,
-            ),
-            fontSize: 15,
+          style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -88,34 +71,19 @@ class InfoItem
 }
 
 // From ProfileScreen
-class ConditionChip
-    extends
-        StatelessWidget {
+class ConditionChip extends StatelessWidget {
   final String label;
   final Color color;
 
-  const ConditionChip(
-    this.label,
-    this.color, {
-    super.key,
-  });
+  const ConditionChip(this.label, this.color, {super.key});
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(
-          0.15,
-        ),
-        borderRadius: BorderRadius.circular(
-          20,
-        ),
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
@@ -130,83 +98,45 @@ class ConditionChip
 }
 
 // From ProfileScreen
-class ContactItem
-    extends
-        StatelessWidget {
+class ContactItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
   final Color color;
 
-  const ContactItem(
-    this.icon,
-    this.label,
-    this.value,
-    this.color, {
-    super.key,
-  });
+  const ContactItem(this.icon, this.label, this.value, this.color, {super.key});
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(
-        16,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(
-          12,
-        ),
-        border: Border.all(
-          color: Colors.grey.shade200,
-        ),
-      ),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return AppCard(
+      padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(
-              8,
-            ),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(
-                0.15,
-              ),
-              borderRadius: BorderRadius.circular(
-                8,
-              ),
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 18,
-            ),
+            child: Icon(icon, color: color, size: 18),
           ),
-          const SizedBox(
-            width: 14,
-          ),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(
-                  height: 4,
-                ),
+                const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
-                    color: Color(
-                      0xFF1A2A2C,
-                    ),
-                    fontSize: 14,
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -220,9 +150,7 @@ class ContactItem
 }
 
 // From HomeScreen
-class HomeQuickAction
-    extends
-        StatelessWidget {
+class HomeQuickAction extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
@@ -237,9 +165,9 @@ class HomeQuickAction
   });
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -248,29 +176,15 @@ class HomeQuickAction
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: color.withOpacity(
-                0.15,
-              ),
-              borderRadius: BorderRadius.circular(
-                14,
-              ),
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 28,
-            ),
+            child: Icon(icon, color: color, size: 28),
           ),
-          const SizedBox(
-            height: 8,
-          ),
+          const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
-              color: Color(
-                0xFF1A2A2C,
-              ),
-              fontSize: 13,
+            style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -281,9 +195,7 @@ class HomeQuickAction
 }
 
 // From FitnessDashboard
-class FitnessQuickAction
-    extends
-        StatelessWidget {
+class FitnessQuickAction extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
@@ -298,39 +210,28 @@ class FitnessQuickAction
   });
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(
-          20,
-        ),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              color.withOpacity(
-                0.8,
-              ),
+              color.withValues(alpha: 0.8),
               color,
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(
-            20,
-          ),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(
-                0.3,
-              ),
+              color: color.withValues(alpha: 0.3),
               blurRadius: 8,
-              offset: const Offset(
-                0,
-                4,
-              ),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -338,30 +239,19 @@ class FitnessQuickAction
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(
-                10,
-              ),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(
-                  0.2,
-                ),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 32,
-              ),
+              child: Icon(icon, color: Colors.white, size: 32),
             ),
-            const SizedBox(
-              height: 12,
-            ),
+            const SizedBox(height: 12),
             Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 color: Colors.white,
-                fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -371,3 +261,4 @@ class FitnessQuickAction
     );
   }
 }
+

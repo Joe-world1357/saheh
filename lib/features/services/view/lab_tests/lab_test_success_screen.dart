@@ -1,170 +1,176 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/widgets/app_card.dart';
 
-class LabTestSuccessScreen
-    extends
-        StatelessWidget {
+class LabTestSuccessScreen extends StatelessWidget {
+  final String testName;
+  final DateTime date;
+  final String time;
+  final String address;
+
   const LabTestSuccessScreen({
     super.key,
+    required this.testName,
+    required this.date,
+    required this.time,
+    required this.address,
   });
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final infoColor = AppColors.getInfo(brightness);
+    final successColor = AppColors.getSuccess(brightness);
+
     return Scaffold(
-      backgroundColor: Colors.black.withOpacity(
-        0.5,
-      ),
-      body: Center(
-        child: Container(
-          margin: const EdgeInsets.symmetric(
-            horizontal: 24,
-          ),
-          padding: const EdgeInsets.all(
-            32,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(
-              30,
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 100,
-                height: 100,
-                decoration: const BoxDecoration(
-                  color: Color(
-                    0xFF20C6B7,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check,
-                  color: Color(
-                    0xFF1A2A2C,
-                  ),
-                  size: 50,
-                ),
-              ),
-              const SizedBox(
-                height: 24,
-              ),
-              const Text(
-                "Requested Successfully",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(
-                    0xFF1A2A2C,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              Text(
-                "Your request has been successful, you can wait for the Sample Collector to contact you through your email",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade500,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(
-                height: 32,
-              ),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Close the entire lab test flow or pop to dashboard/detail
-                    // Based on previous user preference to "keep on detail screen" equivalent
-                    // But here we are deep in the flow (address -> success),
-                    // popping just once closes the popup but keeps address screen.
-                    // Popping twice brings back to details?
-                    // User said "stay on same screen", likely referring to the visible context behind popup
-                    // Here popup IS the screen (full screen dialog-like since scaffold bg is transparent-ish)
-                    // But wait, I made it a new route pushed.
-
-                    // The design shows it as a modal dialog or overlay.
-                    // If I used Navigator.push to get here, Navigator.pop(context) goes back to AddressScreen.
-                    // This seems appropriate given "back to home" usually implies root, but I'll stick to pop.
-                    // However, the text says "Back to Home".
-
-                    Navigator.pop(
-                      context,
-                    ); // Go back to Address Screen
-                    Navigator.pop(
-                      context,
-                    ); // Go back to Detail Screen (Optional, if we want to reset flow)
-                    // For now, let's pop once to close "Success Screen" which reveals Address Screen.
-                    // Or actually, usually we want to go back to the Dashboard or Home.
-
-                    // Let's pop until Main? Or just pop until Services?
-                    // "Back to Home" strongly implies Home/Services Dashboard.
-                    // But previous request was "Close" stay on Detail.
-                    // This is a DIFFERENT flow. I will assume "Back to Home" acts like "Close" per consistency
-                    // OR actually navigate to Home.
-                    // The text literally says "Back to Home".
-                    // But the previous user pref was strong.
-                    // I will perform a multi-pop to return to LabTestsScreen (Dashboard).
-                    Navigator.popUntil(
-                      context,
-                      (
-                        route,
-                      ) {
-                        return route.settings.name ==
-                                null &&
-                            route.isFirst ==
-                                false;
-                        // This is tricky without named routes.
-                        // Let's just pop twice (Success -> Address -> Detail).
-                        // Or pop until LabTestsScreen.
-                      },
-                    );
-                    Navigator.of(
-                      context,
-                    ).pop(); // Attempt to pop success
-                    Navigator.of(
-                      context,
-                    ).pop(); // Attempt to pop address
-                    // Leaving user at Detail screen as per previous preference for Clinic?
-                    // I'll stick to single pop for safety, effectively "Repairing" the flow manually if needed.
-
-                    // ACTUALLY: The safest bet is:
-                    // Navigator.pop(context); // Closes Success Screen
-                    // This leaves the user at Address Screen.
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(
-                      0xFF20C6B7,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: AppCard(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: successColor.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        30,
+                    child: Icon(
+                      Icons.check_circle,
+                      color: successColor,
+                      size: 60,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Requested Successfully!',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Your lab test request for $testName has been confirmed.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  AppCard(
+                    padding: const EdgeInsets.all(16),
+                    backgroundColor: infoColor.withValues(alpha: 0.1),
+                    child: Column(
+                      children: [
+                        _buildInfoRow(
+                          context,
+                          icon: Icons.science,
+                          label: 'Test',
+                          value: testName,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildInfoRow(
+                          context,
+                          icon: Icons.calendar_today,
+                          label: 'Date',
+                          value: DateFormat('MMM dd, yyyy').format(date),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildInfoRow(
+                          context,
+                          icon: Icons.access_time,
+                          label: 'Time',
+                          value: time,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildInfoRow(
+                          context,
+                          icon: Icons.location_on,
+                          label: 'Address',
+                          value: address,
+                          isAddress: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () {
+                        Navigator.popUntil(context, (route) => route.isFirst);
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: infoColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                        ),
+                      ),
+                      child: Text(
+                        'Back to Home',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                    elevation: 0,
                   ),
-                  child: const Text(
-                    "Back to Home",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    bool isAddress = false,
+  }) {
+    final theme = Theme.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: isAddress ? 2 : 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 }

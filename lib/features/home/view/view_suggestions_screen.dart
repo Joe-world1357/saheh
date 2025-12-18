@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import '../../health/view/ai_chatbot_screen.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_card.dart';
 
 class ViewSuggestionsScreen extends StatelessWidget {
   const ViewSuggestionsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const primary = Color(0xFF20C6B7);
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final primary = AppColors.getPrimary(brightness);
+    final infoColor = AppColors.getInfo(brightness);
 
     final List<Map<String, dynamic>> suggestions = [
       {
         'category': 'Protein',
         'icon': Icons.restaurant,
-        'color': const Color(0xFF4CAF50),
+        'color': AppColors.getSuccess(brightness),
         'current': 75,
         'target': 100,
         'unit': 'g',
@@ -49,7 +55,7 @@ class ViewSuggestionsScreen extends StatelessWidget {
       {
         'category': 'Hydration',
         'icon': Icons.water_drop,
-        'color': const Color(0xFF2196F3),
+        'color': AppColors.getInfo(brightness),
         'current': 4,
         'target': 8,
         'unit': 'glasses',
@@ -74,7 +80,7 @@ class ViewSuggestionsScreen extends StatelessWidget {
       {
         'category': 'Vitamins',
         'icon': Icons.medication,
-        'color': const Color(0xFFFF9800),
+        'color': AppColors.getWarning(brightness),
         'current': 2,
         'target': 3,
         'unit': 'servings',
@@ -105,103 +111,54 @@ class ViewSuggestionsScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5FAFA),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text('Health Suggestions', style: theme.textTheme.titleLarge),
+        actions: [
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AIChatbotScreen(),
+                ),
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: AppTheme.primaryGradient(brightness),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.chat_bubble_outline,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            // TOP BAR
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Color(0xFF1A2A2C),
-                        size: 20,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                    child: Text(
-                      "Health Suggestions",
-                      style: TextStyle(
-                        color: Color(0xFF1A2A2C),
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AIChatbotScreen(),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF20C6B7), Color(0xFF17A89A)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF20C6B7).withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.chat_bubble_outline,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
             const SizedBox(height: 8),
 
             // HEADER CARD
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
+              padding: const EdgeInsets.all(16),
+              child: AppCard(
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFE3F2FD),
-                      Color(0xFFBBDEFB),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: const Color(0xFF2196F3).withOpacity(0.3),
-                  ),
+                backgroundColor: infoColor.withValues(alpha: 0.1),
+                border: Border.all(
+                  color: infoColor.withValues(alpha: 0.3),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,8 +167,8 @@ class ViewSuggestionsScreen extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(10),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF2196F3),
+                          decoration: BoxDecoration(
+                            color: infoColor,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -221,12 +178,10 @@ class ViewSuggestionsScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Text(
                             "AI-Powered Health Insights",
-                            style: TextStyle(
-                              color: Color(0xFF1A2A2C),
-                              fontSize: 18,
+                            style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -234,11 +189,10 @@ class ViewSuggestionsScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       "Based on your daily activity and nutrition data, here are personalized suggestions to help you reach your health goals.",
-                      style: TextStyle(
-                        color: Color(0xFF1A2A2C),
-                        fontSize: 14,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                         height: 1.5,
                       ),
                     ),
@@ -247,237 +201,202 @@ class ViewSuggestionsScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 24),
-
             // SUGGESTIONS LIST
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: suggestions.length,
                 itemBuilder: (context, index) {
                   final suggestion = suggestions[index];
                   final progress = (suggestion['current'] as int) /
                       (suggestion['target'] as int);
+                  final suggestionColor = suggestion['color'] as Color;
 
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 20),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: Colors.grey.shade200,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // HEADER
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: (suggestion['color'] as Color)
-                                    .withOpacity(0.15),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                suggestion['icon'] as IconData,
-                                color: suggestion['color'] as Color,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    suggestion['title'] as String,
-                                    style: const TextStyle(
-                                      color: Color(0xFF1A2A2C),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${suggestion['current']} / ${suggestion['target']} ${suggestion['unit']}',
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: (suggestion['color'] as Color)
-                                    .withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                '${(progress * 100).toInt()}%',
-                                style: TextStyle(
-                                  color: suggestion['color'] as Color,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: AppCard(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // HEADER
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: suggestionColor.withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  suggestion['icon'] as IconData,
+                                  color: suggestionColor,
+                                  size: 24,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // PROGRESS BAR
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: LinearProgressIndicator(
-                            value: progress.clamp(0.0, 1.0),
-                            minHeight: 8,
-                            backgroundColor: Colors.grey.shade200,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              suggestion['color'] as Color,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // DESCRIPTION
-                        Text(
-                          suggestion['description'] as String,
-                          style: TextStyle(
-                            color: Colors.grey.shade700,
-                            fontSize: 13,
-                            height: 1.5,
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // SUGGESTIONS LIST
-                        const Text(
-                          "Recommended Options:",
-                          style: TextStyle(
-                            color: Color(0xFF1A2A2C),
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        ...(suggestion['suggestions'] as List)
-                            .map((item) => Container(
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: (suggestion['color'] as Color)
-                                        .withOpacity(0.05),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: (suggestion['color'] as Color)
-                                          .withOpacity(0.2),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      suggestion['title'] as String,
+                                      style: theme.textTheme.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${suggestion['current']} / ${suggestion['target']} ${suggestion['unit']}',
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: suggestionColor.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  '${(progress * 100).toInt()}%',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: suggestionColor,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              item['food'] as String,
-                                              style: const TextStyle(
-                                                color: Color(0xFF1A2A2C),
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                            if (item['protein'] != '')
-                                              const SizedBox(height: 4),
-                                            if (item['protein'] != '')
-                                              Row(
-                                                children: [
-                                                  if (item['protein'] != '')
-                                                    Text(
-                                                      '${item['protein']} protein',
-                                                      style: TextStyle(
-                                                        color: Colors.grey.shade600,
-                                                        fontSize: 12,
-                                                      ),
-                                                    ),
-                                                  if (item['protein'] != '' &&
-                                                      item['calories'] != '')
-                                                    Text(
-                                                      ' • ',
-                                                      style: TextStyle(
-                                                        color: Colors.grey.shade600,
-                                                        fontSize: 12,
-                                                      ),
-                                                    ),
-                                                  if (item['calories'] != '')
-                                                    Text(
-                                                      item['calories'] as String,
-                                                      style: TextStyle(
-                                                        color: Colors.grey.shade600,
-                                                        fontSize: 12,
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                            if (item['serving'] != '')
-                                              const SizedBox(height: 2),
-                                            if (item['serving'] != '')
-                                              Text(
-                                                item['serving'] as String,
-                                                style: TextStyle(
-                                                  color: Colors.grey.shade500,
-                                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // PROGRESS BAR
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: progress.clamp(0.0, 1.0),
+                              minHeight: 8,
+                              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                              valueColor: AlwaysStoppedAnimation<Color>(suggestionColor),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // DESCRIPTION
+                          Text(
+                            suggestion['description'] as String,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              height: 1.5,
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // SUGGESTIONS LIST
+                          Text(
+                            "Recommended Options:",
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          ...(suggestion['suggestions'] as List)
+                              .map((item) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: AppCard(
+                                      padding: const EdgeInsets.all(12),
+                                      backgroundColor: suggestionColor.withValues(alpha: 0.05),
+                                      border: Border.all(
+                                        color: suggestionColor.withValues(alpha: 0.2),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  item['food'] as String,
+                                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
                                                 ),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.add_circle_outline,
-                                          color: Color(0xFF20C6B7),
-                                        ),
-                                        onPressed: () {
-                                          // Add to meal/nutrition
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'Added ${item['food']} to your meal plan',
-                                              ),
-                                              backgroundColor: primary,
+                                                if (item['protein'] != '') ...[
+                                                  const SizedBox(height: 4),
+                                                  Row(
+                                                    children: [
+                                                      if (item['protein'] != '')
+                                                        Text(
+                                                          '${item['protein']} protein',
+                                                          style: theme.textTheme.bodySmall?.copyWith(
+                                                            color: theme.colorScheme.onSurfaceVariant,
+                                                          ),
+                                                        ),
+                                                      if (item['protein'] != '' &&
+                                                          item['calories'] != '')
+                                                        Text(
+                                                          ' • ',
+                                                          style: theme.textTheme.bodySmall?.copyWith(
+                                                            color: theme.colorScheme.onSurfaceVariant,
+                                                          ),
+                                                        ),
+                                                      if (item['calories'] != '')
+                                                        Text(
+                                                          item['calories'] as String,
+                                                          style: theme.textTheme.bodySmall?.copyWith(
+                                                            color: theme.colorScheme.onSurfaceVariant,
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                ],
+                                                if (item['serving'] != '') ...[
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    item['serving'] as String,
+                                                    style: theme.textTheme.bodySmall?.copyWith(
+                                                      color: theme.colorScheme.onSurfaceVariant,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
                                             ),
-                                          );
-                                        },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.add_circle_outline,
+                                              color: primary,
+                                            ),
+                                            onPressed: () {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'Added ${item['food']} to your meal plan',
+                                                  ),
+                                                  backgroundColor: AppColors.getSuccess(brightness),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                ))
-                            .toList(),
-                      ],
+                                    ),
+                                  ))
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -489,4 +408,3 @@ class ViewSuggestionsScreen extends StatelessWidget {
     );
   }
 }
-

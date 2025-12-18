@@ -6,11 +6,14 @@ import '../models/order_model.dart';
 import '../models/medicine_reminder_model.dart';
 import '../models/medicine_intake_model.dart';
 import '../models/meal_model.dart';
+import '../models/nutrition_goal_model.dart';
 import '../models/workout_model.dart';
 import '../models/appointment_model.dart';
 import '../models/health_tracking_model.dart';
 import '../models/activity_model.dart';
 import '../models/fitness_preferences_model.dart';
+import '../models/achievement_model.dart';
+import '../models/xp_redemption_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -30,7 +33,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 8, // Added user_settings table
+      version: 10, // Added achievements and xp_redemptions tables
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -114,8 +117,23 @@ class DatabaseHelper {
         protein REAL NOT NULL,
         carbs REAL NOT NULL,
         fat REAL NOT NULL,
+        fiber REAL NOT NULL DEFAULT 0,
         meal_date TEXT NOT NULL,
         created_at TEXT NOT NULL
+      )
+    ''');
+
+    // Nutrition goals table
+    await db.execute('''
+      CREATE TABLE nutrition_goals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL UNIQUE,
+        calories_goal REAL NOT NULL DEFAULT 2000,
+        protein_goal REAL NOT NULL DEFAULT 150,
+        carbs_goal REAL NOT NULL DEFAULT 250,
+        fat_goal REAL NOT NULL DEFAULT 65,
+        fiber_goal REAL NOT NULL DEFAULT 25,
+        updated_at TEXT NOT NULL
       )
     ''');
 
@@ -250,6 +268,38 @@ class DatabaseHelper {
         setting_value TEXT,
         updated_at TEXT,
         UNIQUE(user_email, setting_key)
+      )
+    ''');
+
+    // Achievements table
+    await db.execute('''
+      CREATE TABLE achievements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
+        achievement_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        xp_reward INTEGER NOT NULL,
+        category TEXT NOT NULL,
+        is_unlocked INTEGER DEFAULT 0,
+        unlocked_at TEXT,
+        created_at TEXT NOT NULL,
+        UNIQUE(user_email, achievement_id)
+      )
+    ''');
+
+    // XP Redemptions table
+    await db.execute('''
+      CREATE TABLE xp_redemptions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
+        redemption_type TEXT NOT NULL,
+        item_name TEXT NOT NULL,
+        item_description TEXT,
+        xp_cost INTEGER NOT NULL,
+        discount_code TEXT,
+        product_id TEXT,
+        redeemed_at TEXT NOT NULL
       )
     ''');
   }
@@ -471,6 +521,7 @@ class DatabaseHelper {
     await db.delete('medicine_reminders', where: 'user_email = ?', whereArgs: [userEmail]);
     await db.delete('medicine_intake', where: 'user_email = ?', whereArgs: [userEmail]);
     await db.delete('meals', where: 'user_email = ?', whereArgs: [userEmail]);
+    await db.delete('nutrition_goals', where: 'user_email = ?', whereArgs: [userEmail]);
     await db.delete('workouts', where: 'user_email = ?', whereArgs: [userEmail]);
     await db.delete('appointments', where: 'user_email = ?', whereArgs: [userEmail]);
     await db.delete('sleep_tracking', where: 'user_email = ?', whereArgs: [userEmail]);
@@ -502,6 +553,48 @@ class DatabaseHelper {
       );
     }
     return maps.map((map) => MealModel.fromMap(map)).toList();
+  }
+
+  // Nutrition goals operations
+  Future<int> insertNutritionGoal(NutritionGoalModel goal) async {
+    final db = await database;
+    try {
+      return await db.insert('nutrition_goals', goal.toMap());
+    } catch (e) {
+      // If user already has a goal, update instead
+      return await updateNutritionGoal(goal);
+    }
+  }
+
+  Future<int> updateNutritionGoal(NutritionGoalModel goal) async {
+    final db = await database;
+    return await db.update(
+      'nutrition_goals',
+      goal.toMap(),
+      where: 'user_email = ?',
+      whereArgs: [goal.userEmail],
+    );
+  }
+
+  Future<NutritionGoalModel?> getNutritionGoal(String userEmail) async {
+    final db = await database;
+    final maps = await db.query(
+      'nutrition_goals',
+      where: 'user_email = ?',
+      whereArgs: [userEmail],
+      limit: 1,
+    );
+    if (maps.isEmpty) return null;
+    return NutritionGoalModel.fromMap(maps.first);
+  }
+
+  Future<void> deleteNutritionGoal(String userEmail) async {
+    final db = await database;
+    await db.delete(
+      'nutrition_goals',
+      where: 'user_email = ?',
+      whereArgs: [userEmail],
+    );
   }
 
   // Workout operations
@@ -550,6 +643,19 @@ class DatabaseHelper {
       maps = await db.query('appointments', orderBy: 'appointment_date DESC');
     }
     return maps.map((map) => AppointmentModel.fromMap(map)).toList();
+  }
+
+  Future<void> updateAppointmentStatus(int id, String status) async {
+    final db = await database;
+    await db.update(
+      'appointments',
+      {
+        'status': status,
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   // ========== SLEEP TRACKING OPERATIONS ==========
@@ -865,6 +971,63 @@ class DatabaseHelper {
         )
       ''');
     }
+
+    if (oldVersion < 9) {
+      // Add fiber column to meals table
+      try {
+        await db.execute('ALTER TABLE meals ADD COLUMN fiber REAL NOT NULL DEFAULT 0');
+      } catch (e) {
+        // Column might already exist, ignore
+      }
+
+      // Create nutrition_goals table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS nutrition_goals (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_email TEXT NOT NULL UNIQUE,
+          calories_goal REAL NOT NULL DEFAULT 2000,
+          protein_goal REAL NOT NULL DEFAULT 150,
+          carbs_goal REAL NOT NULL DEFAULT 250,
+          fat_goal REAL NOT NULL DEFAULT 65,
+          fiber_goal REAL NOT NULL DEFAULT 25,
+          updated_at TEXT NOT NULL
+        )
+      ''');
+    }
+
+    if (oldVersion < 10) {
+      // Add achievements table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS achievements (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_email TEXT NOT NULL,
+          achievement_id TEXT NOT NULL,
+          title TEXT NOT NULL,
+          description TEXT NOT NULL,
+          xp_reward INTEGER NOT NULL,
+          category TEXT NOT NULL,
+          is_unlocked INTEGER DEFAULT 0,
+          unlocked_at TEXT,
+          created_at TEXT NOT NULL,
+          UNIQUE(user_email, achievement_id)
+        )
+      ''');
+
+      // Add xp_redemptions table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS xp_redemptions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_email TEXT NOT NULL,
+          redemption_type TEXT NOT NULL,
+          item_name TEXT NOT NULL,
+          item_description TEXT,
+          xp_cost INTEGER NOT NULL,
+          discount_code TEXT,
+          product_id TEXT,
+          redeemed_at TEXT NOT NULL
+        )
+      ''');
+    }
   }
 
   // ========== ACTIVITY TRACKING OPERATIONS ==========
@@ -1074,6 +1237,144 @@ class DatabaseHelper {
   Future<bool> hasCompletedFitnessOnboarding(String userEmail) async {
     final prefs = await getFitnessPreferences(userEmail);
     return prefs?.onboardingCompleted ?? false;
+  }
+
+  // User Settings operations
+  Future<void> insertOrUpdateUserSetting(String userEmail, String key, String value) async {
+    final db = await database;
+    await db.insert(
+      'user_settings',
+      {
+        'user_email': userEmail,
+        'setting_key': key,
+        'setting_value': value,
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<String?> getUserSetting(String userEmail, String key) async {
+    final db = await database;
+    final maps = await db.query(
+      'user_settings',
+      where: 'user_email = ? AND setting_key = ?',
+      whereArgs: [userEmail, key],
+      limit: 1,
+    );
+    if (maps.isEmpty) return null;
+    return maps.first['setting_value'] as String?;
+  }
+
+  Future<Map<String, String>> getAllUserSettings(String userEmail) async {
+    final db = await database;
+    final maps = await db.query(
+      'user_settings',
+      where: 'user_email = ?',
+      whereArgs: [userEmail],
+    );
+    final settings = <String, String>{};
+    for (final map in maps) {
+      final key = map['setting_key'] as String;
+      final value = map['setting_value'] as String?;
+      if (value != null) {
+        settings[key] = value;
+      }
+    }
+    return settings;
+  }
+
+  Future<void> deleteUserSetting(String userEmail, String key) async {
+    final db = await database;
+    await db.delete(
+      'user_settings',
+      where: 'user_email = ? AND setting_key = ?',
+      whereArgs: [userEmail, key],
+    );
+  }
+
+  // ========== ACHIEVEMENTS OPERATIONS ==========
+  
+  Future<int> insertAchievement(AchievementModel achievement) async {
+    final db = await database;
+    return await db.insert(
+      'achievements',
+      achievement.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<AchievementModel>> getAchievements(String userEmail) async {
+    final db = await database;
+    final maps = await db.query(
+      'achievements',
+      where: 'user_email = ?',
+      whereArgs: [userEmail],
+      orderBy: 'created_at DESC',
+    );
+    return maps.map((map) => AchievementModel.fromMap(map)).toList();
+  }
+
+  Future<AchievementModel?> getAchievement(String userEmail, String achievementId) async {
+    final db = await database;
+    final maps = await db.query(
+      'achievements',
+      where: 'user_email = ? AND achievement_id = ?',
+      whereArgs: [userEmail, achievementId],
+      limit: 1,
+    );
+    if (maps.isEmpty) return null;
+    return AchievementModel.fromMap(maps.first);
+  }
+
+  Future<int> unlockAchievement(String userEmail, String achievementId) async {
+    final db = await database;
+    return await db.update(
+      'achievements',
+      {
+        'is_unlocked': 1,
+        'unlocked_at': DateTime.now().toIso8601String(),
+      },
+      where: 'user_email = ? AND achievement_id = ?',
+      whereArgs: [userEmail, achievementId],
+    );
+  }
+
+  Future<int> getUnlockedAchievementCount(String userEmail) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM achievements WHERE user_email = ? AND is_unlocked = 1',
+      [userEmail],
+    );
+    return result.first['count'] as int? ?? 0;
+  }
+
+  // ========== XP REDEMPTIONS OPERATIONS ==========
+  
+  Future<int> insertXPRedemption(XPRedemptionModel redemption) async {
+    final db = await database;
+    return await db.insert('xp_redemptions', redemption.toMap());
+  }
+
+  Future<List<XPRedemptionModel>> getXPRedemptions(String userEmail, {int limit = 50}) async {
+    final db = await database;
+    final maps = await db.query(
+      'xp_redemptions',
+      where: 'user_email = ?',
+      whereArgs: [userEmail],
+      orderBy: 'redeemed_at DESC',
+      limit: limit,
+    );
+    return maps.map((map) => XPRedemptionModel.fromMap(map)).toList();
+  }
+
+  Future<int> getTotalXPRedeemed(String userEmail) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT COALESCE(SUM(xp_cost), 0) as total FROM xp_redemptions WHERE user_email = ?',
+      [userEmail],
+    );
+    return result.first['total'] as int? ?? 0;
   }
 
   Future<void> close() async {

@@ -1,6 +1,9 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/health_tracking_model.dart';
 import '../database/database_helper.dart';
+import '../core/notifications/notification_service.dart';
 import 'auth_provider.dart';
 
 /// State for health tracking data
@@ -264,7 +267,21 @@ class HealthTrackingNotifier extends Notifier<HealthTrackingState> {
       
       // Award XP for completing goal
       if (progress >= 1.0) {
+        // Get goal name for notification
+        final goal = state.goals.firstWhere((g) => g.id == id, orElse: () => state.goals.first);
+        
         await ref.read(authProvider.notifier).addXP(50);
+        
+        // Show goal completion notification
+        if (Platform.isAndroid) {
+          try {
+            await NotificationService.instance.showGoalCompletionNotification(
+              goalName: goal.title,
+            );
+          } catch (e) {
+            debugPrint('Error showing goal notification: $e');
+          }
+        }
       }
 
       await _loadAllData();

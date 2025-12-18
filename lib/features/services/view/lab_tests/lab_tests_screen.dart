@@ -1,277 +1,226 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'lab_test_detail_screen.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/widgets/app_card.dart';
+import '../../../../providers/appointments_provider.dart';
 
-class LabTestsScreen
-    extends
-        StatefulWidget {
-  const LabTestsScreen({
-    super.key,
-  });
+class LabTestsScreen extends ConsumerStatefulWidget {
+  const LabTestsScreen({super.key});
 
   @override
-  State<
-    LabTestsScreen
-  >
-  createState() => _LabTestsScreenState();
+  ConsumerState<LabTestsScreen> createState() => _LabTestsScreenState();
 }
 
-class _LabTestsScreenState
-    extends
-        State<
-          LabTestsScreen
-        > {
-  final List<
-    Map<
-      String,
-      String
-    >
-  >
-  bloodTests = [
+class _LabTestsScreenState extends ConsumerState<LabTestsScreen> {
+  String _searchQuery = '';
+  String _selectedTab = 'Browse';
+
+  final List<Map<String, dynamic>> _testCategories = [
     {
-      "name": "Complete Blood Count (CBC)",
-      "id": "1",
+      'name': 'Blood Tests',
+      'icon': Icons.bloodtype,
+      'color': (brightness) => AppColors.getError(brightness),
+      'tests': [
+        {'name': 'Complete Blood Count (CBC)', 'price': 50.0, 'fasting': true},
+        {'name': 'Hemoglobin', 'price': 30.0, 'fasting': false},
+        {'name': 'Hematocrit', 'price': 30.0, 'fasting': false},
+        {'name': 'Lipid Panel', 'price': 60.0, 'fasting': true},
+        {'name': 'Liver Function Test', 'price': 70.0, 'fasting': true},
+      ],
     },
     {
-      "name": "Hemoglobin",
-      "id": "2",
+      'name': 'Diabetes Tests',
+      'icon': Icons.monitor_heart,
+      'color': (brightness) => AppColors.getWarning(brightness),
+      'tests': [
+        {'name': 'HbA1c (Glycated Hemoglobin)', 'price': 55.0, 'fasting': false},
+        {'name': 'Fasting Blood Glucose', 'price': 40.0, 'fasting': true},
+        {'name': 'Insulin', 'price': 80.0, 'fasting': true},
+        {'name': 'Microalbuminuria', 'price': 45.0, 'fasting': false},
+      ],
     },
     {
-      "name": "Hematocrit",
-      "id": "3",
+      'name': 'Hormone Tests',
+      'icon': Icons.science,
+      'color': (brightness) => AppColors.getInfo(brightness),
+      'tests': [
+        {'name': 'Thyroid Function Test', 'price': 90.0, 'fasting': false},
+        {'name': 'Testosterone', 'price': 75.0, 'fasting': false},
+        {'name': 'Cortisol', 'price': 65.0, 'fasting': true},
+      ],
+    },
+    {
+      'name': 'Vitamin Tests',
+      'icon': Icons.wb_sunny,
+      'color': (brightness) => AppColors.getSuccess(brightness),
+      'tests': [
+        {'name': 'Vitamin D', 'price': 50.0, 'fasting': false},
+        {'name': 'Vitamin B12', 'price': 45.0, 'fasting': false},
+        {'name': 'Folate', 'price': 40.0, 'fasting': false},
+      ],
     },
   ];
 
-  final List<
-    Map<
-      String,
-      String
-    >
-  >
-  diabetesTests = [
-    {
-      "name": "Insulin",
-      "id": "4",
-    },
-    {
-      "name": "Microalbuminuria",
-      "id": "5",
-    },
-    {
-      "name": "HbA1c (Glycated Hemoglobin)",
-      "id": "6",
-    },
-  ];
+  List<Map<String, dynamic>> get _filteredTests {
+    if (_searchQuery.isEmpty) {
+      return _testCategories;
+    }
+
+    return _testCategories.map((category) {
+      final filteredTests = (category['tests'] as List)
+          .where((test) =>
+              test['name']
+                  .toString()
+                  .toLowerCase()
+                  .contains(_searchQuery.toLowerCase()))
+          .toList();
+      return {
+        ...category,
+        'tests': filteredTests,
+      };
+    }).where((category) => (category['tests'] as List).isNotEmpty).toList();
+  }
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final primary = AppColors.getPrimary(brightness);
+    final successColor = AppColors.getSuccess(brightness);
+    final appointmentsState = ref.watch(appointmentsProvider);
+    final myRequests = appointmentsState.appointments
+        .where((apt) => apt.type == 'lab_test')
+        .toList()
+      ..sort((a, b) => b.appointmentDate.compareTo(a.appointmentDate));
+
     return Scaffold(
-      backgroundColor: const Color(
-        0xFF20C6B7,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text('Lab Tests', style: theme.textTheme.titleLarge),
       ),
       body: SafeArea(
-        bottom: false,
         child: Column(
           children: [
-            // Header
+            // Tabs
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(
-                        12,
-                      ),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(
-                          0.3,
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _selectedTab = 'Browse'),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: _selectedTab == 'Browse'
+                              ? primary
+                              : theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                          border: Border.all(
+                            color: _selectedTab == 'Browse'
+                                ? primary
+                                : theme.colorScheme.outline.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Browse Tests',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: _selectedTab == 'Browse'
+                                  ? Colors.white
+                                  : theme.colorScheme.onSurface,
+                              fontWeight: _selectedTab == 'Browse'
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      onPressed: () => Navigator.pop(
-                        context,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _selectedTab = 'My Requests'),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: _selectedTab == 'My Requests'
+                              ? primary
+                              : theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                          border: Border.all(
+                            color: _selectedTab == 'My Requests'
+                                ? primary
+                                : theme.colorScheme.outline.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'My Requests (${myRequests.length})',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: _selectedTab == 'My Requests'
+                                  ? Colors.white
+                                  : theme.colorScheme.onSurface,
+                              fontWeight: _selectedTab == 'My Requests'
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  const Spacer(),
-                  const Text(
-                    "Lab Tests",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  const SizedBox(
-                    width: 40,
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(
-              height: 10,
-            ),
-
-            // Toggle Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 10,
-                  ),
+            // Search Bar (only for Browse)
+            if (_selectedTab == 'Browse')
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(
-                      30,
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                    border: Border.all(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.1),
                     ),
                   ),
-                  child: const Text(
-                    "My requests",
-                    style: TextStyle(
-                      color: Color(
-                        0xFF687779,
+                  child: TextField(
+                    onChanged: (value) => setState(() => _searchQuery = value),
+                    style: theme.textTheme.bodyLarge,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Search tests...",
+                      hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 40,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(
-                      30,
-                    ),
-                  ),
-                  child: const Text(
-                    "My results",
-                    style: TextStyle(
-                      color: Color(
-                        0xFF687779,
+                      icon: Icon(
+                        Icons.search,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
-                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(
-              height: 20,
-            ),
-
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(
-                    30,
-                  ),
-                ),
-                child: const TextField(
-                  decoration: InputDecoration(
-                    icon: Icon(
-                      Icons.search,
-                      color: Colors.grey,
-                    ),
-                    hintText: "Search here..",
-                    hintStyle: TextStyle(
-                      color: Colors.grey,
-                    ),
-                    border: InputBorder.none,
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 16),
 
-            // Content Area
+            // Content
             Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Color(
-                    0xFFF5FAFA,
-                  ),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(
-                      30,
-                    ),
-                    topRight: Radius.circular(
-                      30,
-                    ),
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(
-                    20,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Categories",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(
-                            0xFF1A2A2C,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-
-                      // Blood Tests
-                      _buildCategorySection(
-                        "Blood tests",
-                        bloodTests,
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-
-                      // Diabetes Tests
-                      _buildCategorySection(
-                        "Diabetes tests",
-                        diabetesTests,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              child: _selectedTab == 'Browse'
+                  ? _buildBrowseTab(theme, brightness, primary)
+                  : _buildMyRequestsTab(theme, brightness, myRequests),
             ),
           ],
         ),
@@ -279,110 +228,232 @@ class _LabTestsScreenState
     );
   }
 
-  Widget _buildCategorySection(
-    String title,
-    List<
-      Map<
-        String,
-        String
-      >
-    >
-    tests,
-  ) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildBrowseTab(ThemeData theme, Brightness brightness, Color primary) {
+    final filteredCategories = _filteredTests;
+
+    if (filteredCategories.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(
-                  0xFF1A2A2C,
-                ),
-              ),
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                "See all",
-                style: TextStyle(
-                  color: Color(
-                    0xFF20C6B7,
-                  ),
-                ),
-              ),
+            const SizedBox(height: 16),
+            Text(
+              'No tests found',
+              style: theme.textTheme.bodyLarge,
             ),
           ],
         ),
-        SizedBox(
-          height: 120,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: tests.length,
-            separatorBuilder:
-                (
-                  _,
-                  __,
-                ) => const SizedBox(
-                  width: 12,
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: filteredCategories.length,
+      itemBuilder: (context, categoryIndex) {
+        final category = filteredCategories[categoryIndex];
+        final categoryColorFn = category['color'] as Color Function(Brightness);
+        final categoryColor = categoryColorFn(brightness);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(category['icon'] as IconData, color: categoryColor, size: 24),
+                    const SizedBox(width: 8),
+                    Text(
+                      category['name'] as String,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-            itemBuilder:
-                (
-                  context,
-                  index,
-                ) {
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (
-                                context,
-                              ) => LabTestDetailScreen(
-                                testName: tests[index]["name"]!,
-                              ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      width: 110,
-                      padding: const EdgeInsets.all(
-                        12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          16,
-                        ),
-                        border: Border.all(
-                          color: const Color(
-                            0xFFE0E0E0,
-                          ),
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          tests[index]["name"]!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(
-                              0xFF1A2A2C,
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 140,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: (category['tests'] as List).length,
+                itemBuilder: (context, testIndex) {
+                  final test = (category['tests'] as List)[testIndex];
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => LabTestDetailScreen(
+                              testName: test['name'] as String,
+                              price: test['price'] as double,
+                              requiresFasting: test['fasting'] as bool,
                             ),
                           ),
+                        );
+                      },
+                      child: AppCard(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: categoryColor.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                category['icon'] as IconData,
+                                color: categoryColor,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Expanded(
+                              child: Text(
+                                test['name'] as String,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '\$${test['price']}',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: primary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   );
                 },
-          ),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMyRequestsTab(ThemeData theme, Brightness brightness, List appointments) {
+    if (appointments.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.description_outlined,
+              size: 64,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No test requests yet',
+              style: theme.textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Browse tests to request one',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
-      ],
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: appointments.length,
+      itemBuilder: (context, index) {
+        final appointment = appointments[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: AppCard(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.getInfo(brightness).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.science,
+                        color: AppColors.getInfo(brightness),
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            appointment.providerName,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${appointment.appointmentDate.day}/${appointment.appointmentDate.month}/${appointment.appointmentDate.year} at ${appointment.time}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: appointment.status == 'upcoming'
+                            ? AppColors.getInfo(brightness).withValues(alpha: 0.15)
+                            : AppColors.getSuccess(brightness).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        appointment.status.toUpperCase(),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: appointment.status == 'upcoming'
+                              ? AppColors.getInfo(brightness)
+                              : AppColors.getSuccess(brightness),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

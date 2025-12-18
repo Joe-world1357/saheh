@@ -5,6 +5,9 @@ import '../../../shared/widgets/common_widgets.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/activity_provider.dart';
 import '../../../providers/men_workout_provider.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_card.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -48,7 +51,9 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const primary = Color(0xFF20C6B7);
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final primary = AppColors.getPrimary(brightness);
     
     // Watch authProvider to get current user data
     final authState = ref.watch(authProvider);
@@ -69,23 +74,16 @@ class ProfileScreen extends ConsumerWidget {
     final memberSince = user?.createdAt;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5FAFA),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // HEADER WITH GRADIENT BACKGROUND -------------------------------
+            // HEADER WITH GRADIENT BACKGROUND
             Container(
               width: double.infinity,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF20C6B7),
-                    Color(0xFF17A89A),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+              decoration: BoxDecoration(
+                gradient: AppTheme.primaryGradient(brightness),
               ),
               child: Column(
                 children: [
@@ -102,7 +100,7 @@ class ProfileScreen extends ConsumerWidget {
                       children: [
                         const Spacer(),
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.settings_outlined,
                             color: Colors.white,
                             size: 24,
@@ -125,7 +123,7 @@ class ProfileScreen extends ConsumerWidget {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withValues(alpha: 0.3),
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: Colors.white,
@@ -135,9 +133,8 @@ class ProfileScreen extends ConsumerWidget {
                     child: Center(
                       child: Text(
                         userInitials,
-                        style: const TextStyle(
+                        style: theme.textTheme.headlineMedium?.copyWith(
                           color: Colors.white,
-                          fontSize: 36,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -146,9 +143,8 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     userName,
-                    style: const TextStyle(
+                    style: theme.textTheme.headlineSmall?.copyWith(
                       color: Colors.white,
-                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -158,18 +154,16 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       Text(
                         "👑 Level $userLevel",
-                        style: const TextStyle(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: Colors.white,
-                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Text(
                         "• $userXP XP",
-                        style: const TextStyle(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: Colors.white70,
-                          fontSize: 14,
                         ),
                       ),
                     ],
@@ -179,52 +173,31 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
 
-            // PERSONAL INFORMATION -------------------------------------------
+            // PERSONAL INFORMATION
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    children: const [
+                    children: [
                       Icon(
                         Icons.person_outline,
                         color: primary,
                         size: 20,
                       ),
-                      SizedBox(
-                        width: 8,
-                      ),
+                      const SizedBox(width: 8),
                       Text(
                         "Personal Information",
-                        style: TextStyle(
-                          color: Color(
-                            0xFF1A2A2C,
-                          ),
-                          fontSize: 16,
+                        style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(
-                      18,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(
-                        16,
-                      ),
-                      border: Border.all(
-                        color: Colors.grey.shade200,
-                      ),
-                    ),
+                  const SizedBox(height: 16),
+                  AppCard(
+                    padding: const EdgeInsets.all(18),
                     child: Column(
                       children: [
                         Row(
@@ -264,43 +237,31 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  const SizedBox(
-                    height: 24,
-                  ),
+                  const SizedBox(height: 24),
 
-                  // HEALTH STATS -----------------------------------------------
+                  // HEALTH STATS
                   _buildHealthStats(context, ref, primary, userHeight, userWeight),
 
-                  const SizedBox(
-                    height: 24,
-                  ),
+                  const SizedBox(height: 24),
 
-                  // CONTACT INFORMATION ----------------------------------------
+                  // CONTACT INFORMATION
                   Row(
-                    children: const [
+                    children: [
                       Icon(
                         Icons.contact_mail_outlined,
                         color: primary,
                         size: 20,
                       ),
-                      SizedBox(
-                        width: 8,
-                      ),
+                      const SizedBox(width: 8),
                       Text(
                         "Contact Information",
-                        style: TextStyle(
-                          color: Color(
-                            0xFF1A2A2C,
-                          ),
-                          fontSize: 16,
+                        style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 16,
-                  ),
+                  const SizedBox(height: 16),
                   ContactItem(
                     Icons.email_outlined,
                     "Email",
@@ -322,93 +283,59 @@ class ProfileScreen extends ConsumerWidget {
                     primary,
                   ),
 
-                  const SizedBox(
-                    height: 24,
-                  ),
+                  const SizedBox(height: 24),
 
-                  // ACCOUNT DETAILS --------------------------------------------
+                  // ACCOUNT DETAILS
                   Row(
-                    children: const [
+                    children: [
                       Icon(
                         Icons.history,
                         color: primary,
                         size: 20,
                       ),
-                      SizedBox(
-                        width: 8,
-                      ),
+                      const SizedBox(width: 8),
                       Text(
                         "Account Details",
-                        style: TextStyle(
-                          color: Color(
-                            0xFF1A2A2C,
-                          ),
-                          fontSize: 16,
+                        style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(
-                      18,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(
-                        16,
-                      ),
-                      border: Border.all(
-                        color: Colors.grey.shade200,
-                      ),
-                    ),
+                  const SizedBox(height: 16),
+                  AppCard(
+                    padding: const EdgeInsets.all(18),
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(
-                            10,
-                          ),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: primary.withOpacity(
-                              0.15,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              10,
-                            ),
+                            color: primary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.calendar_today,
                             color: primary,
                             size: 20,
                           ),
                         ),
-                        const SizedBox(
-                          width: 14,
-                        ),
+                        const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 "Member Since",
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 13,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
-                              const SizedBox(
-                                height: 4,
-                              ),
+                              const SizedBox(height: 4),
                               Text(
                                 memberSince != null
                                     ? "${_getMonthName(memberSince.month)} ${memberSince.day}, ${memberSince.year}"
                                     : "Recently joined",
-                                style: const TextStyle(
-                                  color: Color(0xFF1A2A2C),
-                                  fontSize: 15,
+                                style: theme.textTheme.bodyLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -417,9 +344,8 @@ class ProfileScreen extends ConsumerWidget {
                                 memberSince != null
                                     ? "${_getDurationText(memberSince)} with Sehati"
                                     : "Welcome to Sehati!",
-                                style: TextStyle(
-                                  color: Colors.grey.shade500,
-                                  fontSize: 12,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -429,9 +355,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  const SizedBox(
-                    height: 40,
-                  ),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -442,28 +366,30 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildHealthStats(BuildContext context, WidgetRef ref, Color primary, double? height, double? weight) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
     final activityState = ref.watch(activityProvider);
     final workoutState = ref.watch(menWorkoutProvider);
     
     // Calculate BMI
     double? bmi;
     String bmiCategory = 'N/A';
-    Color bmiColor = Colors.grey;
+    Color bmiColor = AppColors.getInfo(brightness);
     if (height != null && weight != null && height > 0) {
       final heightM = height / 100;
       bmi = weight / (heightM * heightM);
       if (bmi < 18.5) {
         bmiCategory = 'Underweight';
-        bmiColor = Colors.orange;
+        bmiColor = AppColors.getWarning(brightness);
       } else if (bmi < 25) {
         bmiCategory = 'Normal';
-        bmiColor = Colors.green;
+        bmiColor = AppColors.getSuccess(brightness);
       } else if (bmi < 30) {
         bmiCategory = 'Overweight';
-        bmiColor = Colors.orange;
+        bmiColor = AppColors.getWarning(brightness);
       } else {
         bmiCategory = 'Obese';
-        bmiColor = Colors.red;
+        bmiColor = AppColors.getError(brightness);
       }
     }
 
@@ -475,68 +401,135 @@ class ProfileScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          children: const [
-            Icon(Icons.favorite_outline, color: Color(0xFF20C6B7), size: 20),
-            SizedBox(width: 8),
-            Text("Health Stats", style: TextStyle(color: Color(0xFF1A2A2C), fontSize: 16, fontWeight: FontWeight.bold)),
+          children: [
+            Icon(
+              Icons.favorite_outline,
+              color: primary,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              "Health Stats",
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 16),
-        Container(
+        AppCard(
           padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // BMI Section
-              Text("Body Mass Index", style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+              Text(
+                "Body Mass Index",
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Text(
                     bmi != null ? bmi.toStringAsFixed(1) : 'N/A',
-                    style: const TextStyle(color: Color(0xFF1A2A2C), fontSize: 28, fontWeight: FontWeight.bold),
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Spacer(),
-                  Icon(bmi != null ? Icons.check_circle : Icons.help_outline, color: bmiColor, size: 28),
+                  Icon(
+                    bmi != null ? Icons.check_circle : Icons.help_outline,
+                    color: bmiColor,
+                    size: 28,
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
-              Text(bmiCategory, style: TextStyle(color: bmiColor, fontSize: 13, fontWeight: FontWeight.w600)),
+              Text(
+                bmiCategory,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: bmiColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               
               const SizedBox(height: 16),
-              const Divider(),
+              Divider(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
               const SizedBox(height: 16),
               
               // Today's Activity
-              Text("Today's Activity", style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+              Text(
+                "Today's Activity",
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _StatColumn(Icons.directions_walk, '${todayActivity?.steps ?? 0}', 'Steps', Colors.blue),
-                  _StatColumn(Icons.timer, '${todayActivity?.activeMinutes ?? 0}', 'Minutes', Colors.green),
-                  _StatColumn(Icons.local_fire_department, '${(todayActivity?.caloriesBurned ?? 0).toInt()}', 'Calories', Colors.orange),
+                  _StatColumn(
+                    Icons.directions_walk,
+                    '${todayActivity?.steps ?? 0}',
+                    'Steps',
+                    AppColors.getInfo(brightness),
+                    theme,
+                  ),
+                  _StatColumn(
+                    Icons.timer,
+                    '${todayActivity?.activeMinutes ?? 0}',
+                    'Minutes',
+                    AppColors.getSuccess(brightness),
+                    theme,
+                  ),
+                  _StatColumn(
+                    Icons.local_fire_department,
+                    '${(todayActivity?.caloriesBurned ?? 0).toInt()}',
+                    'Calories',
+                    AppColors.getWarning(brightness),
+                    theme,
+                  ),
                 ],
               ),
               
               const SizedBox(height: 16),
-              const Divider(),
+              Divider(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
               const SizedBox(height: 16),
               
               // Weekly Summary
-              Text("This Week", style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+              Text(
+                "This Week",
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _StatColumn(Icons.directions_walk, '${weeklyStats['total_steps'] ?? 0}', 'Steps', Colors.blue),
-                  _StatColumn(Icons.fitness_center, '${workoutStats['total_workouts'] ?? 0}', 'Workouts', primary),
-                  _StatColumn(Icons.local_fire_department, '${((weeklyStats['total_calories'] ?? 0) as num).toInt()}', 'Calories', Colors.orange),
+                  _StatColumn(
+                    Icons.directions_walk,
+                    '${weeklyStats['total_steps'] ?? 0}',
+                    'Steps',
+                    AppColors.getInfo(brightness),
+                    theme,
+                  ),
+                  _StatColumn(
+                    Icons.fitness_center,
+                    '${workoutStats['total_workouts'] ?? 0}',
+                    'Workouts',
+                    primary,
+                    theme,
+                  ),
+                  _StatColumn(
+                    Icons.local_fire_department,
+                    '${((weeklyStats['total_calories'] ?? 0) as num).toInt()}',
+                    'Calories',
+                    AppColors.getWarning(brightness),
+                    theme,
+                  ),
                 ],
               ),
             ],
@@ -552,8 +545,9 @@ class _StatColumn extends StatelessWidget {
   final String value;
   final String label;
   final Color color;
+  final ThemeData theme;
 
-  const _StatColumn(this.icon, this.value, this.label, this.color);
+  const _StatColumn(this.icon, this.value, this.label, this.color, this.theme);
 
   @override
   Widget build(BuildContext context) {
@@ -561,8 +555,18 @@ class _StatColumn extends StatelessWidget {
       children: [
         Icon(icon, color: color, size: 24),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 11)),
+        Text(
+          value,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
       ],
     );
   }

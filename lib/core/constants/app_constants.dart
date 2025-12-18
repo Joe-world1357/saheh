@@ -4,7 +4,7 @@ class AppConstants {
   // APP INFO
   // ============================================================================
   
-  static const String appName = 'Sehati';
+  static const String appName = 'Saheeh';
   static const String appVersion = '1.0.0';
 
   // ============================================================================

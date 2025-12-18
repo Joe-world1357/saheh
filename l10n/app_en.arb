@@ -1,0 +1,245 @@
+{
+  "@@locale": "en",
+  "appName": "Saheeh",
+  "@appName": {
+    "description": "Application name"
+  },
+  "appVersion": "Version {version}",
+  "@appVersion": {
+    "description": "Application version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "home": "Home",
+  "profile": "Profile",
+  "settings": "Settings",
+  "pharmacy": "Pharmacy",
+  "notifications": "Notifications",
+  "achievements": "Achievements",
+  "editPersonalInfo": "Edit Personal Info",
+  "notificationSettings": "Notification Settings",
+  "fitnessReminders": "Fitness Reminders",
+  "fitnessRemindersDesc": "Daily workout reminders",
+  "waterReminders": "Water Intake Reminders",
+  "waterRemindersDesc": "Reminders to drink water throughout the day",
+  "sleepReminders": "Sleep Reminders",
+  "sleepRemindersDesc": "Bedtime reminders based on your sleep goal",
+  "nutritionReminders": "Nutrition Reminders",
+  "nutritionRemindersDesc": "Meal logging and nutrition goal reminders",
+  "xpNotifications": "XP Earned",
+  "xpNotificationsDesc": "Notifications when you earn XP and level up",
+  "achievementNotifications": "Achievement Unlocked",
+  "achievementNotificationsDesc": "Notifications when you unlock achievements",
+  "save": "Save",
+  "cancel": "Cancel",
+  "close": "Close",
+  "confirm": "Confirm",
+  "delete": "Delete",
+  "edit": "Edit",
+  "add": "Add",
+  "search": "Search",
+  "filter": "Filter",
+  "loading": "Loading...",
+  "error": "Error",
+  "success": "Success",
+  "retry": "Retry",
+  "noData": "No data available",
+  "fullName": "Full Name",
+  "email": "Email",
+  "phone": "Phone Number",
+  "age": "Age",
+  "gender": "Gender",
+  "height": "Height (cm)",
+  "weight": "Weight (kg)",
+  "address": "Address",
+  "male": "Male",
+  "female": "Female",
+  "saveChanges": "Save Changes",
+  "noChangesMade": "No changes made",
+  "personalInformationUpdated": "Personal information updated successfully",
+  "errorUpdatingInformation": "Error updating information: {error}",
+  "@errorUpdatingInformation": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "enterYourFullName": "Enter your full name",
+  "enterYourEmail": "Enter your email address",
+  "enterYourPhone": "Enter your phone number",
+  "enterAge": "Enter age",
+  "enterHeight": "Enter height",
+  "enterWeight": "Enter weight",
+  "enterYourAddress": "Enter your address",
+  "pleaseSelectGender": "Please select gender",
+  "redeemXPPoints": "Redeem XP Points",
+  "yourXP": "Your XP: {xp}",
+  "@yourXP": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "availableRedemptions": "Available Redemptions",
+  "redeem": "Redeem",
+  "insufficientXP": "Insufficient XP",
+  "redemptionSuccessful": "Redemption successful!",
+  "redemptionFailed": "Redemption failed. Please try again.",
+  "achievementProgress": "Achievement Progress",
+  "noAchievementsYet": "No achievements yet",
+  "unlocked": "Unlocked",
+  "locked": "Locked",
+  "xp": "XP",
+  "level": "Level",
+  "levelUp": "Level Up!",
+  "youReachedLevel": "You reached Level {level}! Keep it up!",
+  "@youReachedLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "youEarnedXP": "You earned {amount} XP! Total: {total} XP",
+  "@youEarnedXP": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "achievementUnlocked": "Achievement Unlocked!",
+  "goalCompleted": "Goal Completed!",
+  "congratulationsYouCompleted": "Congratulations! You completed: {goalName}",
+  "@congratulationsYouCompleted": {
+    "placeholders": {
+      "goalName": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsEnabled": "Notifications Enabled",
+  "notificationsDisabled": "Notifications Disabled",
+  "youWillReceiveNotifications": "You will receive notifications for reminders and achievements",
+  "enableNotificationsToReceive": "Enable notifications to receive reminders and updates",
+  "enableNotifications": "Enable Notifications",
+  "permissionRequired": "Permission Required",
+  "notificationsAreDisabled": "Notifications are disabled. Please enable them in app settings.",
+  "openSettings": "Open Settings",
+  "language": "Language",
+  "english": "English",
+  "arabic": "Arabic",
+  "theme": "Theme",
+  "light": "Light",
+  "dark": "Dark",
+  "system": "System",
+  "about": "About",
+  "privacyPolicy": "Privacy Policy",
+  "termsOfService": "Terms of Service",
+  "contactSupport": "Contact Support",
+  "logout": "Logout",
+  "login": "Login",
+  "register": "Register",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "forgotPassword": "Forgot Password?",
+  "dontHaveAccount": "Don't have an account?",
+  "alreadyHaveAccount": "Already have an account?",
+  "workout": "Workout",
+  "nutrition": "Nutrition",
+  "medications": "Medications",
+  "appointments": "Appointments",
+  "healthTracking": "Health Tracking",
+  "waterIntake": "Water Intake",
+  "sleep": "Sleep",
+  "steps": "Steps",
+  "calories": "Calories",
+  "today": "Today",
+  "thisWeek": "This Week",
+  "thisMonth": "This Month",
+  "seeAll": "See all",
+  "popularProducts": "Popular Products",
+  "specialOffers": "Special Offers",
+  "viewRedemptions": "View Redemptions",
+  "discount": "Discount",
+  "product": "Product",
+  "service": "Service",
+  "freeDelivery": "Free Delivery",
+  "freeDeliveryDesc": "Free delivery on your next order",
+  "percentOffOrder": "{percent}% Off Order",
+  "@percentOffOrder": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "getPercentDiscount": "Get {percent}% discount on your next order",
+  "@getPercentDiscount": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "freeProduct": "Free {productName}",
+  "@freeProduct": {
+    "placeholders": {
+      "productName": {
+        "type": "String"
+      }
+    }
+  },
+  "redeemFreeProduct": "Redeem a free {productName}",
+  "@redeemFreeProduct": {
+    "placeholders": {
+      "productName": {
+        "type": "String"
+      }
+    }
+  },
+  "activityLevel": "Activity Level",
+  "sedentary": "Sedentary",
+  "light": "Light",
+  "moderate": "Moderate",
+  "active": "Active",
+  "veryActive": "Very Active",
+  "personalInformationUpdated": "Personal information updated successfully",
+  "errorUpdatingInformation": "Error updating information: {error}",
+  "@errorUpdatingInformation": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "searchMedicines": "Search medicines, categories...",
+  "barcodeScanner": "Barcode Scanner",
+  "scanAndOrder": "Scan & order",
+  "prescription": "Prescription",
+  "uploadAndOrder": "Upload & order",
+  "categories": "Categories",
+  "all": "All",
+  "painRelief": "Pain Relief",
+  "coldAndFlu": "Cold & Flu",
+  "vitamins": "Vitamins",
+  "herbal": "Herbal",
+  "antiseptic": "Antiseptic",
+  "cough": "Cough",
+  "myCart": "My Cart",
+  "medications": "Medications",
+  "healthTracking": "Health Tracking",
+  "waterIntake": "Water Intake",
+  "sleep": "Sleep",
+  "steps": "Steps",
+  "calories": "Calories"
+}
+
