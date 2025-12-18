@@ -1377,7 +1377,7 @@ class EnhancedChatbotService {
     // Workout suggestions
     if (recentWorkouts != null) {
       final todayWorkouts = recentWorkouts.where((w) {
-        final workoutDate = DateTime.parse(w.date);
+        final workoutDate = w.workoutDate;
         final today = DateTime.now();
         return workoutDate.year == today.year &&
                workoutDate.month == today.month &&
