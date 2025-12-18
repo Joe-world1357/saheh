@@ -8,6 +8,7 @@ class WearableConnectionState {
   final bool isGoogleFitConnected;
   final bool isWearableConnected;
   final String? connectedDeviceName;
+  final String? connectedAccountEmail;
   final DateTime? lastSyncTime;
   final bool isSyncing;
   final String? error;
@@ -16,6 +17,7 @@ class WearableConnectionState {
     this.isGoogleFitConnected = false,
     this.isWearableConnected = false,
     this.connectedDeviceName,
+    this.connectedAccountEmail,
     this.lastSyncTime,
     this.isSyncing = false,
     this.error,
@@ -25,6 +27,7 @@ class WearableConnectionState {
     bool? isGoogleFitConnected,
     bool? isWearableConnected,
     String? connectedDeviceName,
+    String? connectedAccountEmail,
     DateTime? lastSyncTime,
     bool? isSyncing,
     String? error,
@@ -34,6 +37,7 @@ class WearableConnectionState {
       isGoogleFitConnected: isGoogleFitConnected ?? this.isGoogleFitConnected,
       isWearableConnected: isWearableConnected ?? this.isWearableConnected,
       connectedDeviceName: connectedDeviceName ?? this.connectedDeviceName,
+      connectedAccountEmail: connectedAccountEmail ?? this.connectedAccountEmail,
       lastSyncTime: lastSyncTime ?? this.lastSyncTime,
       isSyncing: isSyncing ?? this.isSyncing,
       error: clearError ? null : (error ?? this.error),
@@ -57,12 +61,14 @@ class WearableConnectionNotifier extends Notifier<WearableConnectionState> {
     final googleFitConnected = _googleFitService.isConnected;
     final wearableConnected = _wearableService.isConnected;
     final deviceName = _wearableService.connectedDeviceName;
+    final accountEmail = _googleFitService.connectedAccountEmail;
     final lastSync = _googleFitService.lastSyncTime ?? _wearableService.lastSyncTime;
 
     state = state.copyWith(
       isGoogleFitConnected: googleFitConnected,
       isWearableConnected: wearableConnected,
       connectedDeviceName: deviceName,
+      connectedAccountEmail: accountEmail,
       lastSyncTime: lastSync,
     );
   }

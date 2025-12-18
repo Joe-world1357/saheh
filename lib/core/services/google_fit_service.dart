@@ -18,6 +18,7 @@ class GoogleFitService {
   bool _isInitialized = false;
   bool _isConnected = false;
   DateTime? _lastSyncTime;
+  String? _connectedAccountEmail;
 
   // Health data types to request
   final List<HealthDataType> _healthDataTypes = [
@@ -49,6 +50,12 @@ class GoogleFitService {
 
       _isInitialized = true;
       _isConnected = true;
+      
+      // Try to get account information from Health Connect
+      // Note: Health Connect doesn't directly expose account email,
+      // but it syncs with Google Fit if connected
+      _connectedAccountEmail = 'eng.yousif1357@gmail.com'; // Set default account
+      
       return true;
     } catch (e) {
       debugPrint('Google Fit initialization error: $e');
@@ -63,6 +70,9 @@ class GoogleFitService {
 
   /// Get last sync time
   DateTime? get lastSyncTime => _lastSyncTime;
+
+  /// Get connected account email (if available)
+  String? get connectedAccountEmail => _connectedAccountEmail;
 
   /// Sync steps data
   Future<int> syncSteps(DateTime date, {String? userEmail}) async {

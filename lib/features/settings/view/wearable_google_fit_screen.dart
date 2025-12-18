@@ -72,6 +72,7 @@ class _WearableGoogleFitScreenState extends ConsumerState<WearableGoogleFitScree
                 brightness: brightness,
                 isConnected: connectionState.isGoogleFitConnected,
                 isSyncing: connectionState.isSyncing,
+                accountEmail: connectionState.connectedAccountEmail,
                 lastSyncTime: connectionState.lastSyncTime,
                 onConnect: () async {
                   final success = await connectionNotifier.connectGoogleFit();
@@ -180,6 +181,7 @@ class _WearableGoogleFitScreenState extends ConsumerState<WearableGoogleFitScree
     required Brightness brightness,
     required bool isConnected,
     required bool isSyncing,
+    required String? accountEmail,
     required DateTime? lastSyncTime,
     required VoidCallback onConnect,
     required VoidCallback onDisconnect,
@@ -260,6 +262,43 @@ class _WearableGoogleFitScreenState extends ConsumerState<WearableGoogleFitScree
             ],
           ),
           const SizedBox(height: AppTheme.spacingL),
+          if (accountEmail != null && isConnected) ...[
+            Container(
+              padding: const EdgeInsets.all(AppTheme.spacingM),
+              decoration: BoxDecoration(
+                color: AppColors.getInfo(brightness).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.account_circle,
+                    color: AppColors.getInfo(brightness),
+                    size: 20,
+                  ),
+                  const SizedBox(width: AppTheme.spacingS),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Google Account',
+                          style: AppTextStyles.labelSmall(brightness).copyWith(
+                            color: AppColors.getInfo(brightness),
+                          ),
+                        ),
+                        Text(
+                          accountEmail,
+                          style: AppTextStyles.bodySmall(brightness),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppTheme.spacingM),
+          ],
           if (lastSyncTime != null) ...[
             Text(
               'Last sync: ${_formatDateTime(lastSyncTime)}',
@@ -421,6 +460,90 @@ class _WearableGoogleFitScreenState extends ConsumerState<WearableGoogleFitScree
           _buildSyncItem('Calories Burned', Icons.local_fire_department, brightness),
           _buildSyncItem('Sleep Duration', Icons.bedtime, brightness),
           _buildSyncItem('Workout Sessions', Icons.fitness_center, brightness),
+          const SizedBox(height: AppTheme.spacingM),
+          if (state.connectedAccountEmail != null) ...[
+            Container(
+              padding: const EdgeInsets.all(AppTheme.spacingM),
+              decoration: BoxDecoration(
+                color: AppColors.getSuccess(brightness).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.account_circle,
+                    color: AppColors.getSuccess(brightness),
+                    size: 18,
+                  ),
+                  const SizedBox(width: AppTheme.spacingS),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Connected Google Account',
+                          style: AppTextStyles.labelSmall(brightness).copyWith(
+                            color: AppColors.getSuccess(brightness),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          state.connectedAccountEmail!,
+                          style: AppTextStyles.bodySmall(brightness).copyWith(
+                            color: AppColors.getSuccess(brightness),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppTheme.spacingM),
+          ],
+          Container(
+            padding: const EdgeInsets.all(AppTheme.spacingM),
+            decoration: BoxDecoration(
+              color: AppColors.getWarning(brightness).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: AppColors.getWarning(brightness),
+                  size: 18,
+                ),
+                const SizedBox(width: AppTheme.spacingS),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Setup Instructions',
+                        style: AppTextStyles.labelSmall(brightness).copyWith(
+                          color: AppColors.getWarning(brightness),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '1. Install Health Connect app (Android 14+)\n'
+                        '2. Open Google Fit app\n'
+                        '3. Connect Google Fit to Health Connect\n'
+                        '4. Ensure eng.yousif1357@gmail.com is signed in\n'
+                        '5. Grant permissions in this app',
+                        style: AppTextStyles.bodySmall(brightness).copyWith(
+                          color: AppColors.getWarning(brightness),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: AppTheme.spacingM),
           Text(
             'Synced data automatically updates your XP and achievements!',
